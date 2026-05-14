@@ -44,7 +44,37 @@ export default defineConfig({
 			},
 			workbox: {
 				globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff,woff2}'],
+				navigateFallback: '/',
+				navigateFallbackDenylist: [/^\/api\//],
+				cleanupOutdatedCaches: true,
 				runtimeCaching: [
+					/* Page HTML — cache after first visit so offline navigation works.
+					   NetworkFirst falls back to cache when the network call fails. */
+					{
+						urlPattern: ({ request }) => request.mode === 'navigate',
+						handler: 'NetworkFirst',
+						options: {
+							cacheName: 'pages',
+							networkTimeoutSeconds: 3,
+							expiration: {
+								maxEntries: 50,
+								maxAgeSeconds: 60 * 60 * 24 * 7
+							}
+						}
+					},
+					/* microCMS API responses (works data) */
+					{
+						urlPattern: /^https:\/\/.*\.microcms\.io\/api\/.*/i,
+						handler: 'NetworkFirst',
+						options: {
+							cacheName: 'microcms-api',
+							networkTimeoutSeconds: 4,
+							expiration: {
+								maxEntries: 100,
+								maxAgeSeconds: 60 * 60 * 24
+							}
+						}
+					},
 					{
 						urlPattern: /^https:\/\/images\.microcms-assets\.io\/.*/i,
 						handler: 'CacheFirst',

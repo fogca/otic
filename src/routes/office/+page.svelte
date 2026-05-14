@@ -336,6 +336,10 @@
 		line-height: 1.7;
 	}
 
+	.Office .body.body-ja p {
+		text-align: justify;
+	}
+
 	.Office .body[lang='en'] p {
 		font-size: 11px;
 		line-height: 1.5;
