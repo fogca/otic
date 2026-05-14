@@ -62,48 +62,19 @@
 				<div class="content">
 					<div class="body" lang="en">
 					<p>
-						We are a design office working at the intersection of design,
-						engineering, and visualisation. From industrial design and typography
-						to visual identity and digital communication, we have built work that
-						crosses visual and material domains, in collaboration with partners
-						across many fields.
-					</p>
-					<p>
-						Today's social system is beginning to show its seams — through its
-						fragility and through the widening gap between need and want. Amid an
-						overflow of information and a value order in constant flux, easy forms
-						of happiness have become available for instant consumption. As a
-						result, what lasts in the body as embodied experience has grown
-						relatively thin. Within this shift, we are moving our creative focus
-						toward more fundamental and resilient interactions: corporeality and
-						emotion. To be a designer is to occupy one of the few professions
-						permitted to give physical form to what was once metaphysical — which
-						is to say, a profession capable of intervening in lifestyles, in
-						material values, and in the patterns of consumption that shape much of
-						human life. From the latter half of the twentieth century, Victor
-						Papanek and many other thinkers have sounded warnings about the weight
-						of this fact. For design to recover its telesis and respond to genuine
-						human need, returning to our origin — the body, and our connection
-						with the natural world — has, we believe, become ever more essential.
-						As designers, we are also among those who accelerate consumption and
-						add daily to the burden placed on the environment. While we continue
-						to ask how to live alongside impulse design and commercial design, we
-						want to keep learning, and to leave — even in small measure —
-						something to hand on to the generation that follows. When one day we
-						close our work, we hope to look back and say that on balance we left
-						something positive for society, building such a record one project at
-						a time.
+						We are a design office dedicated to the development of visual
+						identity and design engineering. From brand design, product design,
+						and furniture design to type development, CG visualisation, and
+						digital communication, we have built work that crosses the visual
+						domain, in collaboration with partners across many fields. The Radix
+						— our unwavering pursuit of the root — is a posture of converging
+						toward the form that must inevitably exist in a given time and place.
+						Day by day, learning further, we strive toward better creation.
 					</p>
 				</div>
 				<div class="body body-ja">
 					<p>
-						私たちは、デザイン・エンジニアリング・ビジュアライゼーションの設計と構築を手掛ける、デザインオフィスです。インダストリアルからタイポグラフィ、ビジュアルアイデンティティ、デジタルコミュニケーションに至るまで、視覚と物質を横断する制作を、多様な分野のパートナーとともに重ねてきました。
-					</p>
-					<p>
-						今日の社会システムは、その脆弱性と、必要（needs）と欲求（wants）の乖離によって、随所に綻びが露見しはじめています。情報が氾濫し、価値秩序が絶えず移ろうなかで、簡便な幸福はインスタントに摂取できるようになりました。その結果、実体として身体に残るものは、相対的に痩せてきているようにも見えます。私たちはこの変化のなかで、より根源的で確かな相互作用——「身体性（corporeality）」と「情緒（emotion）」へと、創作の焦点を移しつつあります。デザイナーとは、形而上のものを形而下へと具象化することの許される職能であり、言い換えれば、生活様式・物的価値・消費の様態など、人間の営みの広い範囲に介入し得る職能でもあります。20世紀後半、Victor
-						Papanek
-						をはじめ多くの知識人が、その重さに警鐘を鳴らしてきました。デザインが目的論性（telesis）を取り戻し、人間の本当の必要（real
-						needs）に応答するためには、私たちのオリジンである身体や、自然との繋がりへと立ち返ることが、いま改めて重要であると捉えています。私たちデザイナーは、日々、消費を加速させ、環境への負荷を積み重ねている当事者でもあります。インパルスデザインや商業デザインといかに付き合うかを問いつづけながら、日々学びを重ね、わずかでも次代に手渡せるものを残していきたい。いつか自分たちの仕事を閉じる日に、総じて社会の側へわずかでもプラスを残せたと振り返れる仕事を、ひとつずつ積み重ねていきたいと考えています。
+						私たちは、ビジュアルアイデンティティの開発とデザインエンジニアリングを担うデザイン事務所です。ブランドデザインから、プロダクトデザイン、ファニチャーデザイン、書体開発、CGビジュアライゼーション、デジタルコミュニケーションまで、視覚領域を横断するクリエイションを、多様な分野のパートナーとともに重ねてきました。私たちが貫徹する「Radix——根源——の探求」は、その時その場所に必然として在るべきかたちへと収斂させていく姿勢です。日々学びを重ねながら、よりよいクリエイションを行うために努めてまいります。
 					</p>
 				</div>
 				</div>
@@ -156,11 +127,62 @@
 		</div>
 	</section>
 
-	<section class="Founder">
+	<section class="Ethos">
 		<div class="wrapper">
 			<div class="container">
 				<div class="header">
 					<h5 class="num" lang="en">03</h5>
+					<h3 class="label" lang="en">Ethos:</h3>
+					<h3 class="label" lang="en">Toward a Net-Positive Practice</h3>
+				</div>
+				<div class="content">
+					<div class="body" lang="en">
+						<p>
+							Today's social system is beginning to show its seams — through its
+							fragility and through the widening gap between need and want. Amid
+							an overflow of information and a value order in constant flux, easy
+							forms of happiness have become available for instant consumption.
+							As a result, what lasts in the body as embodied experience has
+							grown relatively thin. Within this shift, we are moving our
+							creative focus toward more fundamental and resilient interactions:
+							corporeality and emotion. To be a designer is to occupy one of the
+							few professions permitted to give physical form to what was once
+							metaphysical — which is to say, a profession capable of intervening
+							in lifestyles, in material values, and in the patterns of
+							consumption that shape much of human life. From the latter half of
+							the twentieth century, Victor Papanek and many other thinkers have
+							sounded warnings about the weight of this fact. For design to
+							recover its telesis and respond to genuine human need, returning to
+							our origin — the body, and our connection with the natural world —
+							has, we believe, become ever more essential. As designers, we are
+							also among those who accelerate consumption and add daily to the
+							burden placed on the environment. While we continue to ask how to
+							live alongside impulse design and commercial design, we want to
+							keep learning, and to leave — even in small measure — something to
+							hand on to the generation that follows. When one day we close our
+							work, we hope to look back and say that on balance we left
+							something positive for society, building such a record one project
+							at a time.
+						</p>
+					</div>
+					<div class="body body-ja">
+						<p>
+							今日の社会システムは、その脆弱性と、必要（needs）と欲求（wants）の乖離によって、随所に綻びが露見しはじめています。情報が氾濫し、価値秩序が絶えず移ろうなかで、簡便な幸福はインスタントに摂取できるようになりました。その結果、実体として身体に残るものは、相対的に痩せてきているようにも見えます。私たちはこの変化のなかで、より根源的で確かな相互作用——「身体性（corporeality）」と「情緒（emotion）」へと、創作の焦点を移しつつあります。デザイナーとは、形而上のものを形而下へと具象化することの許される職能であり、言い換えれば、生活様式・物的価値・消費の様態など、人間の営みの広い範囲に介入し得る職能でもあります。20世紀後半、Victor
+							Papanek
+							をはじめ多くの知識人が、その重さに警鐘を鳴らしてきました。デザインが目的論性（telesis）を取り戻し、人間の本当の必要（real
+							needs）に応答するためには、私たちのオリジンである身体や、自然との繋がりへと立ち返ることが、いま改めて重要であると捉えています。私たちデザイナーは、日々、消費を加速させ、環境への負荷を積み重ねている当事者でもあります。インパルスデザインや商業デザインといかに付き合うかを問いつづけながら、日々学びを重ね、わずかでも次代に手渡せるものを残していきたい。いつか自分たちの仕事を閉じる日に、総じて社会の側へわずかでもプラスを残せたと振り返れる仕事を、ひとつずつ積み重ねていきたいと考えています。
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="Founder">
+		<div class="wrapper">
+			<div class="container">
+				<div class="header">
+					<h5 class="num" lang="en">04</h5>
 					<h3 class="label" lang="en">Founder:</h3>
 					<h3 class="label" lang="en">TAKUMI ISOBE</h3>
 				</div>
@@ -201,6 +223,7 @@
 	}
 
 	.Office .Service,
+	.Office .Ethos,
 	.Office .Founder {
 		padding-top: 80px;
 	}
@@ -349,6 +372,7 @@
 		}
 
 		.Office .Service,
+		.Office .Ethos,
 		.Office .Founder {
 			padding-top: 120px;
 		}
