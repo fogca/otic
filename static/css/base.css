@@ -31,8 +31,8 @@
    variation-settings: 'wght' <number>` to pick a weight. */
 @font-face {
   font-family: 'Aether';
-  src: url('/fonts/Aether-Variable.woff2?v=20260511-1254') format('woff2-variations'),
-       url('/fonts/Aether-Variable.woff2?v=20260511-1254') format('woff2');
+  src: url('/fonts/Aether-Variable.woff2?v=20260517-num') format('woff2-variations'),
+       url('/fonts/Aether-Variable.woff2?v=20260517-num') format('woff2');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;

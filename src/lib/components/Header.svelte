@@ -5,9 +5,7 @@
 	import { intro } from '$lib/state/intro.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 
-	const isArchives = $derived(
-		page.url.pathname === '/' || page.url.pathname.startsWith('/archives')
-	);
+	const isArchives = $derived(page.url.pathname.startsWith('/archives'));
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
 
 	// ── Header visibility settings (adjust freely) ──
@@ -68,8 +66,7 @@
 		<a
 			href="/archives"
 			class="link"
-			class:is-active={isArchives}
-			class:is-mute={!isArchives}
+			class:is-mute={isArchives}
 			lang="en"
 		>
 			Archives
@@ -77,8 +74,7 @@
 		<a
 			href="/office"
 			class="link"
-			class:is-active={isOffice}
-			class:is-mute={!isOffice}
+			class:is-mute={isOffice}
 			lang="en"
 		>
 			Office

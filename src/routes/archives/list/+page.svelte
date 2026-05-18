@@ -24,7 +24,9 @@
 				<a class="archive-row" href="/archives/{work.id}">
 					<span class="num" lang="en">{padNumber(i)}</span>
 					<span class="title" lang="en">{work.title}</span>
-					<span class="brand" lang="en">{work.brand ?? ''}</span>
+					<span class="scope" lang="en">
+						{(work.scope ?? []).slice(0, 2).join(' / ')}
+					</span>
 				</a>
 			{:else}
 				<p class="empty" lang="en">No archives yet.</p>
@@ -89,7 +91,7 @@
 		opacity: 0.6;
 	}
 
-	.Archives .List .archive-row .brand {
+	.Archives .List .archive-row .scope {
 		text-align: right;
 		opacity: 0.6;
 	}

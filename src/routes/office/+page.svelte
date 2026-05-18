@@ -309,6 +309,10 @@
 		margin-top: 20px;
 	}
 
+	.Office .body + .body {
+		margin-top: 8px;
+	}
+
 	/* SP/tablet only: 01 Section1 を 2カラム grid（左 27.5% / 右 72.5%）にして
 	   title と本文の Y を揃え、本文を右寄せにする。03 Founder は通常の block flow に戻す。 */
 	@media (max-width: 1023px) {
@@ -326,7 +330,7 @@
 			grid-column: 2;
 		}
 
-		.Office .Section1 .body {
+		.Office .Section1 .body:first-child {
 			margin-top: 0;
 		}
 	}
@@ -367,7 +371,7 @@
 	/* Desktop — matches PC Figma (4:220) */
 	@media (min-width: 1024px) {
 		.Office {
-			padding-top: 42.5vh;
+			padding-top: 15vh;
 			padding-bottom: 160px;
 		}
 
@@ -378,7 +382,7 @@
 		.Office .Service,
 		.Office .Ethos,
 		.Office .Founder {
-			padding-top: 120px;
+			padding-top: 40px;
 		}
 
 		.Office .wrapper {

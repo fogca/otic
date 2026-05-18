@@ -42,18 +42,12 @@
 							exploratory or still finding its shape, we welcome that
 							conversation just as warmly.
 						</p>
-						<p>
-							Direct: <a href="mailto:hi@takumiisobe.com">hi@takumiisobe.com</a>
-						</p>
 					</div>
 
 					<div class="body body-ja">
 						<p>新しいプロジェクトのご相談、ご協業、あるいはただのご挨拶まで。</p>
 						<p>
 							現在、ヴィジュアル・アイデンティティ、書体、プロダクト、デジタルコミュニケーションを横断する案件を、選別のうえ少数受け付けています。ご相談には原則2営業日以内に返信いたします。構想段階のテーマや、まだ輪郭の定まらないプロジェクトのご相談も歓迎です。
-						</p>
-						<p>
-							ダイレクト：<a href="mailto:hi@takumiisobe.com">hi@takumiisobe.com</a>
 						</p>
 					</div>
 
@@ -293,6 +287,7 @@
 	@media (min-width: 1024px) {
 		.Contact {
 			padding-top: 42.5vh;
+			margin-bottom: 0;
 		}
 
 		.Contact .container {

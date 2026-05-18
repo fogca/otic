@@ -46,7 +46,7 @@
 			</ul>
 		</nav>
 
-		<!-- Column 3: social / contact -->
+		<!-- Column 3: social -->
 		<div class="Footer__col">
 			<h3 class="Footer__heading" lang="en">Find us</h3>
 			<ul class="Footer__list">
@@ -57,9 +57,6 @@
 						</a>
 					</li>
 				{/each}
-				<li>
-					<a href="mailto:hi@takumiisobe.com" lang="en">hi@takumiisobe.com</a>
-				</li>
 			</ul>
 		</div>
 
@@ -90,6 +87,12 @@
 		color: #fff;
 		padding: 64px 0 24px;
 		margin-top: 120px;
+	}
+
+	@media (min-width: 1024px) {
+		.Footer {
+			margin-top: 0;
+		}
 	}
 
 	.Footer :global(*) {

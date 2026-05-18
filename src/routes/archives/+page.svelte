@@ -1,13 +1,104 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	const padNumber = (n: number) => String(n + 1).padStart(2, '0');
+	// Optimise microCMS image URLs via Imgix-style query params.
+	const images = $derived(
+		data.images.map((img) => {
+			const optimised = img.url.includes('microcms-assets.io')
+				? `${img.url}?fm=webp&q=60&w=700&fit=max&auto=compress`
+				: img.url;
+			return {
+				...img,
+				url: optimised,
+				aspectRatio: `${img.width} / ${img.height}`
+			};
+		})
+	);
 
-	const works = $derived(data.works);
-	const firstWork = $derived(works[0]);
-	const restWorks = $derived(works.slice(1, 10));
+	let isLoading = $state(true);
+
+	// Fixed column count: PC = 5, SP = 2
+	function getColumnCount(): number {
+		if (!browser) return 5;
+		return window.matchMedia('(min-width: 1024px)').matches ? 5 : 2;
+	}
+
+	function layoutMasonry() {
+		if (!browser) return;
+		const container = document.getElementById('grid-gallery');
+		const items = document.querySelectorAll<HTMLElement>('.grid_gallery_item');
+		if (!container || items.length === 0) return;
+
+		const columnCount = getColumnCount();
+		const gap = 5;
+		const containerWidth = container.offsetWidth;
+		const columnWidth = (containerWidth - gap * (columnCount - 1)) / columnCount;
+
+		items.forEach((item) => {
+			item.style.width = `${columnWidth}px`;
+		});
+
+		const columnHeights = Array(columnCount).fill(0);
+		items.forEach((item, index) => {
+			const column = index % columnCount;
+			const x = column * (columnWidth + gap);
+			const y = columnHeights[column];
+			const itemHeight = item.offsetHeight;
+			item.style.left = `${x}px`;
+			item.style.top = `${y}px`;
+			columnHeights[column] += itemHeight + gap;
+		});
+
+		container.style.height = `${Math.max(...columnHeights)}px`;
+	}
+
+	function navigateToWork(workId: string) {
+		goto(`/archives/${workId}`);
+	}
+
+	let resizeTimer: number;
+
+	onMount(() => {
+		if (!browser) return;
+
+		const imageElements = document.querySelectorAll('.grid_gallery_item img');
+		let loaded = 0;
+
+		const checkAllLoaded = () => {
+			loaded++;
+			if (loaded === imageElements.length) {
+				layoutMasonry();
+				setTimeout(() => {
+					isLoading = false;
+				}, 80);
+			}
+		};
+
+		imageElements.forEach((img) => {
+			if ((img as HTMLImageElement).complete) {
+				checkAllLoaded();
+			} else {
+				img.addEventListener('load', checkAllLoaded);
+				img.addEventListener('error', checkAllLoaded);
+			}
+		});
+
+		const handleResize = () => {
+			clearTimeout(resizeTimer);
+			resizeTimer = window.setTimeout(layoutMasonry, 100);
+		};
+		window.addEventListener('resize', handleResize);
+
+		return () => {
+			window.removeEventListener('resize', handleResize);
+			clearTimeout(resizeTimer);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -22,58 +113,44 @@
 		</div>
 	</section>
 
-	<section class="Stream">
-		<div class="wrapper">
-			{#if firstWork}
-				<a class="card card-01" href="/archives/{firstWork.id}">
-					<div class="image">
-						{#if firstWork.thumbnail}
-							<img
-								src={firstWork.thumbnail.url}
-								alt={firstWork.title}
-								loading="eager"
-							/>
-						{/if}
-					</div>
-					<div class="meta">
-						<span class="num" lang="en">{padNumber(0)}</span>
-						<span class="code" lang="en">{firstWork.title}</span>
-						<span class="brand" lang="en">{firstWork.brand ?? ''}</span>
-					</div>
-				</a>
-			{/if}
-
-			{#each restWorks as work, i (work.id)}
-				<a class="card card-{padNumber(i + 1)}" href="/archives/{work.id}">
-					<div class="image">
-						{#if work.thumbnail}
-							<img
-								src={work.thumbnail.url}
-								alt={work.title}
-								loading="lazy"
-							/>
-						{/if}
-					</div>
-					<div class="meta">
-						<span class="num" lang="en">{padNumber(i + 1)}</span>
-						<span class="code" lang="en">{work.title}</span>
-						<span class="brand" lang="en">{work.brand ?? ''}</span>
-					</div>
-				</a>
-			{/each}
-		</div>
+	<section class="Gallery" class:loading={isLoading} id="grid-gallery">
+		{#each images as image, i (i + image.workId + image.url)}
+			<div
+				class="grid_gallery_item"
+				role="button"
+				tabindex="0"
+				onclick={() => navigateToWork(image.workId)}
+				onkeydown={(e) => e.key === 'Enter' && navigateToWork(image.workId)}
+				aria-label={image.workTitle}
+			>
+				<div class="image-wrapper" style:aspect-ratio={image.aspectRatio}>
+					<img
+						src={image.url}
+						alt={image.workTitle}
+						loading="lazy"
+						width={image.width}
+						height={image.height}
+						draggable="false"
+					/>
+				</div>
+			</div>
+		{/each}
 	</section>
 </main>
 
 <style>
 	.Archives {
-		padding-top: 24px;
+		padding-top: 73px;
 		padding-bottom: 120px;
+		padding-inline: var(--padding);
 	}
 
-	/* ----- View switch (Index | List) ----- */
+	/* View switch */
+	.Archives .ViewSwitch {
+		padding-block: 24px 32px;
+	}
+
 	.Archives .ViewSwitch .wrapper {
-		padding-inline: var(--gutter);
 		display: flex;
 		gap: 16px;
 	}
@@ -92,162 +169,53 @@
 		opacity: 1;
 	}
 
-	/* ----- Stream (mirrors home Archives section) ----- */
-	.Archives .Stream {
-		padding-top: 40px;
+	/* Masonry */
+	.Archives .Gallery {
+		position: relative;
+		opacity: 1;
+		transition: opacity 0.6s ease-out;
 	}
 
-	.Archives .Stream .wrapper {
-		display: flex;
-		flex-direction: column;
-		gap: 80px;
+	.Archives .Gallery.loading {
+		opacity: 0;
 	}
 
-	.Archives .Stream .card {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
+	.Archives .grid_gallery_item {
+		position: absolute;
+		cursor: pointer;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 
-	.Archives .Stream .card:hover {
-		opacity: 0.8;
+	.Archives .grid_gallery_item:hover {
+		opacity: 0.85;
 	}
 
-	.Archives .Stream .card .image {
+	.Archives .image-wrapper {
 		position: relative;
 		width: 100%;
 		overflow: hidden;
 		background: var(--color-bg-gray);
 	}
 
-	.Archives .Stream .card .image img {
+	.Archives .image-wrapper img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		display: block;
 	}
 
-	/* Cards 02–10: natural height (aspect-ratio temporarily disabled) */
-	.Archives .Stream .card:not(.card-01) .image img {
-		height: auto;
-		object-fit: initial;
-	}
-
-	.Archives .Stream .card .meta {
-		display: grid;
-		grid-template-columns: 12.5% 1fr auto;
-		align-items: baseline;
-		gap: 8px;
-		font-size: var(--fs-h6);
-		font-weight: 400;
-	}
-
-	.Archives .Stream .card .meta .num {
-		opacity: 0.6;
-	}
-
-	.Archives .Stream .card .meta .brand {
-		text-align: right;
-		opacity: 0.6;
-		font-weight: 400;
-	}
-
-	/* 01 — keep aspect-ratio (OP-handoff geometry) */
-	.Archives .Stream .card-01 {
-		width: 257px;
-		max-width: 100%;
-		margin-inline: auto;
-	}
-	.Archives .Stream .card-01 .image {
-		aspect-ratio: 257 / 385;
-	}
-
-	/* 02 — 90% centered */
-	.Archives .Stream .card-02 {
-		width: 90%;
-		margin-inline: auto;
-	}
-
-	/* 03 — full bleed image, meta inside padding */
-	.Archives .Stream .card-03 {
-		width: 100vw;
-		margin-left: calc(-1 * var(--padding));
-	}
-	.Archives .Stream .card-03 .meta {
-		padding-inline: var(--padding);
-	}
-
-	/* 04 — narrow, centered */
-	.Archives .Stream .card-04 {
-		width: 62.5vw;
-		margin-inline: auto;
-	}
-
-	/* 05 — full bleed */
-	.Archives .Stream .card-05 {
-		width: 100vw;
-		margin-left: calc(-1 * var(--padding));
-	}
-	.Archives .Stream .card-05 .meta {
-		padding-inline: var(--padding);
-	}
-
-	/* 06 — 85% centered */
-	.Archives .Stream .card-06 {
-		width: 85%;
-		margin-inline: auto;
-	}
-
-	/* 07 — 70% centered */
-	.Archives .Stream .card-07 {
-		width: 70%;
-		margin-inline: auto;
-	}
-
-	/* 08 — 80% centered */
-	.Archives .Stream .card-08 {
-		width: 80%;
-		margin-inline: auto;
-	}
-
-	/* 09 — full bleed */
-	.Archives .Stream .card-09 {
-		width: 100vw;
-		margin-left: calc(-1 * var(--padding));
-	}
-	.Archives .Stream .card-09 .meta {
-		padding-inline: var(--padding);
-	}
-
-	/* 10 — narrow, centered */
-	.Archives .Stream .card-10 {
-		width: 62.5vw;
-		margin-inline: auto;
-	}
-
-	@media (min-width: 768px) {
-		.Archives .Stream .card-01 {
-			width: 320px;
-		}
-	}
-
 	@media (min-width: 1024px) {
 		.Archives {
-			padding-top: 32px;
+			padding-top: 80px;
 			padding-bottom: 160px;
+		}
+
+		.Archives .ViewSwitch {
+			padding-block: 32px 40px;
 		}
 
 		.Archives .ViewSwitch .link {
 			font-size: var(--fs-h5);
-		}
-
-		.Archives .Stream .card .meta {
-			font-size: var(--fs-h5);
-		}
-
-		.Archives .Stream .card-01 {
-			width: 380px;
 		}
 	}
 </style>
