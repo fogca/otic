@@ -252,7 +252,7 @@
 
 	.Office .service-title {
 		font-size: var(--fs-h5);
-		font-weight: 500;
+		font-weight: 400;
 		margin: 20px 0 0;
 	}
 
@@ -296,13 +296,13 @@
 
 	.Office .num {
 		font-size: var(--fs-h3);
-		font-weight: 500;
+		font-weight: 400;
 		margin-bottom: 0;
 	}
 
 	.Office .label {
 		font-size: var(--fs-h3);
-		font-weight: 500;
+		font-weight: 400;
 	}
 
 	.Office .body {
