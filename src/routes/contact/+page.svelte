@@ -34,20 +34,20 @@
 
 				<div class="content">
 					<div class="body" lang="en">
-						<p>For new projects, collaborations, or just a quiet hello.</p>
 						<p>
-							We are currently open for a small number of select projects across
-							visual identity, type, product, and digital communication, and aim
-							to respond to inquiries within two business days. If your project is
-							exploratory or still finding its shape, we welcome that
-							conversation just as warmly.
+							We are currently accepting a limited number of projects across
+							brand design, product design, typeface, digital communication, and
+							CG image creation — work that crosses the visual domain. Email
+							replies are typically returned within five business days. Whether
+							your project is at the conceptual stage, in need of an estimate,
+							or simply an open conversation, please feel free to reach out. We
+							look forward to the collaborations ahead.
 						</p>
 					</div>
 
 					<div class="body body-ja">
-						<p>新しいプロジェクトのご相談、ご協業、あるいはただのご挨拶まで。</p>
 						<p>
-							現在、ヴィジュアル・アイデンティティ、書体、プロダクト、デジタルコミュニケーションを横断する案件を、選別のうえ少数受け付けています。ご相談には原則2営業日以内に返信いたします。構想段階のテーマや、まだ輪郭の定まらないプロジェクトのご相談も歓迎です。
+							ブランドデザインやプロダクトデザイン、タイプフェイスやデジタルコミュニケーション、CGイメージクリエイションなど、視覚領域を横断する制作を現在少数受け付けております。メールのお返事には原則5営業日以内に返信いたします。構想段階のプロジェクトやお見積り、その他ご相談などお気軽にご連絡ください。新たなコラボレーションを楽しみにお待ちしております。
 						</p>
 					</div>
 
@@ -150,12 +150,12 @@
 	}
 
 	.Contact .body[lang='en'] p {
-		font-size: 14px;
+		font-size: 12px;
 		line-height: 1.5;
 	}
 
 	.Contact .body p {
-		font-size: 13px;
+		font-size: 12px;
 		line-height: 1.7;
 	}
 
