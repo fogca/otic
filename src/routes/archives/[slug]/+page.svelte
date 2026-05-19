@@ -166,7 +166,7 @@
 	.Archive .Body .wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 80px;
+		gap: 60px;
 	}
 
 	.Archive .Body .image img,
