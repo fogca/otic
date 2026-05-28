@@ -25,14 +25,12 @@
    1. Font faces
    ------------------------------------------------------------ */
 
-/* Primary Latin face — Mischen Typefoundry / Aether (in-house variable
-   font, replaces the previous Apercu setup). Single woff2 covers the
-   full weight axis; consumers use `font-weight: <number>` or `font-
-   variation-settings: 'wght' <number>` to pick a weight. */
+/* Primary Latin face — August Type Foundry / Scheteiner (in-house face,
+   formerly Aether). Single "Book" weight; the 100–900 range below lets
+   any requested font-weight map to this master without faux-bold synthesis. */
 @font-face {
-  font-family: 'Aether';
-  src: url('/fonts/Aether-Variable.woff2?v=20260517-num') format('woff2-variations'),
-       url('/fonts/Aether-Variable.woff2?v=20260517-num') format('woff2');
+  font-family: 'Scheteiner';
+  src: url('/fonts/Scheteiner-Book.woff2?v=20260527') format('woff2');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -98,11 +96,13 @@ a {
 :root {
   /* --- Colors --- */
   --color-bg:        #ffffff;
-  --color-text:      #000000;
+  --color-text:      #004489;  /* default text — accent blue */
   --color-text-mute: rgba(0, 0, 0, 0.3);
   --color-bg-dark:   #121212;
   --color-bg-gray:   #f1f1f1;
   --color-accent:    #b33030;
+  --color-accent-yellow: #f2edcb;  /* Office text & header */
+  --color-accent-blue:   #004489;  /* Office background */
   --color-line:      rgba(0, 0, 0, 0.15);
 
   /* --- Color aliases (general-purpose) --- */
@@ -112,7 +112,7 @@ a {
   --key:        var(--color-text);
 
   /* --- Typography stacks --- */
-  --font-en:     'Aether', 'Helvetica Neue', Arial, sans-serif;
+  --font-en:     'Scheteiner', 'Helvetica Neue', Arial, sans-serif;
   --font-ja:     'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI',

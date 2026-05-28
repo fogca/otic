@@ -72,7 +72,7 @@
 						Day by day, learning further, we strive toward better creation.
 					</p>
 				</div>
-				<div class="body body-ja">
+				<div class="body body-ja" lang="ja">
 					<p>
 						私たちは、ビジュアルアイデンティティの開発とデザインエンジニアリングを担うデザイン事務所です。ブランドデザインから、プロダクトデザイン、ファニチャーデザイン、書体開発、CGビジュアライゼーション、デジタルコミュニケーションまで、視覚領域を横断するクリエイションを、多様な分野のパートナーとともに重ねてきました。私たちが貫徹する「Radix——根源——の探求」は、その時その場所に必然として在るべきかたちへと収斂させていく姿勢です。日々学びを重ねながら、よりよいクリエイションを行うために努めてまいります。
 					</p>
@@ -165,7 +165,7 @@
 							at a time.
 						</p>
 					</div>
-					<div class="body body-ja">
+					<div class="body body-ja" lang="ja">
 						<p>
 							今日の社会システムは、その脆弱性と、必要（needs）と欲求（wants）の乖離によって、随所に綻びが露見しはじめています。情報が氾濫し、価値秩序が絶えず移ろうなかで、簡便な幸福はインスタントに摂取できるようになりました。その結果、実体として身体に残るものは、相対的に痩せてきているようにも見えます。私たちはこの変化のなかで、より根源的で確かな相互作用——「身体性（corporeality）」と「情緒（emotion）」へと、創作の焦点を移しつつあります。デザイナーとは、形而上のものを形而下へと具象化することの許される職能であり、言い換えれば、生活様式・物的価値・消費の様態など、人間の営みの広い範囲に介入し得る職能でもあります。20世紀後半、Victor
 							Papanek
@@ -199,7 +199,7 @@
 						community.
 					</p>
 				</div>
-				<div class="body body-ja">
+				<div class="body body-ja" lang="ja">
 					<p>
 						2001年日本生まれ。<br />
 						英University of
@@ -216,6 +216,17 @@
 	.Office {
 		padding-top: 20vh;
 		padding-bottom: 40px;
+		background: var(--color-accent-blue);
+		color: var(--color-accent-yellow);
+		/* Absorb Footer's margin-top so the blue flows straight into the black Footer */
+		margin-bottom: -120px;
+	}
+
+	/* base.css sets color: var(--color-text) directly on div, p, span, headings,
+	   anchors, etc., which beats inheritance from .Office — so override every
+	   descendant here. */
+	.Office :global(*) {
+		color: var(--color-accent-yellow);
 	}
 
 	.Office .Section1 {
@@ -313,12 +324,12 @@
 		margin-top: 8px;
 	}
 
-	/* SP/tablet only: 01 Section1 を 2カラム grid（左 27.5% / 右 72.5%）にして
+	/* SP/tablet only: 01 Section1 を 2カラム grid（左 20% / 右 80%）にして
 	   title と本文の Y を揃え、本文を右寄せにする。03 Founder は通常の block flow に戻す。 */
 	@media (max-width: 1023px) {
 		.Office .Section1 .container {
 			display: grid;
-			grid-template-columns: 27.5% 72.5%;
+			grid-template-columns: 20% 80%;
 			align-items: start;
 		}
 
@@ -340,13 +351,15 @@
 		line-height: 1.7;
 	}
 
-	.Office .body.body-ja p {
-		text-align: justify;
+	.Office .body[lang='en'] p {
+		font-size: 12.5px;
+		line-height: 1.3;
 	}
 
-	.Office .body[lang='en'] p {
-		font-size: 11px;
-		line-height: 1.5;
+	.Office .body[lang='ja'] p {
+		font-size: 10.5px;
+		line-height: 1.7;
+		text-align: justify;
 	}
 
 	.Office .body p + p {

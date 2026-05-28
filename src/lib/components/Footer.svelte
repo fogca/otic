@@ -89,12 +89,6 @@
 		margin-top: 120px;
 	}
 
-	@media (min-width: 1024px) {
-		.Footer {
-			margin-top: 0;
-		}
-	}
-
 	.Footer :global(*) {
 		color: #fff;
 	}

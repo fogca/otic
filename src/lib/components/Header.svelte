@@ -61,6 +61,7 @@
 	class="Header"
 	class:is-revealed={intro.completed}
 	class:is-shown={headerShown}
+	class:is-office={isOffice}
 >
 	<nav class="nav">
 		<a
@@ -100,7 +101,6 @@
 		align-items: center;
 		padding: 25px var(--padding);
 		z-index: var(--z-header);
-		mix-blend-mode: difference;
 		opacity: 0;
 		transform: translateY(-100%);
 		transition:
@@ -118,16 +118,22 @@
 		transform: translateY(0);
 	}
 
+	/* Office page: match the page text color (yellow) */
+	.Header.is-office .link,
+	.Header.is-office .logo {
+		color: var(--color-accent-yellow);
+	}
+
 	/* ----- Nav (left) ----- */
 	.Header .nav {
 		display: flex;
-		gap: 27px;
+		gap: 20px;
 	}
 
 	.Header .link {
 		font-size: 11px;
 		line-height: 1;
-		color: var(--white);
+		color: var(--color-text);
 		font-weight: 400;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
@@ -143,7 +149,7 @@
 	/* ----- Logo (right) ----- */
 	.Header .logo {
 		width: 200px;
-		color: var(--white);
+		color: var(--color-text);
 	}
 
 	.Header .logo :global(svg) {
@@ -158,7 +164,7 @@
 		}
 
 		.Header .nav {
-			gap: 40px;
+			gap: 30px;
 		}
 
 		.Header .link {

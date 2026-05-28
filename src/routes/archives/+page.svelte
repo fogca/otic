@@ -22,10 +22,16 @@
 
 	let isLoading = $state(true);
 
-	// Fixed column count: PC = 5, SP = 2
+	// Column count by viewport: SP = 2, Laptop+ (≥1024) = 5
 	function getColumnCount(): number {
 		if (!browser) return 5;
 		return window.matchMedia('(min-width: 1024px)').matches ? 5 : 2;
+	}
+
+	// Grid gap: PC = 15px, SP = 5px
+	function getGap(): number {
+		if (!browser) return 15;
+		return window.matchMedia('(min-width: 1024px)').matches ? 15 : 5;
 	}
 
 	function layoutMasonry() {
@@ -35,7 +41,7 @@
 		if (!container || items.length === 0) return;
 
 		const columnCount = getColumnCount();
-		const gap = 5;
+		const gap = getGap();
 		const containerWidth = container.offsetWidth;
 		const columnWidth = (containerWidth - gap * (columnCount - 1)) / columnCount;
 
@@ -106,6 +112,10 @@
 </svelte:head>
 
 <main class="Archives">
+	<section class="Title">
+		<h1 class="title" lang="en">Work Archives</h1>
+	</section>
+
 	<section class="ViewSwitch">
 		<div class="wrapper">
 			<span class="link is-active" lang="en">Index</span>
@@ -140,14 +150,42 @@
 
 <style>
 	.Archives {
-		padding-top: 73px;
+		padding-top: 120px;
 		padding-bottom: 120px;
+		padding-inline: 0;
+	}
+
+	/* Override base.css `section { padding-inline: var(--padding) }`
+	   — every section inside .Archives sets its own padding. */
+	.Archives section {
+		padding-inline: 0;
+	}
+
+	/* SP: Title / ViewSwitch align with header padding,
+	   Gallery hugs closer to the edge for the masonry rhythm. */
+	.Archives .Title,
+	.Archives .ViewSwitch {
 		padding-inline: var(--padding);
+	}
+
+	.Archives .Gallery {
+		padding-inline: 5px;
+	}
+
+	/* Title */
+	.Archives .Title {
+		padding-block: 24px 0;
+	}
+
+	.Archives .Title .title {
+		font-size: var(--fs-h1);
+		font-weight: 400;
+		margin: 0;
 	}
 
 	/* View switch */
 	.Archives .ViewSwitch {
-		padding-block: 24px 32px;
+		padding-block: 8px 24px;
 	}
 
 	.Archives .ViewSwitch .wrapper {
@@ -183,11 +221,6 @@
 	.Archives .grid_gallery_item {
 		position: absolute;
 		cursor: pointer;
-		transition: opacity var(--duration-fast) var(--ease-default);
-	}
-
-	.Archives .grid_gallery_item:hover {
-		opacity: 0.85;
 	}
 
 	.Archives .image-wrapper {
@@ -206,12 +239,28 @@
 
 	@media (min-width: 1024px) {
 		.Archives {
-			padding-top: 80px;
+			padding-top: 150px;
 			padding-bottom: 160px;
+			padding-inline: var(--padding);
+			/* Up to ~16-inch (1640px) viewport: behaves like header (100% minus padding).
+			   Beyond ~1822px viewport (where 90vw > 1640): cap shifts to 90vw, gradually. */
+			max-width: max(1640px, 90vw);
+			margin-inline: auto;
+		}
+
+		/* PC: child sections inherit .Archives padding-inline, no own padding. */
+		.Archives .Title,
+		.Archives .ViewSwitch,
+		.Archives .Gallery {
+			padding-inline: 0;
+		}
+
+		.Archives .Title {
+			padding-block: 32px 0;
 		}
 
 		.Archives .ViewSwitch {
-			padding-block: 32px 40px;
+			padding-block: 12px 32px;
 		}
 
 		.Archives .ViewSwitch .link {

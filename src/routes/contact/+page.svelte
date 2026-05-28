@@ -287,7 +287,6 @@
 	@media (min-width: 1024px) {
 		.Contact {
 			padding-top: 42.5vh;
-			margin-bottom: 0;
 		}
 
 		.Contact .container {

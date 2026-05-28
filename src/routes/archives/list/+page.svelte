@@ -80,11 +80,6 @@
 		padding-block: 24px;
 		border-bottom: 1px solid var(--color-line);
 		font-size: var(--fs-h6);
-		transition: opacity var(--duration-fast) var(--ease-default);
-	}
-
-	.Archives .List .archive-row:hover {
-		opacity: 0.5;
 	}
 
 	.Archives .List .archive-row .num {

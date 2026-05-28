@@ -105,9 +105,21 @@
 				</a>
 			{/if}
 
-			<!-- 02 〜 10: aspect-ratio temporarily disabled, natural height -->
+			<!-- 02 〜 10: aspect-ratio temporarily disabled, natural height.
+			     `--aspect` is computed from thumbnail dimensions so PC styles can
+			     cap card width by `min(predefined, calc(90vh * aspect))` — this
+			     shrinks the card for portrait images so the meta below aligns
+			     with the rendered image width. -->
 			{#each restWorks as work, i (work.id)}
-				<a class="card card-{padNumber(i + 1)}" href="/archives/{work.id}">
+				{@const aspect =
+					work.thumbnail && work.thumbnail.height
+						? work.thumbnail.width / work.thumbnail.height
+						: 1}
+				<a
+					class="card card-{padNumber(i + 1)}"
+					href="/archives/{work.id}"
+					style="--aspect: {aspect}"
+				>
 					<div class="image">
 						{#if work.thumbnail}
 							<img
@@ -148,11 +160,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		transition: opacity var(--duration-fast) var(--ease-default);
-	}
-
-	.Home .Archives .card:hover {
-		opacity: 0.8;
 	}
 
 	.Home .Archives .card .image {
@@ -183,6 +190,13 @@
 		gap: 8px;
 		font-size: var(--fs-h6);
 		font-weight: 400;
+	}
+
+	/* base.css sets color directly on span — override meta text to accent blue */
+	.Home .Archives .card .meta .num,
+	.Home .Archives .card .meta .code,
+	.Home .Archives .card .meta .brand {
+		color: var(--color-accent-blue);
 	}
 
 	.Home .Archives .card .meta .num {
@@ -314,14 +328,120 @@
 			padding-bottom: 160px;
 		}
 
+		.Home .Archives .wrapper {
+			gap: 120px;
+		}
+
 		.Home .Archives .card .meta {
 			font-size: var(--fs-h5);
 		}
 
+		/* PC: cap tall (portrait) images at 90vh without cropping.
+		   Image scales down proportionally, centered within the card,
+		   and the gray placeholder background is removed so the empty
+		   sides blend into the page rather than showing a gray block. */
+		.Home .Archives .card:not(.card-01) .image {
+			display: flex;
+			justify-content: center;
+			background: transparent;
+		}
+
+		.Home .Archives .card:not(.card-01) .image img {
+			width: auto;
+			height: auto;
+			max-width: 100%;
+			max-height: 90vh;
+		}
+
+		/* 01 — hero, centered on first viewport */
 		.Home .Archives .card-01 {
 			width: 380px;
 			padding-top: calc((100vh - 570px) / 2);
 			margin-bottom: calc((100vh - 570px) / 2);
+		}
+
+		/* 02 — right-shifted medium */
+		.Home .Archives .card-02 {
+			width: 50vw;
+			max-width: min(720px, calc(90vh * var(--aspect, 999)));
+			margin-left: auto;
+			margin-right: 0;
+		}
+		.Home .Archives .card-02 .meta {
+			padding-inline: 0;
+		}
+
+		/* 03 — full-bleed wide */
+		.Home .Archives .card-03 {
+			width: 90vw;
+			max-width: min(1400px, calc(90vh * var(--aspect, 999)));
+			margin-left: auto;
+			margin-right: auto;
+		}
+		.Home .Archives .card-03 .meta {
+			padding-inline: 0;
+		}
+
+		/* 04 — left-shifted narrow */
+		.Home .Archives .card-04 {
+			width: 32vw;
+			max-width: min(500px, calc(90vh * var(--aspect, 999)));
+			margin-left: 8vw;
+			margin-right: auto;
+		}
+
+		/* 05 — centered medium-wide */
+		.Home .Archives .card-05 {
+			width: 60vw;
+			max-width: min(900px, calc(90vh * var(--aspect, 999)));
+			margin-left: auto;
+			margin-right: auto;
+		}
+		.Home .Archives .card-05 .meta {
+			padding-inline: 0;
+		}
+
+		/* 06 — right-shifted medium */
+		.Home .Archives .card-06 {
+			width: 45vw;
+			max-width: min(700px, calc(90vh * var(--aspect, 999)));
+			margin-left: auto;
+			margin-right: 8vw;
+		}
+
+		/* 07 — left-shifted small */
+		.Home .Archives .card-07 {
+			width: 38vw;
+			max-width: min(580px, calc(90vh * var(--aspect, 999)));
+			margin-left: 8vw;
+			margin-right: auto;
+		}
+
+		/* 08 — centered medium */
+		.Home .Archives .card-08 {
+			width: 50vw;
+			max-width: min(800px, calc(90vh * var(--aspect, 999)));
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		/* 09 — full-bleed wide */
+		.Home .Archives .card-09 {
+			width: 90vw;
+			max-width: min(1400px, calc(90vh * var(--aspect, 999)));
+			margin-left: auto;
+			margin-right: auto;
+		}
+		.Home .Archives .card-09 .meta {
+			padding-inline: 0;
+		}
+
+		/* 10 — right-shifted narrow */
+		.Home .Archives .card-10 {
+			width: 35vw;
+			max-width: min(540px, calc(90vh * var(--aspect, 999)));
+			margin-left: auto;
+			margin-right: 8vw;
 		}
 	}
 </style>
