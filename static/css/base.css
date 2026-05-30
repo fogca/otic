@@ -25,12 +25,12 @@
    1. Font faces
    ------------------------------------------------------------ */
 
-/* Primary Latin face — August Type Foundry / Scheteiner (in-house face,
-   formerly Aether). Single "Book" weight; the 100–900 range below lets
-   any requested font-weight map to this master without faux-bold synthesis. */
+/* Primary Latin face — August Type Foundry / Steiner (in-house face,
+   formerly Aether / Scheteiner). Single "Book" weight; the 100–900 range below
+   lets any requested font-weight map to this master without faux-bold synthesis. */
 @font-face {
-  font-family: 'Scheteiner';
-  src: url('/fonts/Scheteiner-Book.woff2?v=20260527') format('woff2');
+  font-family: 'Steiner';
+  src: url('/fonts/Steiner-Book.woff2?v=20260530b') format('woff2');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -112,7 +112,7 @@ a {
   --key:        var(--color-text);
 
   /* --- Typography stacks --- */
-  --font-en:     'Scheteiner', 'Helvetica Neue', Arial, sans-serif;
+  --font-en:     'Steiner', 'Helvetica Neue', Arial, sans-serif;
   --font-ja:     'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI',
