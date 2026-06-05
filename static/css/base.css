@@ -26,12 +26,12 @@
    ------------------------------------------------------------ */
 
 /* Primary Latin face — August Type Foundry / Steiner (in-house face,
-   formerly Aether / Scheteiner). Single "Book" weight; the 100–900 range below
-   lets any requested font-weight map to this master without faux-bold synthesis. */
+   formerly Aether / Scheteiner). VF04 variable font (wght 400–900):
+   any requested weight interpolates on the single variable master. */
 @font-face {
   font-family: 'Steiner';
-  src: url('/fonts/Steiner-Book.woff2?v=20260530b') format('woff2');
-  font-weight: 100 900;
+  src: url('/fonts/Steiner-VF06.woff2?v=20260605') format('woff2');
+  font-weight: 400 900;
   font-style: normal;
   font-display: swap;
 }
@@ -113,7 +113,8 @@ a {
 
   /* --- Typography stacks --- */
   --font-en:     'Steiner', 'Helvetica Neue', Arial, sans-serif;
-  --font-ja:     'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
+  --font-ja:     'Steiner', 'Tazugane Gothic StdN', 'Tazugane Gothic',
+                 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI',
                  Roboto, sans-serif;
@@ -132,6 +133,10 @@ a {
   --fs-h6:   10px;   /* Mobile body, meta, caption, mobile nav */
   --fs-body: var(--fs-h6);
   --fs-p:    var(--fs-h6);
+
+  /* Body copy is language-aware (Latin runs larger than JP) */
+  --fs-p-en: 13px;   /* Body copy (Latin) */
+  --fs-p-ja: 11px;   /* Body copy (JP) */
 
   /* --- Line heights --- */
   --lh-h1:   1.2;
@@ -263,7 +268,7 @@ body {
 
 body {
   font-family: var(--text-font);
-  font-weight: 400;
+  font-weight: 470;
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   color: var(--color-text);
@@ -272,6 +277,10 @@ body {
 /* JP-specific line-height (font-family is already switched by :lang) */
 :lang(ja) {
   line-height: var(--lh-ja);
+  /* Latin/numerals in JP runs are Steiner (variable) — nudge to 500 so they
+     match the Tazugane weight. Only affects the variable font; Tazugane keeps
+     its font-weight (470). */
+  font-variation-settings: 'wght' 520;
 }
 
 /* ------------------------------------------------------------
@@ -294,49 +303,49 @@ tr, td, th, p, li {
 .h0 {
   font-size: var(--fs-h0);
   line-height: var(--lh-h1);
-  font-weight: 400;
+  font-weight: 470;
 }
 
 h1, .h1 {
   font-family:  var(--heading-font);
   font-size:    var(--fs-h1);
   line-height:  var(--lh-h1);
-  font-weight:  400;
+  font-weight:  470;
 }
 
 h2, .h2 {
   font-family:  var(--heading-font);
   font-size:    var(--fs-h2);
   line-height:  var(--lh-h2);
-  font-weight:  400;
+  font-weight:  470;
 }
 
 h3, .h3 {
   font-family:  var(--heading-font);
   font-size:    var(--fs-h3);
   line-height:  var(--lh-h3);
-  font-weight:  500;
+  font-weight:  470;
 }
 
 h4, .h4 {
   font-family:  var(--heading-font);
   font-size:    var(--fs-h4);
   line-height:  var(--lh-h4);
-  font-weight:  500;
+  font-weight:  470;
 }
 
 h5, .h5 {
   font-family:  var(--heading-font);
   font-size:    var(--fs-h5);
   line-height:  var(--lh-h5);
-  font-weight:  500;
+  font-weight:  470;
 }
 
 h6, .h6 {
   font-family:  var(--heading-font);
   font-size:    var(--fs-h6);
   line-height:  var(--lh-h6);
-  font-weight:  400;
+  font-weight:  470;
 }
 
 p, .p {
@@ -345,7 +354,14 @@ p, .p {
   line-height:  var(--lh-body);
 }
 
+/* Body copy size is language-aware and scales up on PC (vars in :root) */
+p:lang(en), .p:lang(en) {
+  font-size: var(--fs-p-en);
+  font-weight: 470;   /* Steiner 450 for body copy */
+}
+
 p:lang(ja), .p:lang(ja) {
+  font-size: var(--fs-p-ja);
   line-height: var(--lh-ja);
 }
 
@@ -374,9 +390,9 @@ input::placeholder {
    ------------------------------------------------------------ */
 
 /* Weight */
-.regular { font-weight: 400; }
-.medium  { font-weight: 500; }
-.bold    { font-weight: 700; }
+.regular { font-weight: 470; }
+.medium  { font-weight: 470; }
+.bold    { font-weight: 470; }
 
 /* Color */
 .white   { color: var(--white); }

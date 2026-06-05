@@ -5,7 +5,9 @@
 	import { intro } from '$lib/state/intro.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 
-	const isArchives = $derived(page.url.pathname.startsWith('/archives'));
+	// Underline only on the Archives index/list — not on individual project
+	// pages (/archives/[slug]).
+	const isArchives = $derived(['/archives', '/archives/list'].includes(page.url.pathname));
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
 
 	// ── Header visibility settings (adjust freely) ──
@@ -67,7 +69,7 @@
 		<a
 			href="/archives"
 			class="link"
-			class:is-mute={isArchives}
+			class:is-current={isArchives}
 			lang="en"
 		>
 			Archives
@@ -75,7 +77,7 @@
 		<a
 			href="/office"
 			class="link"
-			class:is-mute={isOffice}
+			class:is-current={isOffice}
 			lang="en"
 		>
 			Office
@@ -118,10 +120,10 @@
 		transform: translateY(0);
 	}
 
-	/* Office page: match the page text color (yellow) */
+	/* Office page: match the page text color (blue) */
 	.Header.is-office .link,
 	.Header.is-office .logo {
-		color: var(--color-accent-yellow);
+		color: var(--color-text);
 	}
 
 	/* ----- Nav (left) ----- */
@@ -131,15 +133,26 @@
 	}
 
 	.Header .link {
+		position: relative;
 		font-size: 11px;
 		line-height: 1;
 		color: var(--color-text);
-		font-weight: 400;
+		font-weight: 470;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 
-	.Header .link.is-mute {
-		opacity: 0.3;
+	/* Current page: 3px dot to the left of the text (・Office) */
+	.Header .link.is-current::before {
+		content: '';
+		position: absolute;
+		right: 100%;
+		top: 50%;
+		transform: translateY(calc(-50% + 1px));
+		margin-right: 3px;
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: currentColor;
 	}
 
 	.Header .link:hover {

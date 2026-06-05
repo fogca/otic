@@ -1,6 +1,8 @@
 <script lang="ts">
 	// Office page — static for now, microCMS later
 
+	const padNumber = (n: number) => String(n + 1).padStart(2, '0');
+
 	type Project = { no: string; code: string; name: string; action: string };
 	type Service = {
 		title: string;
@@ -13,7 +15,7 @@
 
 	const services: Service[] = [
 		{
-			title: 'Industrial Design',
+			title: 'Product Design',
 			subtitle: 'プロダクトデザインと工業意匠',
 			body: '身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる「必然のかたち」を追い求めながら、日々の所作に静かに寄り添うプロダクトの企画・開発を行っています。デザイナーとは形而上のものを形而下へと具象化することが許された数少ない職能であると捉え、私たちのオリジンである身体へと立ち返ることを大切に、日々学びながらその実践を続けてまいります。',
 			image: '',
@@ -23,25 +25,25 @@
 		{
 			title: 'V.I. & Typography',
 			subtitle: 'ビジュアルアイデンティティと書体の開発',
-			body: '弊社主宰のタイプファウンダリーーMischenでは、歴史を紐解き、現代の思想を交えながら再解釈することで生まれるニューフォームを追い求め、グラフィックデザインの大きな構成要素である書体の開発を行っています。また書体開発で培ったディテールへの眼差しをビジュアルアイデンティティ・ブランドアイデンティティの設計まで拡げ、ブランドの根幹を貫く一貫した造形言語を追求します。',
-			image: '',
+			body: '弊社主宰のタイプファウンダリ——August Type Foundryでは、歴史を紐解き、現代の思想を交えながら再解釈することで生まれるニューフォームを追い求め、グラフィックデザインの大きな構成要素である書体の開発を行っています。また書体開発で培ったディテールへの眼差しをビジュアルアイデンティティ・ブランドアイデンティティの設計まで拡げ、ブランドの根幹を貫く一貫した造形言語を追求します。',
+			image: '/images/services_typefoundry.png',
 			imageAlt: 'V.I. & Typography',
 			projects: []
 		},
 		{
-			title: 'CG Visualisation',
+			title: 'Image Visualisation',
 			subtitle: 'イメージクリエイションとCGビジュアライゼーション',
-			body: '弊社主宰のイメージクリエイションスタジオーーStudio Ristoranteでは、食と空間に焦点をあて、その企画・立ち上げ・B.I.設計を実施し、現在はイメージクリエイションのディレクションと制作を一貫して手がけています。また実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。',
-			image: '',
-			imageAlt: 'CG Visualisation',
+			body: '弊社主宰のイメージクリエイションスタジオ——Studio Ristoranteでは、食と空間に焦点をあて、その企画・立ち上げ・B.I.設計を実施し、現在はイメージクリエイションのディレクションと制作を一貫して手がけています。また実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。',
+			image: '/images/services_visualisation.png',
+			imageAlt: 'Image Visualisation',
 			projects: []
 		},
 		{
-			title: 'UX & Web & App Development',
+			title: 'Digital Infrastructure',
 			subtitle: 'UXとデジタルコミュニケーションの設計',
-			body: 'Office / TAKUMIISOBEでは、UXデザインを始め、ブランドサイトやEコマース、アプリなどの開発など、デジタルプロダクトの設計と実装を行っています。モダンな技術スタックを軸に、UXとデジタルコミュニケーションの両面から体験の輪郭を整え、ブランドのデジタル体験を形にします。',
-			image: '',
-			imageAlt: 'UX & Web & App Development',
+			body: '弊社主宰のエンジニアリングスタジオ——TEKNEでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
+			image: '/images/services_production.png',
+			imageAlt: 'Digital Infrastructure',
 			projects: []
 		}
 	];
@@ -52,12 +54,19 @@
 </svelte:head>
 
 <main class="Office">
+	<!-- First view: full-screen PV video (placeholder until the file is ready) -->
+	<section class="OfficeHero" aria-label="PV">
+		<!-- Replace with: <video class="OfficeHero__media" src="…" autoplay muted loop playsinline poster="…"></video> -->
+		<div class="OfficeHero__media" aria-hidden="true"></div>
+	</section>
+
 	<section class="Section1">
 		<div class="wrapper">
 			<div class="container">
 				<div class="header">
-					<h5 class="num" lang="en">01</h5>
+					<span class="num" lang="en">01</span>
 					<h3 class="label" lang="en">Office</h3>
+					<span class="sub" lang="en">Overview</span>
 				</div>
 				<div class="content">
 					<div class="body" lang="en">
@@ -86,9 +95,9 @@
 		<div class="wrapper">
 			<div class="container">
 				<div class="header">
-					<h5 class="num" lang="en">02</h5>
-					<h3 class="label" lang="en">Service:</h3>
-					<h3 class="label" lang="en">Case Studies</h3>
+					<span class="num" lang="en">02</span>
+					<h3 class="label" lang="en">Services</h3>
+					<span class="sub" lang="en">Studios</span>
 				</div>
 				<div class="content">
 				<ul class="service-list">
@@ -102,10 +111,10 @@
 							></div>
 							<h4 class="service-title" lang="en">{service.title}</h4>
 							{#if service.subtitle}
-								<p class="service-subtitle">{service.subtitle}</p>
+								<p class="service-subtitle" lang="ja">{service.subtitle}</p>
 							{/if}
 							{#if service.body}
-								<p class="service-body">{service.body}</p>
+								<p class="service-body" lang="ja">{service.body}</p>
 							{/if}
 							{#if service.projects.length}
 								<ul class="project-list" lang="en">
@@ -131,9 +140,9 @@
 		<div class="wrapper">
 			<div class="container">
 				<div class="header">
-					<h5 class="num" lang="en">03</h5>
-					<h3 class="label" lang="en">Ethos:</h3>
-					<h3 class="label" lang="en">Toward a Net-Positive Practice</h3>
+					<span class="num" lang="en">03</span>
+					<h3 class="label" lang="en">Ethos</h3>
+					<span class="sub" lang="en">Our Raison d'être</span>
 				</div>
 				<div class="content">
 					<div class="body" lang="en">
@@ -167,10 +176,10 @@
 					</div>
 					<div class="body body-ja" lang="ja">
 						<p>
-							今日の社会システムは、その脆弱性と、必要（needs）と欲求（wants）の乖離によって、随所に綻びが露見しはじめています。情報が氾濫し、価値秩序が絶えず移ろうなかで、簡便な幸福はインスタントに摂取できるようになりました。その結果、実体として身体に残るものは、相対的に痩せてきているようにも見えます。私たちはこの変化のなかで、より根源的で確かな相互作用——「身体性（corporeality）」と「情緒（emotion）」へと、創作の焦点を移しつつあります。デザイナーとは、形而上のものを形而下へと具象化することの許される職能であり、言い換えれば、生活様式・物的価値・消費の様態など、人間の営みの広い範囲に介入し得る職能でもあります。20世紀後半、Victor
-							Papanek
-							をはじめ多くの知識人が、その重さに警鐘を鳴らしてきました。デザインが目的論性（telesis）を取り戻し、人間の本当の必要（real
-							needs）に応答するためには、私たちのオリジンである身体や、自然との繋がりへと立ち返ることが、いま改めて重要であると捉えています。私たちデザイナーは、日々、消費を加速させ、環境への負荷を積み重ねている当事者でもあります。インパルスデザインや商業デザインといかに付き合うかを問いつづけながら、日々学びを重ね、わずかでも次代に手渡せるものを残していきたい。いつか自分たちの仕事を閉じる日に、総じて社会の側へわずかでもプラスを残せたと振り返れる仕事を、ひとつずつ積み重ねていきたいと考えています。
+							今日の社会システムは、その脆弱性と自己中心的な世界観によって随所に綻びが露見しはじめているように思えます。情報が氾濫し、価値秩序が絶えず移ろいゆくなかで、簡便な幸福はインスタントに摂取できるようになりました。その結果、実体として身体に残るものは、相対的に痩せてきているようにも見えます。私たちはこの変化のなかで、より根源的で確かな相互作用——「身体性」と「情緒」へと焦点を移しつつあります。
+						</p>
+						<p>
+							デザイナーは、形而上のものを形而下へと具象化することのできる職能であり、言い換えれば、生活様式・物的価値・消費の様態など、人間の営みの広い範囲に介入し得る職能でもあります。20世紀後半、ヴィクター・パパネックをはじめ多くの知識人が、その重大さに警鐘を鳴らしてきました。デザインが目的論性を取り戻し、人間の本当の必要に応答するためには、私たちのオリジンである身体や、自然との繋がりへと立ち返ることが、いま改めて重要であると捉えています。私たちデザイナーは、日々、消費を加速させ、環境への負荷を積み重ねている当事者です。インパルスデザインや商業デザインといかに付き合うかを問いつづけながら、日々学びを重ね、わずかでも次代に手渡せるものを残していきたい。いつか自分たちの仕事を閉じる日に、総じて社会の側へわずかでもプラスを残せたと振り返れる仕事を、ひとつずつ積み重ねていきたいと考えています。
 						</p>
 					</div>
 				</div>
@@ -182,9 +191,9 @@
 		<div class="wrapper">
 			<div class="container">
 				<div class="header">
-					<h5 class="num" lang="en">04</h5>
-					<h3 class="label" lang="en">Founder:</h3>
-					<h3 class="label" lang="en">TAKUMI ISOBE</h3>
+					<span class="num" lang="en">04</span>
+					<h3 class="label" lang="en">Founder</h3>
+					<span class="sub" lang="en">TAKUMI ISOBE</span>
 				</div>
 				<div class="content">
 				<div class="body" lang="en">
@@ -202,8 +211,7 @@
 				<div class="body body-ja" lang="ja">
 					<p>
 						2001年日本生まれ。<br />
-						英University of
-						Westminster在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。東京都内のデザインオフィス数社を経て、独立。現在はディレクターとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
+						英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在はディレクターとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
 					</p>
 				</div>
 				</div>
@@ -214,11 +222,11 @@
 
 <style>
 	.Office {
-		padding-top: 20vh;
-		padding-bottom: 40px;
-		background: var(--color-accent-blue);
-		color: var(--color-accent-yellow);
-		/* Absorb Footer's margin-top so the blue flows straight into the black Footer */
+		padding-top: 0;
+		padding-bottom: 100px;
+		background: var(--color-bg);
+		color: var(--color-text);
+		/* Absorb Footer's margin-top so the page flows straight into the black Footer */
 		margin-bottom: -120px;
 	}
 
@@ -226,11 +234,33 @@
 	   anchors, etc., which beats inheritance from .Office — so override every
 	   descendant here. */
 	.Office :global(*) {
-		color: var(--color-accent-yellow);
+		color: var(--color-text);
+	}
+
+	/* Roomier horizontal margins for all content sections (hero stays full-bleed) */
+	.Office section:not(.OfficeHero) {
+		padding-left: calc(var(--padding) * 2);
+		padding-right: calc(var(--padding) * 2);
+	}
+
+	/* First view — full-screen PV video (100vw × 100vh) */
+	.Office .OfficeHero {
+		width: 100%;
+		height: 100vh;
+		height: 100dvh;
+		padding: 0;
+		overflow: hidden;
+	}
+
+	.Office .OfficeHero__media {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		background: #eaeaea; /* placeholder until the video is in */
 	}
 
 	.Office .Section1 {
-		padding-top: 30px;
+		padding-top: 60px;
 	}
 
 	.Office .Service,
@@ -255,21 +285,21 @@
 
 	.Office .service-visual {
 		width: 100%;
-		aspect-ratio: 344 / 154;
+		aspect-ratio: 16 / 9;
 		background-color: #eaeaea;
 		background-size: cover;
 		background-position: center;
 	}
 
 	.Office .service-title {
-		font-size: var(--fs-h5);
-		font-weight: 400;
+		font-size: var(--fs-h3);
+		font-weight: 470;
 		margin: 20px 0 0;
 	}
 
 	.Office .service-subtitle {
 		font-size: 10px;
-		font-weight: 400;
+		font-weight: 470;
 		line-height: 1.7;
 		margin: 4px 0 0;
 		opacity: 0.6;
@@ -305,15 +335,28 @@
 		width: 100%;
 	}
 
-	.Office .num {
-		font-size: var(--fs-h3);
-		font-weight: 400;
-		margin-bottom: 0;
+	/* Section header — meta row: num + label (left) / sub (right), all 12px */
+	.Office .header {
+		display: grid;
+		grid-template-columns: 5% 1fr auto;
+		align-items: baseline;
+		gap: 8px;
+	}
+
+	.Office .num,
+	.Office .label,
+	.Office .sub {
+		font-size: 12px;
+		font-weight: 470;
+		line-height: 1.4;
 	}
 
 	.Office .label {
-		font-size: var(--fs-h3);
-		font-weight: 400;
+		font-weight: 470;
+	}
+
+	.Office .sub {
+		text-align: right;
 	}
 
 	.Office .body {
@@ -324,40 +367,20 @@
 		margin-top: 8px;
 	}
 
-	/* SP/tablet only: 01 Section1 を 2カラム grid（左 20% / 右 80%）にして
-	   title と本文の Y を揃え、本文を右寄せにする。03 Founder は通常の block flow に戻す。 */
-	@media (max-width: 1023px) {
-		.Office .Section1 .container {
-			display: grid;
-			grid-template-columns: 20% 80%;
-			align-items: start;
-		}
-
-		.Office .Section1 .header {
-			grid-column: 1;
-		}
-
-		.Office .Section1 .content {
-			grid-column: 2;
-		}
-
-		.Office .Section1 .body:first-child {
-			margin-top: 0;
-		}
-	}
-
+	/* Body copy size comes from base.css (lang-aware, scales on PC).
+	   Office keeps only its own line-height / justification. */
 	.Office .body p {
-		font-size: 10px;
 		line-height: 1.7;
 	}
 
 	.Office .body[lang='en'] p {
-		font-size: 12.5px;
 		line-height: 1.3;
+		text-align: justify;
+		hyphens: auto;
+		font-size: 12.5px;
 	}
 
 	.Office .body[lang='ja'] p {
-		font-size: 10.5px;
 		line-height: 1.7;
 		text-align: justify;
 	}
@@ -369,7 +392,7 @@
 	/* Tablet */
 	@media (min-width: 768px) {
 		.Office {
-			padding-top: 100px;
+			padding-top: 0;
 		}
 
 		.Office .wrapper {
@@ -384,12 +407,18 @@
 	/* Desktop — matches PC Figma (4:220) */
 	@media (min-width: 1024px) {
 		.Office {
-			padding-top: 15vh;
-			padding-bottom: 160px;
+			padding-top: 0;
+			padding-bottom: 100px;
 		}
 
 		.Office section {
 			padding-top: 0;
+		}
+
+		/* Body content sits in the right half on desktop; meta header stays full width */
+		.Office .content {
+			width: 50%;
+			margin-left: auto;
 		}
 
 		.Office .Service,
@@ -404,29 +433,6 @@
 
 		.Office .container {
 			max-width: none;
-			display: grid;
-			grid-template-columns: 7.5% 40% 52.5%;
-			align-items: start;
-		}
-
-		.Office .header {
-			display: contents;
-		}
-
-		.Office .num {
-			grid-column: 1;
-		}
-
-		.Office .label {
-			grid-column: 2;
-		}
-
-		.Office .content {
-			grid-column: 3;
-		}
-
-		.Office .body {
-			margin-top: 0;
 		}
 
 		.Office .service-list {
@@ -435,6 +441,23 @@
 
 		.Office .body p + p {
 			margin-top: 16px;
+		}
+
+		/* PC type scale: sp→pc ratio ≈ 1.2x (matches general website convention) */
+		.Office .label {
+			font-size: 14px;
+		}
+
+		.Office .service-title {
+			font-size: 20px;
+		}
+
+		.Office .body[lang='en'] p {
+			font-size: 15px;
+		}
+
+		.Office .body[lang='ja'] p {
+			font-size: 13px;
 		}
 	}
 

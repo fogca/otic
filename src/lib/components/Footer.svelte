@@ -83,7 +83,7 @@
 
 <style>
 	.Footer {
-		background: #000;
+		background: var(--color-text);
 		color: #fff;
 		padding: 64px 0 24px;
 		margin-top: 120px;
@@ -162,7 +162,7 @@
 
 	.Footer__heading {
 		font-size: 12px;
-		font-weight: 500;
+		font-weight: 470;
 		letter-spacing: 0;
 		opacity: 0.6;
 		margin: 0;
@@ -200,7 +200,7 @@
 
 	.Footer__cta {
 		font-size: 14px;
-		font-weight: 500;
+		font-weight: 470;
 		color: inherit;
 		text-decoration: none;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.4);

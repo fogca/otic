@@ -91,7 +91,7 @@
 			</div>
 		</section>
 
-		<section class="body body-ja">
+		<section class="body body-ja" lang="ja">
 			<div class="block">
 				<h2 class="subtitle">プライバシーポリシー</h2>
 				<p>
@@ -154,9 +154,13 @@
 
 <style>
 	.Legal {
-		padding: 100px var(--padding) 80px;
+		padding: 100px calc(var(--padding) * 2) 80px;
 		max-width: 720px;
 		margin-inline: auto;
+	}
+
+	.Legal .body {
+		padding-inline: 0;
 	}
 
 	.Legal .head {
@@ -164,8 +168,9 @@
 	}
 
 	.Legal .title {
-		font-size: var(--fs-h3);
-		font-weight: 400;
+		font-size: var(--fs-h1);
+		font-weight: 450;
+		line-height: 1.2;
 		margin: 0 0 4px;
 	}
 
@@ -188,20 +193,27 @@
 
 	.Legal .body h2,
 	.Legal .body h3 {
-		font-size: var(--fs-h3);
-		font-weight: 400;
+		font-size: var(--fs-h4);
+		font-weight: 450;
+		line-height: 1.3;
 		margin: 0;
 	}
 
+	.Legal .body.body-ja h2,
+	.Legal .body.body-ja h3 {
+		font-size: var(--fs-h5);
+	}
+
 	.Legal .body .subtitle {
-		font-size: var(--fs-h3);
-		font-weight: 400;
+		font-size: var(--fs-h4);
+		font-weight: 450;
+		line-height: 1.3;
 	}
 
 	.Legal .body p {
 		font-size: 11px;
-		line-height: 1.7;
-		font-weight: 400;
+		line-height: 1.3;
+		font-weight: 450;
 		margin: 0;
 	}
 

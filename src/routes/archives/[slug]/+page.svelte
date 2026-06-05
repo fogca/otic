@@ -39,7 +39,7 @@
 							</div>
 						{/if}
 						{#if archive.descriptionJa}
-							<div class="caption caption-ja">
+							<div class="caption caption-ja" lang="ja">
 								<p>{archive.descriptionJa}</p>
 							</div>
 						{/if}
@@ -192,7 +192,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 5px;
-		padding-inline: 30px;
+		padding-inline: var(--padding);
 	}
 
 	.Archive .Title .brand-tag {
@@ -378,7 +378,7 @@
 			align-items: flex-start;
 			max-width: 1080px;
 			margin-inline: auto;
-			padding-inline: var(--padding);
+			padding-inline: calc(var(--padding) * 2);
 		}
 
 		.Archive .Title .wrapper {
