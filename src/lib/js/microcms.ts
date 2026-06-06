@@ -24,6 +24,8 @@ export type Work = {
 	headline?: string;
 	category: string | null;
 	thumbnail?: MicroCMSImage;
+	/** Optional SP-specific thumbnail; falls back to `thumbnail` when absent. */
+	sp_thumbnail?: MicroCMSImage;
 	repeat: Array<{
 		fieldId: string;
 		pj_images?: MicroCMSImage;

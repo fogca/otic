@@ -30,7 +30,7 @@
    any requested weight interpolates on the single variable master. */
 @font-face {
   font-family: 'Steiner';
-  src: url('/fonts/Steiner-VF06.woff2?v=20260605') format('woff2');
+  src: url('/fonts/Steiner-VF08.woff2?v=20260606') format('woff2');
   font-weight: 400 900;
   font-style: normal;
   font-display: swap;
@@ -96,7 +96,7 @@ a {
 :root {
   /* --- Colors --- */
   --color-bg:        #ffffff;
-  --color-text:      #004489;  /* default text — accent blue */
+  --color-text:      #000000;  /* default text — black (was accent blue #004489) */
   --color-text-mute: rgba(0, 0, 0, 0.3);
   --color-bg-dark:   #121212;
   --color-bg-gray:   #f1f1f1;
@@ -130,13 +130,13 @@ a {
   --fs-h3:   16px;   /* PC section title ("Office", "Ethos:") */
   --fs-h4:   14px;   /* "Colophon" heading */
   --fs-h5:   12px;   /* Numbering "01", labels, nav PC */
-  --fs-h6:   10px;   /* Mobile body, meta, caption, mobile nav */
+  --fs-h6:   10.5px;   /* Body copy / meta / caption — SP (PC: 13.5) */
   --fs-body: var(--fs-h6);
-  --fs-p:    var(--fs-h6);
+  --fs-p:    11.5px;
 
   /* Body copy is language-aware (Latin runs larger than JP) */
-  --fs-p-en: 13px;   /* Body copy (Latin) */
-  --fs-p-ja: 11px;   /* Body copy (JP) */
+  --fs-p-en: 12.5px;   /* Body copy (Latin) — SP */
+  --fs-p-ja: 11.5px;   /* Body copy (JP) — SP */
 
   /* --- Line heights --- */
   --lh-h1:   1.2;
@@ -198,7 +198,6 @@ a {
   :root {
     --fs-h1: 28px;
     --fs-h2: 24px;
-    --fs-h6: 11px;
     --padding:       7.5vw;
     --gutter:        32px;
     --gutter-alt:    40px;
@@ -210,9 +209,11 @@ a {
   :root {
     --fs-h1: 40px;
     --fs-h2: 28px;
-    --fs-h6: 12px;
+    --fs-h6: 13.5px;
     --fs-body: 12px;
-    --fs-p:    12px;
+    --fs-p:    14px;
+    --fs-p-en: 16px;   /* Body copy (Latin) — PC */
+    --fs-p-ja: 14px;   /* Body copy (JP) — PC */
     --padding:       3vw;
     --gutter:        40px;
     --gutter-alt:    40px;
@@ -277,10 +278,10 @@ body {
 /* JP-specific line-height (font-family is already switched by :lang) */
 :lang(ja) {
   line-height: var(--lh-ja);
-  /* Latin/numerals in JP runs are Steiner (variable) — nudge to 500 so they
-     match the Tazugane weight. Only affects the variable font; Tazugane keeps
-     its font-weight (470). */
-  font-variation-settings: 'wght' 520;
+  /* Tazugane (static) weight via font-weight; Latin/numerals (Steiner, variable)
+     are pushed to 520 via the wght axis so they match. */
+  font-weight: 450;
+  font-variation-settings: 'wght' 500;
 }
 
 /* ------------------------------------------------------------
@@ -357,7 +358,10 @@ p, .p {
 /* Body copy size is language-aware and scales up on PC (vars in :root) */
 p:lang(en), .p:lang(en) {
   font-size: var(--fs-p-en);
-  font-weight: 470;   /* Steiner 450 for body copy */
+  font-weight: 470;   /* Steiner for body copy */
+  line-height: 1.25;
+  text-align: justify;
+  hyphens: auto;
 }
 
 p:lang(ja), .p:lang(ja) {

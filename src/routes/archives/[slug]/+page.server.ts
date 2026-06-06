@@ -30,6 +30,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		title: work.title,
 		brand: work.brand ?? '',
 		heroImage: work.thumbnail?.url ?? '',
+		heroImageSp: work.sp_thumbnail?.url ?? '',
 		descriptionJa: work.body_jp ?? work.description ?? '',
 		descriptionEn: work.body_en ?? '',
 		headline: work.headline ?? '',

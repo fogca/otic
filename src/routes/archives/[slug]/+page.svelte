@@ -21,39 +21,40 @@
 </svelte:head>
 
 <main class="Archive">
-	<div class="text-group">
-		<section class="Title">
-			<div class="wrapper">
-				<h1 class="title" lang="en">{archive.title}</h1>
-				<p class="brand-tag" lang="en">/ {archive.brand}</p>
-			</div>
-		</section>
-
-		{#if archive.descriptionEn || archive.descriptionJa}
-			<section class="Captions">
-				<div class="wrapper">
-					<div class="captions">
-						{#if archive.descriptionEn}
-							<div class="caption" lang="en">
-								<p>{archive.descriptionEn}</p>
-							</div>
-						{/if}
-						{#if archive.descriptionJa}
-							<div class="caption caption-ja" lang="ja">
-								<p>{archive.descriptionJa}</p>
-							</div>
-						{/if}
-					</div>
-				</div>
-			</section>
-		{/if}
-	</div>
-
+	<!-- First view: centered thumbnail + title/tag pinned to the bottom -->
 	<section class="Hero">
 		<div class="image-wrap">
-			<img src={archive.heroImage} alt={archive.title} />
+			<picture>
+				{#if archive.heroImageSp}
+					<source media="(max-width: 1023px)" srcset={archive.heroImageSp} />
+				{/if}
+				<img src={archive.heroImage} alt={archive.title} />
+			</picture>
+		</div>
+		<div class="hero-caption">
+			<h1 class="title" lang="en">{archive.title}</h1>
+			<p class="brand-tag" lang="ja">{archive.headline}</p>
 		</div>
 	</section>
+
+	{#if archive.descriptionEn || archive.descriptionJa}
+		<section class="Captions">
+			<div class="wrapper">
+				<div class="captions">
+					{#if archive.descriptionEn}
+						<div class="caption" lang="en">
+							<p>{archive.descriptionEn}</p>
+						</div>
+					{/if}
+					{#if archive.descriptionJa}
+						<div class="caption caption-ja" lang="ja">
+							<p>{archive.descriptionJa}</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</section>
+	{/if}
 
 	<section class="Gallery">
 		<div class="wrapper">
@@ -125,21 +126,16 @@
 		display: grid;
 		grid-template-columns: 1fr;
 		grid-template-areas:
-			'title'
 			'hero'
 			'captions'
 			'gallery'
 			'colophon';
+		color: #000;
 	}
 
-	/* SP: flatten text-group so Title and Captions become direct grid items.
-	   This lets us interleave them with Hero/Gallery per grid-template-areas. */
-	.Archive .text-group {
-		display: contents;
-	}
-
-	.Archive .Title {
-		grid-area: title;
+	/* base.css sets color directly on text elements — override to black here. */
+	.Archive :global(*) {
+		color: #000;
 	}
 
 	.Archive .Hero {
@@ -158,65 +154,68 @@
 		grid-area: colophon;
 	}
 
-	/* ----- Hero (full-bleed, top half of first viewport) ----- */
+	/* ----- Hero — first view: thumbnail centered, title/tag at the bottom ----- */
 	.Archive .Hero {
+		position: relative;
 		width: 100vw;
-		padding-inline: 0;
+		height: 100vh;
+		height: 100dvh;
 		margin-left: 0;
-		height: auto;
+		padding-inline: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		overflow: hidden;
 	}
 
 	.Archive .Hero .image-wrap {
-		width: 100%;
-		height: auto;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.Archive .Hero .image-wrap img {
-		width: 100%;
+		max-width: 90vw;
+		max-height: 70vh;
+		width: auto;
 		height: auto;
-		object-fit: initial;
+		object-fit: contain;
+		display: block;
 	}
 
-	/* ----- Title block — pushed down so it lands roughly at the centre of
-	   the next viewport after the hero, then sits flush at the floor. ----- */
-	.Archive .Title {
-		display: flex;
-		align-items: flex-end;
-		padding-top: 20vh;
-		padding-bottom: 24px;
-	}
-
-	.Archive .Title .wrapper {
-		width: 100%;
+	.Archive .Hero .hero-caption {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 30px;
 		display: flex;
 		flex-direction: column;
+		align-items: center;
 		gap: 5px;
 		padding-inline: var(--padding);
+		text-align: center;
 	}
 
-	.Archive .Title .brand-tag {
+	.Archive .Hero .brand-tag {
 		font-size: var(--fs-h6);
-		opacity: 0.6;
-		text-align: right;
+		opacity: 1;
 	}
 
-	.Archive .Title .title {
+	.Archive .Hero .title {
 		font-size: var(--fs-h1);
 		line-height: 1.25;
 		font-weight: 400;
-		text-align: right;
 	}
 
 	/* ----- Gallery (image stream) ----- */
 	.Archive .Gallery {
-		margin-top: 40px;
+		margin-top: 100px;
 	}
 
 	.Archive .Gallery .wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 60px;
+		gap: 100px;
 	}
 
 	.Archive .Gallery .image img,
@@ -233,7 +232,10 @@
 	   full-bleed slots so the gallery has visual rhythm without per-image
 	   manual layout. */
 	.Archive .Gallery .gp-1 { width: 90%; margin-inline: auto; }
-	.Archive .Gallery .gp-2,
+	.Archive .Gallery .gp-2 {
+		width: 100%;
+		margin-inline: 0;
+	}
 	.Archive .Gallery .gp-4,
 	.Archive .Gallery .gp-8 {
 		width: 100vw;
@@ -265,14 +267,12 @@
 	}
 
 	.Archive .Captions .caption p {
-		font-size: 10px;
 		line-height: 1.7;
 		white-space: pre-line;
 	}
 
 	.Archive .Captions .caption[lang='en'] p {
-		font-size: 11px;
-		line-height: 1.5;
+		line-height: 1.25;
 	}
 
 	/* ----- Colophon ----- */
@@ -317,10 +317,6 @@
 
 	/* ----- Tablet+ ----- */
 	@media (min-width: 768px) {
-		.Archive .Title .wrapper {
-			padding-inline: 40px;
-		}
-
 		.Archive .Gallery .wrapper {
 			gap: 80px;
 		}
@@ -341,64 +337,13 @@
 			grid-template-columns: 1fr;
 			grid-template-areas:
 				'hero'
-				'title'
 				'captions'
 				'gallery'
 				'colophon';
 			padding-inline: 0;
 		}
 
-		/* Hero centered in 100vh, image cap by 80vh / 720px-or-50vw */
-		.Archive .Hero {
-			width: 100%;
-			height: 100vh;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin-left: 0;
-		}
-
-		.Archive .Hero .image-wrap {
-			width: auto;
-			max-width: min(720px, 50vw);
-			height: auto;
-		}
-
-		.Archive .Hero .image-wrap img {
-			width: 100%;
-			height: auto;
-			max-height: 80vh;
-			object-fit: contain;
-		}
-
-		/* Title — below Hero, max-width contained, baseline-aligned with brand */
-		.Archive .Title {
-			padding-top: 80px;
-			padding-bottom: 0;
-			align-items: flex-start;
-			max-width: 1080px;
-			margin-inline: auto;
-			padding-inline: calc(var(--padding) * 2);
-		}
-
-		.Archive .Title .wrapper {
-			padding-inline: 0;
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: baseline;
-			gap: 32px;
-		}
-
-		.Archive .Title .title {
-			font-size: var(--fs-h1);
-			text-align: left;
-		}
-
-		.Archive .Title .brand-tag {
-			font-size: var(--fs-h5);
-			text-align: right;
-			white-space: nowrap;
-		}
+		/* First view styling (centered thumb + bottom caption) is shared with SP. */
 
 		/* Captions — readable centered text column */
 		.Archive .Captions {
@@ -421,13 +366,7 @@
 		}
 
 		.Archive .Captions .caption p {
-			font-size: 14px;
 			line-height: 1.7;
-		}
-
-		.Archive .Captions .caption[lang='en'] p {
-			font-size: 15px;
-			line-height: 1.5;
 		}
 
 		/* Gallery — editorial rhythm with varied widths */
@@ -506,6 +445,7 @@
 			margin-left: 8vw;
 			margin-right: auto;
 		}
+
 
 		/* Colophon — tight info block */
 		.Archive .Colophon {

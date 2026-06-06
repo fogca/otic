@@ -11,6 +11,12 @@
 		image: string;
 		imageAlt: string;
 		projects: Project[];
+		// Split visual: 16:9 area divided into two 8:9 panels (gap 0).
+		// Left is a video slot (mp4, TBD), right is `image`.
+		split?: boolean;
+		leftVideo?: string;
+		// External link (domain only, e.g. 'www.august.tf'); opens in a new tab.
+		link?: string;
 	};
 
 	const services: Service[] = [
@@ -26,9 +32,12 @@
 			title: 'V.I. & Typography',
 			subtitle: 'ビジュアルアイデンティティと書体の開発',
 			body: '弊社主宰のタイプファウンダリ——August Type Foundryでは、歴史を紐解き、現代の思想を交えながら再解釈することで生まれるニューフォームを追い求め、グラフィックデザインの大きな構成要素である書体の開発を行っています。また書体開発で培ったディテールへの眼差しをビジュアルアイデンティティ・ブランドアイデンティティの設計まで拡げ、ブランドの根幹を貫く一貫した造形言語を追求します。',
-			image: '/images/services_typefoundry.png',
+			image: '/images/services_typefoundry_02.png',
 			imageAlt: 'V.I. & Typography',
-			projects: []
+			projects: [],
+			split: true,
+			leftVideo: '/images/services_typefoundry_01.mp4',
+			link: 'www.august.tf'
 		},
 		{
 			title: 'Image Visualisation',
@@ -44,7 +53,8 @@
 			body: '弊社主宰のエンジニアリングスタジオ——TEKNEでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
 			image: '/images/services_production.png',
 			imageAlt: 'Digital Infrastructure',
-			projects: []
+			projects: [],
+			link: 'www.tekne.jp'
 		}
 	];
 </script>
@@ -103,18 +113,45 @@
 				<ul class="service-list">
 					{#each services as service}
 						<li class="service-item">
-							<div
-								class="service-visual"
-								style={service.image ? `background-image:url(${service.image})` : ''}
-								role="img"
-								aria-label={service.imageAlt}
-							></div>
+							{#if service.split}
+								<div class="service-visual service-visual--split">
+									<div class="split-left" aria-hidden="true">
+										{#if service.leftVideo}
+											<video src={service.leftVideo} autoplay muted loop playsinline></video>
+										{/if}
+									</div>
+									<div
+										class="split-right"
+										style={service.image ? `background-image:url(${service.image})` : ''}
+										role="img"
+										aria-label={service.imageAlt}
+									></div>
+								</div>
+							{:else}
+								<div
+									class="service-visual"
+									style={service.image ? `background-image:url(${service.image})` : ''}
+									role="img"
+									aria-label={service.imageAlt}
+								></div>
+							{/if}
 							<h4 class="service-title" lang="en">{service.title}</h4>
 							{#if service.subtitle}
 								<p class="service-subtitle" lang="ja">{service.subtitle}</p>
 							{/if}
 							{#if service.body}
 								<p class="service-body" lang="ja">{service.body}</p>
+							{/if}
+							{#if service.link}
+								<a
+									class="service-link"
+									href={`https://${service.link}`}
+									target="_blank"
+									rel="noopener noreferrer"
+									lang="en"
+								>
+									{service.link} ↗
+								</a>
 							{/if}
 							{#if service.projects.length}
 								<ul class="project-list" lang="en">
@@ -291,6 +328,31 @@
 		background-position: center;
 	}
 
+	/* Split visual: 16:9 area = two 8:9 panels, gap 0 (left = video, right = image) */
+	.Office .service-visual--split {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0;
+		background-color: transparent;
+	}
+
+	.Office .service-visual--split .split-left,
+	.Office .service-visual--split .split-right {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		background-color: #eaeaea;
+		background-size: cover;
+		background-position: center;
+	}
+
+	.Office .service-visual--split .split-left video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
 	.Office .service-title {
 		font-size: var(--fs-h3);
 		font-weight: 470;
@@ -306,9 +368,22 @@
 	}
 
 	.Office .service-body {
-		font-size: 10px;
+		font-size: var(--fs-h6);
 		line-height: 1.7;
 		margin: 12px 0 0;
+	}
+
+	.Office .service-link {
+		display: inline-block;
+		margin-top: 20px;
+		font-size: var(--fs-h5);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		transition: opacity var(--duration-fast) var(--ease-default);
+	}
+
+	.Office .service-link:hover {
+		opacity: 0.6;
 	}
 
 	.Office .project-list {
@@ -367,24 +442,7 @@
 		margin-top: 8px;
 	}
 
-	/* Body copy size comes from base.css (lang-aware, scales on PC).
-	   Office keeps only its own line-height / justification. */
-	.Office .body p {
-		line-height: 1.7;
-	}
-
-	.Office .body[lang='en'] p {
-		line-height: 1.3;
-		text-align: justify;
-		hyphens: auto;
-		font-size: 12.5px;
-	}
-
-	.Office .body[lang='ja'] p {
-		line-height: 1.7;
-		text-align: justify;
-	}
-
+	/* Body copy follows base.css p (lang-aware). Only paragraph spacing here. */
 	.Office .body p + p {
 		margin-top: 14px;
 	}
@@ -424,7 +482,7 @@
 		.Office .Service,
 		.Office .Ethos,
 		.Office .Founder {
-			padding-top: 40px;
+			padding-top: 160px;
 		}
 
 		.Office .wrapper {
@@ -437,6 +495,7 @@
 
 		.Office .service-list {
 			margin-top: 0;
+			gap: 100px;
 		}
 
 		.Office .body p + p {
@@ -450,14 +509,6 @@
 
 		.Office .service-title {
 			font-size: 20px;
-		}
-
-		.Office .body[lang='en'] p {
-			font-size: 15px;
-		}
-
-		.Office .body[lang='ja'] p {
-			font-size: 13px;
 		}
 	}
 
