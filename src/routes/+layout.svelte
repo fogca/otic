@@ -188,6 +188,7 @@
 <svelte:head>
 	<link rel="icon" type="image/png" href="/favicon.png" />
 	<title>TAKUMIISOBE.com</title>
+	<script src="https://webfont.fontplus.jp/accessor/script/fontplus.js?kqbwQX--jVA%3D&box=-1MT0mUgg4A%3D&aa=1&ab=2"></script>
 </svelte:head>
 
 <div class="transition-bg">
