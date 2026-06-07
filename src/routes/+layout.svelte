@@ -151,6 +151,14 @@
 
 	// ── Incoming: fade in over the white panel (or hand off to Loader on home) ──
 	afterNavigate(() => {
+		// SvelteKit navigates client-side (no full reload), so FONTPLUS never
+		// re-scans the new page. Re-trigger it so Tazugane is applied on the
+		// freshly rendered DOM. Runs on every navigation, before the early returns.
+		if (browser) {
+			const fp = (window as unknown as { FONTPLUS?: { reload: (init?: boolean) => void } }).FONTPLUS;
+			if (fp?.reload) requestAnimationFrame(() => fp.reload());
+		}
+
 		if (!needsEntryAnim) return;
 		needsEntryAnim = false;
 		if (!browser) return;

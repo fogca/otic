@@ -76,9 +76,9 @@
 				<div class="header">
 					<span class="num" lang="en">01</span>
 					<h3 class="label" lang="en">Office</h3>
-					<span class="sub" lang="en">Overview</span>
 				</div>
 				<div class="content">
+					<p class="section-lead" lang="en">Unwavering pursuit<br />of the Radix</p>
 					<div class="body" lang="en">
 					<p>
 						We are a design office dedicated to the development of visual
@@ -107,7 +107,6 @@
 				<div class="header">
 					<span class="num" lang="en">02</span>
 					<h3 class="label" lang="en">Services</h3>
-					<span class="sub" lang="en">Studios</span>
 				</div>
 				<div class="content">
 				<ul class="service-list">
@@ -179,7 +178,6 @@
 				<div class="header">
 					<span class="num" lang="en">03</span>
 					<h3 class="label" lang="en">Ethos</h3>
-					<span class="sub" lang="en">Our Raison d'être</span>
 				</div>
 				<div class="content">
 					<div class="body" lang="en">
@@ -230,7 +228,6 @@
 				<div class="header">
 					<span class="num" lang="en">04</span>
 					<h3 class="label" lang="en">Founder</h3>
-					<span class="sub" lang="en">TAKUMI ISOBE</span>
 				</div>
 				<div class="content">
 				<div class="body" lang="en">
@@ -411,24 +408,28 @@
 	/* Section header — meta row: num + label (left) / sub (right), all 12px */
 	.Office .header {
 		display: grid;
-		grid-template-columns: 5% 1fr auto;
+		grid-template-columns: 5% 1fr;
 		align-items: baseline;
 		gap: 8px;
 	}
 
 	.Office .num,
-	.Office .label,
-	.Office .sub {
+	.Office .label {
 		font-size: 12px;
 		line-height: 1.4;
 	}
 
-	.Office .sub {
-		text-align: right;
+	/* 01 Office — lead line above the body copy (slightly larger) */
+	.Office .section-lead {
+		font-size: 18px;
+		line-height: 1.3;
+		margin-top: 40px;
+		margin-bottom: 0;
+		text-align: left;
 	}
 
 	.Office .body {
-		margin-top: 20px;
+		margin-top: 10px;
 	}
 
 	.Office .body + .body {
