@@ -354,7 +354,7 @@ p, .p {
 p:lang(en), .p:lang(en) {
   font-size: var(--fs-p-en);
   font-weight: 420;   /* Steiner for body copy */
-  line-height: 1.25;
+  line-height: 1.4;
   text-align: justify;
   hyphens: auto;
 }
@@ -389,9 +389,9 @@ input::placeholder {
    ------------------------------------------------------------ */
 
 /* Weight */
-.regular { font-weight: 400; }
-.medium  { font-weight: 450; }
-.bold    { font-weight: 500; }
+.regular { font-weight: 450; }
+.medium  { font-weight: 500; }
+.bold    { font-weight: 700; }
 
 /* Color */
 .white   { color: var(--white); }

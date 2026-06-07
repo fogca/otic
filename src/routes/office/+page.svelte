@@ -355,13 +355,11 @@
 
 	.Office .service-title {
 		font-size: var(--fs-h3);
-		font-weight: 470;
 		margin: 20px 0 0;
 	}
 
 	.Office .service-subtitle {
 		font-size: 10px;
-		font-weight: 470;
 		line-height: 1.7;
 		margin: 4px 0 0;
 		opacity: 0.6;
@@ -422,12 +420,7 @@
 	.Office .label,
 	.Office .sub {
 		font-size: 12px;
-		font-weight: 470;
 		line-height: 1.4;
-	}
-
-	.Office .label {
-		font-weight: 470;
 	}
 
 	.Office .sub {

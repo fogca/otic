@@ -262,7 +262,7 @@
 	}
 
 	.Archive .Captions .caption {
-		padding-inline: 30px;
+		padding-inline: 25px;
 		max-width: 100%;
 	}
 
@@ -272,7 +272,7 @@
 	}
 
 	.Archive .Captions .caption[lang='en'] p {
-		line-height: 1.25;
+		line-height: 1.4;
 	}
 
 	/* ----- Colophon ----- */

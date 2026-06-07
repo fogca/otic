@@ -231,7 +231,13 @@
 
 	.transition-panel {
 		position: fixed;
-		inset: 0;
+		top: 0;
+		left: 0;
+		right: 0;
+		/* Use the LARGE viewport height so translateY(100%) always clears the
+		   collapsed-toolbar height on iOS (prevents a white band at the bottom). */
+		height: 100vh;
+		height: 100lvh;
 		background: white;
 		transform: translateY(100%);
 		z-index: 1000;
