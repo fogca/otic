@@ -192,11 +192,11 @@
 		font-weight: 400;
 	}
 
-	/* base.css sets color directly on span — override meta text to accent blue */
+	/* base.css sets color directly on span — keep meta text black */
 	.Home .Archives .card .meta .num,
 	.Home .Archives .card .meta .code,
 	.Home .Archives .card .meta .brand {
-		color: var(--color-accent-blue);
+		color: var(--color-text);
 	}
 
 	.Home .Archives .card .meta .num {
