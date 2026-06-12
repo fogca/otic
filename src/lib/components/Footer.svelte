@@ -16,7 +16,8 @@
 
 	const LEGAL: LinkItem[] = [
 		{ label: 'Privacy', href: '/legal/privacy' },
-		{ label: 'Imprint', href: '/legal/imprint' }
+		{ label: 'Imprint', href: '/legal/imprint' },
+		{ label: 'Company', href: '/legal/company' }
 	];
 
 	const YEAR = new Date().getFullYear();

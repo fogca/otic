@@ -6,6 +6,7 @@
 	type Frame = {
 		id: string;
 		src: string;
+		srcset?: string;
 		alt: string;
 	};
 
@@ -219,6 +220,8 @@
 				class="frame"
 				bind:this={frameEls[i]}
 				src={frame.src}
+				srcset={frame.srcset}
+				sizes="100vw"
 				alt={frame.alt}
 				loading="eager"
 			/>

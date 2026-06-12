@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import Loader from '$lib/components/Loader.svelte';
 	import { intro } from '$lib/state/intro.svelte';
+	import { imgOpt, imgSrcset } from '$lib/js/img';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -23,14 +24,20 @@
 			return works
 				.filter((w) => w.thumbnail)
 				.slice(0, 4)
-				.map((w) => ({ id: w.id, src: w.thumbnail!.url, alt: w.title }));
+				.map((w) => ({
+					id: w.id,
+					src: imgOpt(w.thumbnail!.url, 1600),
+					srcset: imgSrcset(w.thumbnail!.url, [800, 1200, 1600, 2400]),
+					alt: w.title
+				}));
 		}
 		const others = works
 			.filter((w) => w.thumbnail && w.id !== fw.id)
 			.slice(0, 3);
 		return [...others, fw].map((w) => ({
 			id: w.id,
-			src: w.thumbnail!.url,
+			src: imgOpt(w.thumbnail!.url, 1600),
+			srcset: imgSrcset(w.thumbnail!.url, [800, 1200, 1600, 2400]),
 			alt: w.title
 		}));
 	});
@@ -91,7 +98,9 @@
 					<div class="image">
 						{#if firstWork.thumbnail}
 							<img
-								src={firstWork.thumbnail.url}
+								src={imgOpt(firstWork.thumbnail.url, 1600)}
+								srcset={imgSrcset(firstWork.thumbnail.url, [800, 1200, 1600, 2400])}
+								sizes="(min-width: 1024px) 60vw, 100vw"
 								alt={firstWork.title}
 								loading="eager"
 							/>
@@ -123,7 +132,9 @@
 					<div class="image">
 						{#if work.thumbnail}
 							<img
-								src={work.thumbnail.url}
+								src={imgOpt(work.thumbnail.url, 1200)}
+								srcset={imgSrcset(work.thumbnail.url, [600, 900, 1200, 1800])}
+								sizes="(min-width: 1024px) 45vw, 90vw"
 								alt={work.title}
 								loading="lazy"
 							/>

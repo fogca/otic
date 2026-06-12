@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { imgOpt, imgSrcset } from '$lib/js/img';
 
 	let { data }: { data: PageData } = $props();
 	const archive = $derived(data.archive);
@@ -26,9 +27,18 @@
 		<div class="image-wrap">
 			<picture>
 				{#if archive.heroImageSp}
-					<source media="(max-width: 1023px)" srcset={archive.heroImageSp} />
+					<source
+						media="(max-width: 1023px)"
+						srcset={imgSrcset(archive.heroImageSp, [640, 900, 1200])}
+						sizes="90vw"
+					/>
 				{/if}
-				<img src={archive.heroImage} alt={archive.title} />
+				<img
+					src={imgOpt(archive.heroImage, 1600)}
+					srcset={imgSrcset(archive.heroImage, [900, 1400, 2000])}
+					sizes="90vw"
+					alt={archive.title}
+				/>
 			</picture>
 		</div>
 		<div class="hero-caption">
@@ -73,7 +83,13 @@
 							aria-label={`${archive.title} ${i + 1}`}
 						></video>
 					{:else}
-						<img src={item.src} alt={`${archive.title} ${i + 1}`} loading="lazy" />
+						<img
+							src={imgOpt(item.src, 1600)}
+							srcset={imgSrcset(item.src, [800, 1200, 1600, 2000])}
+							sizes="100vw"
+							alt={`${archive.title} ${i + 1}`}
+							loading="lazy"
+						/>
 					{/if}
 				</div>
 			{/each}
