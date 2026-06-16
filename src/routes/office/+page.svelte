@@ -172,11 +172,64 @@
 		</div>
 	</section>
 
-	<section class="Ethos">
+	<!-- Recognition — awards / press / selected features. Not live yet, so the
+	     live sections run sequentially: 01 Office · 02 Services · 03 Company ·
+	     04 Ethos · 05 Director. When Recognition is ready, uncomment it as 03
+	     and bump Company / Ethos / Director to 04 / 05 / 06.
+	<section class="Recognition">
 		<div class="wrapper">
 			<div class="container">
 				<div class="header">
 					<span class="num" lang="en">03</span>
+					<h3 class="label" lang="en">Recognition</h3>
+				</div>
+				<div class="content">
+					<div class="body" lang="en">
+						<p>Awards, press, and selected features.</p>
+					</div>
+					<div class="body body-ja" lang="ja">
+						<p>受賞歴・掲載・取り上げられた実績。</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	-->
+
+	<section class="Founder">
+		<div class="wrapper">
+			<div class="container">
+				<div class="header">
+					<span class="num" lang="en">03</span>
+					<h3 class="label" lang="en">Company</h3>
+				</div>
+				<div class="content">
+					<div class="body" lang="en">
+						<dl class="cfacts">
+							<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
+							<div class="cfact"><dt>Address</dt><dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya 451-0034, Japan</dd></div>
+							<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
+							<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
+						</dl>
+					</div>
+					<div class="body body-ja" lang="ja">
+						<dl class="cfacts">
+							<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
+							<div class="cfact"><dt>所在地</dt><dd>〒451-0034 名古屋市西区樋の口町1-16</dd></div>
+							<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
+							<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
+						</dl>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="Ethos">
+		<div class="wrapper">
+			<div class="container">
+				<div class="header">
+					<span class="num" lang="en">04</span>
 					<h3 class="label" lang="en">Ethos</h3>
 				</div>
 				<div class="content">
@@ -226,28 +279,28 @@
 		<div class="wrapper">
 			<div class="container">
 				<div class="header">
-					<span class="num" lang="en">04</span>
-					<h3 class="label" lang="en">Founder</h3>
+					<span class="num" lang="en">05</span>
+					<h3 class="label" lang="en">Director</h3>
 				</div>
 				<div class="content">
-				<div class="body" lang="en">
-					<p>
-						Born in Japan in 2001.<br />
-						While attending the University of Westminster in the UK, exposed to
-						a wide range of cultures and arts, I developed a strong interest in
-						visual expression and entered the creative industry. After working at
-						several design studios in Tokyo, I established my own practice.
-						Today, as creative director, I run a design office at the core of my
-						work, alongside a type foundry, an image-making studio, and a wine
-						community.
-					</p>
-				</div>
-				<div class="body body-ja" lang="ja">
-					<p>
-						2001年日本生まれ。<br />
-						英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在はディレクターとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
-					</p>
-				</div>
+					<div class="body" lang="en">
+						<p>
+							Born in Japan in 2001.<br />
+							While attending the University of Westminster in the UK, exposed to
+							a wide range of cultures and arts, I developed a strong interest in
+							visual expression and entered the creative industry. After working at
+							several design studios in Tokyo, I established my own practice.
+							Today, as creative director, I run a design office at the core of my
+							work, alongside a type foundry, an image-making studio, and a wine
+							community.
+						</p>
+					</div>
+					<div class="body body-ja" lang="ja">
+						<p>
+							2001年日本生まれ。<br />
+							英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
+						</p>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -301,6 +354,44 @@
 	.Office .Ethos,
 	.Office .Founder {
 		padding-top: 80px;
+	}
+
+	/* 04 Company — label | value, two columns, both left-aligned, hairline rows.
+	   EN and JA read as ONE continuous ruled list: every row has a top rule and
+	   only the final (JA) row closes with a bottom rule, so the en/ja seam is a
+	   single line, not a doubled one. */
+	.Office .cfacts {
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+	}
+
+	.Office .content:has(.cfacts) {
+		display: block;
+	}
+
+	.Office .cfact {
+		display: flex;
+		align-items: center; /* label sits Y-centred even when the value wraps */
+		text-align: left;
+		padding: 12px 0;
+		border-top: 1px solid var(--color-line);
+	}
+
+	.Office .body-ja .cfacts .cfact:last-child {
+		border-bottom: 1px solid var(--color-line);
+	}
+
+	.Office .cfact dt {
+		flex: none;
+		width: 25%;
+		margin-right: 24px;
+		opacity: 0.5;
+	}
+
+	.Office .cfact dd {
+		flex: 1;
+		margin: 0;
 	}
 
 	.Office .service-list {
