@@ -9,6 +9,7 @@
 	type Service = {
 		title: string;
 		subtitle: string;
+		bodyEn: string;
 		body: string;
 		image: string;
 		imageAlt: string;
@@ -25,6 +26,8 @@
 		{
 			title: 'Product & Furniture Design',
 			subtitle: '工業デザインと家具デザイン',
+			bodyEn:
+				'We develop products that bring use and quiet joy to daily life, returning to the materiality that meets the body and pursuing the forms that must inevitably arise from material, structure, and presence. Amid this transformation of the age, a more fundamental interaction — embodiment and emotion — has become our central concern. We continue this practice day by day, returning to the body and heart that are our origin.',
 			body: '身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる、必然のかたちを追い求めながら、日々の所作に添う用と喜びのあるプロダクトの企画・開発を行っています。わたしたちが直面しているこの大きな時代の変革において、より根源的で確かな相互作用——「身体性」と「情緒」が、私たちの大きな関心へとなりつつあります。私たちのオリジンである身体と心へと立ち返ることを大切に、日々学びながらその実践を続けてまいります。',
 			image: '',
 			imageAlt: 'Industrial Design',
@@ -33,7 +36,9 @@
 		{
 			title: 'V.I. & Typography',
 			subtitle: 'ビジュアルアイデンティティと書体の開発',
-			body: '私たちは、ブランディングを始めとする視覚領域におけるビジネスクリエイティブの策定と設計から、ロゴ・グラフィックデザイン・パッケージデザインといった具体的な制作までを一貫して手がけています。また弊社主宰のタイプファウンダリ——August Type Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。',
+			bodyEn:
+				'From brand strategy and direction through to logo, graphic, and package design, we work across the full arc of creation. Our in-house type foundry, August Type Foundry, develops typefaces in pursuit of new forms that reinterpret history within a contemporary context. The precision honed in type design runs through all our branding, shaping a coherent formal language at the core of each brand.',
+			body: '私たちは、ブランディングを始めとするクリエイティブ戦略の策定・ディレクションから、ロゴ・グラフィックデザイン・パッケージデザインといったクリエイションまで手掛けています。また弊社主宰のタイプファウンダリ——August Type Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。',
 			image: '/images/services_typefoundry_02.png',
 			imageAlt: 'V.I. & Typography',
 			projects: [],
@@ -44,6 +49,8 @@
 		{
 			title: 'Image Visualisation',
 			subtitle: 'イメージクリエイションとCGビジュアライゼーション',
+			bodyEn:
+				'We direct and produce image creation as a single, integrated practice. Extending the eye for light and texture honed in live-action photography into 3DCGI and visualisation, we pursue imagery with true substance — fixing into the image the atmosphere and mass latent within each subject.',
 			body: '私たちは、イメージクリエイションのディレクションと制作を一貫して手がけています。実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。',
 			image: '/images/services_visualisation.png',
 			imageAlt: 'Image Visualisation',
@@ -52,6 +59,8 @@
 		{
 			title: 'Digital Infrastructure',
 			subtitle: 'UXとデジタルコミュニケーションの設計',
+			bodyEn:
+				'Our in-house engineering studio, Joule Joule, designs and builds digital products — brand sites, e-commerce, reservation systems, and web apps — and digital infrastructure, including AI / DX integration. With a modern stack and considered architecture, we refine experience and usability to give form to a brand in the digital world.',
 			body: '弊社主宰のエンジニアリングスタジオ——Joule Jouleでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
 			image: '/images/services_production.png',
 			imageAlt: 'Digital Infrastructure',
@@ -172,8 +181,11 @@
 							{#if service.subtitle}
 								<p class="service-subtitle" lang="ja">{service.subtitle}</p>
 							{/if}
+							{#if service.bodyEn}
+								<p class="service-body service-body-en" lang="en">{service.bodyEn}</p>
+							{/if}
 							{#if service.body}
-								<p class="service-body" lang="ja">{service.body}</p>
+								<p class="service-body service-body-ja" lang="ja">{service.body}</p>
 							{/if}
 							{#if service.link}
 								<a
@@ -267,74 +279,38 @@
 					<h3 class="label" lang="en">Ethos</h3>
 				</div>
 				<div class="content">
-					<!-- EN copy hidden for now (re-enable by removing style="display:none") -->
-					<div class="body" lang="en" style="display: none">
+					<div class="body" lang="en">
 						<p>
-							Today's social system is beginning to show its seams — through its
-							fragility and through the widening gap between need and want. Amid
-							an overflow of information and a value order in constant flux, easy
-							forms of happiness have become available for instant consumption.
-							As a result, what lasts in the body as embodied experience has
-							grown relatively thin. Within this shift, we are moving our
-							creative focus toward more fundamental and resilient interactions:
-							corporeality and emotion. To be a designer is to occupy one of the
-							few professions permitted to give physical form to what was once
-							metaphysical — which is to say, a profession capable of intervening
-							in lifestyles, in material values, and in the patterns of
-							consumption that shape much of human life. From the latter half of
-							the twentieth century, Victor Papanek and many other thinkers have
-							sounded warnings about the weight of this fact. For design to
-							recover its telesis and respond to genuine human need, returning to
-							our origin — the body, and our connection with the natural world —
-							has, we believe, become ever more essential. As designers, we are
-							also among those who accelerate consumption and add daily to the
-							burden placed on the environment. While we continue to ask how to
-							live alongside impulse design and commercial design, we want to
-							keep learning, and to leave — even in small measure — something to
-							hand on to the generation that follows. When one day we close our
-							work, we hope to look back and say that on balance we left
-							something positive for society, building such a record one project
-							at a time.
+							The 21st century we inhabit is driven by capitalism — the ceaseless cycle of production and consumption. Designers, too, are one of its gears: we give contour to the formless, spur consumption, and send things out into the world. As those who help accelerate that consumption, we feel we must look closely at this age and keep learning from it.
+						</p>
+						<h4 class="ethos-part" lang="en">I. Acceleration and Attention Economy</h4>
+						<p>
+							The present we live in sits amid a confusion faster and deeper than at the dawn of the Industrial Revolution, or even the Digital one. Technology accelerates, social change accelerates, and the very pace of life accelerates; the margin to pause is lost, and we are ceaselessly driven by something (Rosa, 2005). Upon this acceleration, human attention and behaviour themselves are treated as capital and mined; built on that data, mechanisms engineered to trigger dopamine come to govern our habits, and the inner life turns into a commodity (Zuboff, 2019). Easy happiness has become something taken instantly — and at the same time we are made to feel that it is not what we chose, but a consequence the structure has produced. Within that same acceleration, we keep transforming the planet irreversibly; each act of consumption stacks an unseen burden upon the future (Crutzen, 2000). What this acceleration, attention economy, and environmental burden have cost us is, we believe, corporeality itself.
+						</p>
+						<h4 class="ethos-part" lang="en">II. Le corps vécu and Resonance</h4>
+						<p>
+							“The human being does not first understand the world with the head, but dwells within it through the body; the lived body — le corps vécu — is the first site that binds the world and us.” So Merleau-Ponty wrote in his Phenomenology of Perception (Merleau-Ponty, 1945). What grows thin within the accelerating world is precisely this experience through the body (Bauman, 2000). To see, to touch, to feel with the skin — what remains in the body as substance has grown relatively faint, and that sensation is our point of departure. At the opposite pole of acceleration lies resonance: a relationship in which we do not own or dominate the world, but call out to it and are answered in turn (Rosa, 2016). What we would call “a more fundamental and certain interaction” feels close to this resonance. To move our focus toward corporeality, and toward emotion — this is not nostalgia, but a return for resonating with the world once more.
+						</p>
+						<h4 class="ethos-part" lang="en">III. Defuturing</h4>
+						<p>
+							To keep making the unsustainable is not to make a future; it is to quietly rob the next generation of its choices — a condition called defuturing (Fry, 1999). A designer can give physical form to the metaphysical, intervening across a wide span of human life: lifestyles, material values, modes of consumption. The weight of that responsibility was already pointed out half a century ago (Papanek, 1971), and we ourselves are among those who, day by day, accelerate consumption and add to its burden. How things act upon the world, and what in turn shapes it — we know astonishingly little. That is exactly why we must keep learning, day after day. So that when each of us reaches the end of our path we might leave even a little to hand on to the next generation, we will not stop thinking, and will keep on learning.
 						</p>
 					</div>
 					<div class="body body-ja" lang="ja">
-						<h4 class="ethos-part" lang="en">I. Acceleration and Attention Economy</h4>
 						<p>
-							技術が加速し、社会の変化が加速し、生活のペースそのものが加速していく。立ち止まるための余白は失われ、私たちは絶えず何かに追い立てられています (Rosa, 2005)。その速度を、私はどこかおかしいと感じています。
+							わたしたちが生きる21世紀は、生産と消費の絶え間ない循環——資本主義によって駆動されています。デザイナーもまた、その歯車のひとつとして、形のないものに輪郭を与え、消費を促し、世に送り出すことを生業としています。その消費を促進させる身として、わたしたちはこの時代をよく捉え、学んでいく必要があると感じています。
 						</p>
+						<h4 class="ethos-part" lang="en">I. Acceleration and Attention Economy ｜ 加速主義とアテンションエコノミー</h4>
 						<p>
-							加速の上では、人の注意や行動そのものが資源として採掘されていきます。ドーパミンを刺激するよう設計された仕組みが習慣を支配し、内面は商品へと変わっていく (Zuboff, 2019)。簡便な幸福が、インスタントに摂取できるものになった。けれどそれは、私たちが選び取ったものではなく、構造がもたらした帰結にすぎないのだと思います。
+							わたしたちの生きる今は、産業革命が起きた時よりも、デジタル革命が起きた時よりも、なお速く、深い混乱のただ中にあります。技術が加速し、社会の変化が加速し、生活のペースそのものが加速していく。立ち止まるための余白は失われ、わたしたちは絶えず何かに追い立てられています (Rosa, 2005)。加速の上では、人の注意や行動そのものが資本的価値とみなされ、搾取されていきます。そのデータをもとに、ドーパミンを刺激するよう設計された仕組みがわたしたちの習慣を支配し、内面は商品へと変わっていきます (Zuboff, 2019)。簡便な幸福がインスタントに摂取できるものになったと同時に、それはわたしたちが選び取ったものではなく、構造がもたらした帰結にすぎないのだと思わされます。またその加速のなかで、わたしたちは地球環境を不可逆に変容させ続けています。消費のひとつひとつが、見えないところで未来に負荷を積み重ねています (Crutzen, 2000)。この加速とアテンションエコノミー、そして環境への負荷によってわたしたちが失ったのは、身体性なのではないかと考えています。
 						</p>
-						<p>
-							そして同じ加速のなかで、私たちは地球環境を不可逆に変え続けています。消費のひとつひとつが、見えないところで未来に負荷を積み重ねている (Crutzen, 2000)。
-						</p>
-						<p>
-							加速、注意の搾取、環境への負荷。私にはこれらが別々の問題には見えません。ひとつの事態が見せる、異なる表情のように思えます。ではその結果、私たちは何を失ったのか。その中心にあるのは、身体なのではないかと考えています。
-						</p>
-
 						<h4 class="ethos-part" lang="en">II. Le corps vécu and Resonance</h4>
 						<p>
-							人間は、まず頭で世界を理解するのではないと言います。身体を通して、世界のなかに住み込んでいる。「生きられた身体（le corps vécu）」こそが、世界と私を繋ぐ最初の場である (Merleau-Ponty, 1945)。この考えに、私は強く惹かれます。
+							「人間は、まず頭で世界を理解するのではなく、身体を通して世界のなかに住み込んでいる。『生きられた身体（le corps vécu）』こそが、世界とわたしたちを繋ぐ最初の場である」と、メルロー＝ポンティはその著書『知覚の現象学』で説いています (Merleau-Ponty, 1945)。加速していく世界のなかで痩せていくのは、まさにこの「身体を通した経験」なのだと思います (Bauman, 2000)。見て、触れて、その肌で感じること、実体として身体に残るものが、相対的に薄くなっている——その感覚が、わたしたちの出発点にあります。その加速の対極に位置するのが、「共鳴（Resonance）」と呼ばれる、世界を所有し支配するのではなく、世界に呼びかけ、世界から応答される関係です (Rosa, 2016)。わたしたちが「より根源的で確かな相互作用」と呼びたいものは、おそらくこの共鳴に近いものだと感じています。身体性、そして情緒へと焦点を移すこと。それは懐古ではなく、世界と共鳴するための回帰なのだと、わたしたちは捉えています。
 						</p>
-						<p>
-							スクリーンに媒介され、液状化し、加速していく世界のなかで痩せていくのは、まさにこの「身体を通した経験」なのだと思います (Bauman, 2000)。触れること、待つこと、その場に居合わせること。実体として身体に残るものが、相対的に薄くなっている——その感覚が、私の出発点にあります。
-						</p>
-						<p>
-							加速の対極にあるものは、「共鳴（Resonance）」と呼ばれています。世界を所有し支配するのではなく、世界に呼びかけ、世界から応答される関係。加速する社会は、この共鳴を体系的に不可能にしてしまった (Rosa, 2016)。
-						</p>
-						<p>
-							私が「より根源的で確かな相互作用」と呼びたいものは、おそらくこの共鳴に近いものです。身体性へ、そして情緒へと焦点を移すこと。それは懐古ではなく、世界ともう一度共鳴するための回帰なのだと、私は捉えています。
-						</p>
-
 						<h4 class="ethos-part" lang="en">III. Defuturing</h4>
 						<p>
-							持続不可能なものを作り続けるという行為は、未来を作っているのではありません。それは、次の世代から選択肢を静かに奪っている——「脱未来化（defuturing）」と呼ばれる事態です (Fry, 1999)。
-						</p>
-						<p>
-							デザイナーは、形而上のものを形而下へと具象化できる職能です。生活様式や物的価値、消費の様態といった、人間の営みの広い範囲に介入し得る。その責任の重さは、すでに半世紀前から指摘されてきました (Papanek, 1971)。そして私たち自身が、日々、消費を加速させ、負荷を積み重ねている当事者でもあります。
-						</p>
-						<p>
-							何がどのように世界に作用しているのか。そして、何が世界を形作っているのか。その全体を、私たちはまだほとんど知りません。だからこそ、答えを持っているふりをするのではなく、学び続けなければならないのだと思います。わずかでも次代に手渡せるものを残すために。
+							持続不可能なものを作り続けるという行為は、未来を作っているのではありません。それは、次の世代から選択肢を静かに奪っている——「脱未来化（defuturing）」と呼ばれる事態です (Fry, 1999)。デザイナーは、形而上のものを形而下へと具象化できる職能です。生活様式や物的価値、消費の様態といった、人間の営みの広い範囲に介入し得る。その責任の重さは、すでに半世紀前から指摘されてきました (Papanek, 1971)。そしてわたしたち自身が、日々、消費を加速させ、負荷を積み重ねている当事者でもあります。何がどのように世界に作用しているのか、そして何が世界を形作っているのか、驚くほどわたしたちは知りません。だからこそ、日々学びを重ね続けなければならないのだと思います。わたしたちがそれぞれのキャリアを終えるその時に、わずかでも次代に手渡せるものを残すために、日々思考を止めず、学びを続けてまいります。
 						</p>
 					</div>
 				</div>
@@ -429,7 +405,7 @@
 	}
 
 	.Office .Section1 {
-		padding-top: 60px;
+		padding-top: 100px;
 	}
 
 	.Office .Service,
@@ -541,6 +517,16 @@
 		margin: 12px 0 0;
 	}
 
+	/* 10px gap at the EN/JA body seam */
+	.Office .service-body-en + .service-body-ja {
+		margin-top: 10px;
+	}
+
+	/* EN body keeps a tighter line-height than JA (don't inherit JA's 1.7) */
+	.Office .service-body-en {
+		line-height: 1.45;
+	}
+
 	.Office .service-link {
 		display: inline-block;
 		margin-top: 20px;
@@ -606,9 +592,9 @@
 		margin-top: 10px;
 	}
 
-	/* Small 5px gap at the EN/JA body seam */
+	/* 20px gap at the EN/JA body seam */
 	.Office .body + .body {
-		margin-top: 5px;
+		margin-top: 20px;
 	}
 
 	/* Body copy follows base.css p (lang-aware). Only paragraph spacing here. */
@@ -616,12 +602,13 @@
 		margin-top: 14px;
 	}
 
-	/* Ethos — numbered part headings (I / II / III) */
+	/* Ethos — numbered part headings (I / II / III).
+	   SP: same size as body copy; PC bumps to fs-h3 (see @1024 below). */
 	.Office .ethos-part {
-		font-size: var(--fs-h5);
+		font-size: var(--fs-p);
 		font-weight: var(--fw-medium);
 		line-height: 1.4;
-		margin: 36px 0 12px;
+		margin: 20px 0 10px;
 		opacity: 0.6;
 	}
 
@@ -657,8 +644,8 @@
 
 		/* Body content sits in the right half on desktop; meta header stays full width */
 		.Office .content {
-			width: 58%;
-			margin-left: auto;
+			width: auto;
+			margin-left: 0;
 		}
 
 		.Office .Service,
@@ -673,6 +660,19 @@
 
 		.Office .container {
 			max-width: none;
+			/* PC: header (num over label) on the left, content on the right,
+			   tops aligned so content starts level with the "01" number. */
+			display: grid;
+			grid-template-columns: 1fr 58%;
+			align-items: start;
+			column-gap: 4%;
+		}
+
+		/* PC: stack num / label vertically (break instead of running wide) */
+		.Office .header {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
 		}
 
 		.Office .service-list {
@@ -686,12 +686,17 @@
 
 		/* PC: section labels (Office / Services / Ethos …) read large */
 		.Office .label {
-			font-size: var(--fs-h1);
+			font-size: var(--fs-h2);
 			line-height: 1.1;
 		}
 
 		.Office .service-title {
 			font-size: 20px;
+		}
+
+		/* PC: Ethos part headings step up to fs-h3 (SP stays body-size) */
+		.Office .ethos-part {
+			font-size: var(--fs-h3);
 		}
 
 		.Office .section-lead {
