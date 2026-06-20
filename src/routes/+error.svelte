@@ -62,12 +62,12 @@
 		font-size: 11px;
 		opacity: 0.5;
 		margin-bottom: 24px;
-		font-weight: 400;
+		font-weight: var(--fw-base);
 	}
 
 	.ErrorPage .num {
 		font-size: clamp(96px, 22vw, 220px);
-		font-weight: 500;
+		font-weight: var(--fw-medium);
 		line-height: 1;
 		letter-spacing: -0.02em;
 		margin-bottom: 40px;

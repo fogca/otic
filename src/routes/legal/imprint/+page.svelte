@@ -165,7 +165,7 @@
 
 	.Legal .title {
 		font-size: var(--fs-h1);
-		font-weight: 450;
+		font-weight: var(--fw-medium);
 		line-height: 1.2;
 		margin: 0 0 4px;
 	}
@@ -190,7 +190,7 @@
 	.Legal .body h2,
 	.Legal .body h3 {
 		font-size: var(--fs-h4);
-		font-weight: 450;
+		font-weight: var(--fw-medium);
 		line-height: 1.3;
 		margin: 0;
 	}
@@ -202,14 +202,14 @@
 
 	.Legal .body .subtitle {
 		font-size: var(--fs-h4);
-		font-weight: 450;
+		font-weight: var(--fw-medium);
 		line-height: 1.3;
 	}
 
 	.Legal .body p {
 		font-size: 11px;
 		line-height: 1.3;
-		font-weight: 450;
+		font-weight: var(--fw-medium);
 		margin: 0;
 	}
 

@@ -303,7 +303,7 @@
 		align-items: baseline;
 		gap: 8px;
 		font-size: var(--fs-h6);
-		font-weight: 400;
+		font-weight: var(--fw-base);
 		color: var(--color-text);
 	}
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	// Office page — static for now, microCMS later
 
 	const padNumber = (n: number) => String(n + 1).padStart(2, '0');
@@ -21,9 +23,9 @@
 
 	const services: Service[] = [
 		{
-			title: 'Product Design',
-			subtitle: 'プロダクトデザインと工業意匠',
-			body: '身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる「必然のかたち」を追い求めながら、日々の所作に静かに寄り添うプロダクトの企画・開発を行っています。デザイナーとは形而上のものを形而下へと具象化することが許された数少ない職能であると捉え、私たちのオリジンである身体へと立ち返ることを大切に、日々学びながらその実践を続けてまいります。',
+			title: 'Product & Furniture Design',
+			subtitle: '工業デザインと家具デザイン',
+			body: '身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる、必然のかたちを追い求めながら、日々の所作に添う用と喜びのあるプロダクトの企画・開発を行っています。わたしたちが直面しているこの大きな時代の変革において、より根源的で確かな相互作用——「身体性」と「情緒」が、私たちの大きな関心へとなりつつあります。私たちのオリジンである身体と心へと立ち返ることを大切に、日々学びながらその実践を続けてまいります。',
 			image: '',
 			imageAlt: 'Industrial Design',
 			projects: []
@@ -31,7 +33,7 @@
 		{
 			title: 'V.I. & Typography',
 			subtitle: 'ビジュアルアイデンティティと書体の開発',
-			body: '弊社主宰のタイプファウンダリ——August Type Foundryでは、歴史を紐解き、現代の思想を交えながら再解釈することで生まれるニューフォームを追い求め、グラフィックデザインの大きな構成要素である書体の開発を行っています。また書体開発で培ったディテールへの眼差しをビジュアルアイデンティティ・ブランドアイデンティティの設計まで拡げ、ブランドの根幹を貫く一貫した造形言語を追求します。',
+			body: '私たちは、ブランディングを始めとする視覚領域におけるビジネスクリエイティブの策定と設計から、ロゴ・グラフィックデザイン・パッケージデザインといった具体的な制作までを一貫して手がけています。また弊社主宰のタイプファウンダリ——August Type Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。',
 			image: '/images/services_typefoundry_02.png',
 			imageAlt: 'V.I. & Typography',
 			projects: [],
@@ -42,7 +44,7 @@
 		{
 			title: 'Image Visualisation',
 			subtitle: 'イメージクリエイションとCGビジュアライゼーション',
-			body: '弊社主宰のイメージクリエイションスタジオ——Studio Ristoranteでは、食と空間に焦点をあて、その企画・立ち上げ・B.I.設計を実施し、現在はイメージクリエイションのディレクションと制作を一貫して手がけています。また実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。',
+			body: '私たちは、イメージクリエイションのディレクションと制作を一貫して手がけています。実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。',
 			image: '/images/services_visualisation.png',
 			imageAlt: 'Image Visualisation',
 			projects: []
@@ -50,20 +52,52 @@
 		{
 			title: 'Digital Infrastructure',
 			subtitle: 'UXとデジタルコミュニケーションの設計',
-			body: '弊社主宰のエンジニアリングスタジオ——TEKNEでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
+			body: '弊社主宰のエンジニアリングスタジオ——Joule Jouleでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
 			image: '/images/services_production.png',
 			imageAlt: 'Digital Infrastructure',
 			projects: [],
-			link: 'www.tekne.jp'
+			link: 'www.joulejoule.com'
 		}
 	];
+
+	// Scroll-driven background: white through 01 Office, then fade to dark
+	// (#181818 / white text) once 02 Services reaches the viewport middle.
+	// Once dark, it stays dark for everything below. Reactive class (not
+	// classList) so Svelte keeps the scoped .is-dark styles.
+	let isDark = $state(false);
+
+	onMount(() => {
+		const office = document.querySelector('.Office');
+		const svc = office?.querySelector('.Service');
+		if (!office || !svc) return;
+
+		let ticking = false;
+		const update = () => {
+			ticking = false;
+			const vh = window.innerHeight;
+			const enteredDark = svc.getBoundingClientRect().top <= vh / 2;
+			// Close the dark section back to white just before the black Footer
+			// scrolls in (office.bottom accounts for the -120px margin).
+			const nearFooter = office.getBoundingClientRect().bottom <= vh + 120;
+			isDark = enteredDark && !nearFooter;
+		};
+		const onScroll = () => {
+			if (ticking) return;
+			ticking = true;
+			requestAnimationFrame(update);
+		};
+
+		window.addEventListener('scroll', onScroll, { passive: true });
+		update();
+		return () => window.removeEventListener('scroll', onScroll);
+	});
 </script>
 
 <svelte:head>
 	<title>Office — TAKUMIISOBE.com</title>
 </svelte:head>
 
-<main class="Office">
+<main class="Office" class:is-dark={isDark}>
 	<!-- First view: full-screen PV video (placeholder until the file is ready) -->
 	<section class="OfficeHero" aria-label="PV">
 		<!-- Replace with: <video class="OfficeHero__media" src="…" autoplay muted loop playsinline poster="…"></video> -->
@@ -78,7 +112,7 @@
 					<h3 class="label" lang="en">Office</h3>
 				</div>
 				<div class="content">
-					<p class="section-lead" lang="en">Unwavering pursuit<br />of the Radix</p>
+					<p class="section-lead" lang="en">Radix.<br />For what endures.</p>
 					<div class="body" lang="en">
 					<p>
 						We are a design office dedicated to the development of visual
@@ -207,7 +241,7 @@
 					<div class="body" lang="en">
 						<dl class="cfacts">
 							<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
-							<div class="cfact"><dt>Address</dt><dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya 451-0034, Japan</dd></div>
+							<div class="cfact"><dt>Address</dt><dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd></div>
 							<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
 							<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
 						</dl>
@@ -215,7 +249,7 @@
 					<div class="body body-ja" lang="ja">
 						<dl class="cfacts">
 							<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
-							<div class="cfact"><dt>所在地</dt><dd>〒451-0034 名古屋市西区樋の口町1-16</dd></div>
+							<div class="cfact"><dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd></div>
 							<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
 							<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
 						</dl>
@@ -233,7 +267,8 @@
 					<h3 class="label" lang="en">Ethos</h3>
 				</div>
 				<div class="content">
-					<div class="body" lang="en">
+					<!-- EN copy hidden for now (re-enable by removing style="display:none") -->
+					<div class="body" lang="en" style="display: none">
 						<p>
 							Today's social system is beginning to show its seams — through its
 							fragility and through the widening gap between need and want. Amid
@@ -263,11 +298,43 @@
 						</p>
 					</div>
 					<div class="body body-ja" lang="ja">
+						<h4 class="ethos-part" lang="en">I. Acceleration and Attention Economy</h4>
 						<p>
-							今日の社会システムは、その脆弱性と自己中心的な世界観によって随所に綻びが露見しはじめているように思えます。情報が氾濫し、価値秩序が絶えず移ろいゆくなかで、簡便な幸福はインスタントに摂取できるようになりました。その結果、実体として身体に残るものは、相対的に痩せてきているようにも見えます。私たちはこの変化のなかで、より根源的で確かな相互作用——「身体性」と「情緒」へと焦点を移しつつあります。
+							技術が加速し、社会の変化が加速し、生活のペースそのものが加速していく。立ち止まるための余白は失われ、私たちは絶えず何かに追い立てられています (Rosa, 2005)。その速度を、私はどこかおかしいと感じています。
 						</p>
 						<p>
-							デザイナーは、形而上のものを形而下へと具象化することのできる職能であり、言い換えれば、生活様式・物的価値・消費の様態など、人間の営みの広い範囲に介入し得る職能でもあります。20世紀後半、ヴィクター・パパネックをはじめ多くの知識人が、その重大さに警鐘を鳴らしてきました。デザインが目的論性を取り戻し、人間の本当の必要に応答するためには、私たちのオリジンである身体や、自然との繋がりへと立ち返ることが、いま改めて重要であると捉えています。私たちデザイナーは、日々、消費を加速させ、環境への負荷を積み重ねている当事者です。インパルスデザインや商業デザインといかに付き合うかを問いつづけながら、日々学びを重ね、わずかでも次代に手渡せるものを残していきたい。いつか自分たちの仕事を閉じる日に、総じて社会の側へわずかでもプラスを残せたと振り返れる仕事を、ひとつずつ積み重ねていきたいと考えています。
+							加速の上では、人の注意や行動そのものが資源として採掘されていきます。ドーパミンを刺激するよう設計された仕組みが習慣を支配し、内面は商品へと変わっていく (Zuboff, 2019)。簡便な幸福が、インスタントに摂取できるものになった。けれどそれは、私たちが選び取ったものではなく、構造がもたらした帰結にすぎないのだと思います。
+						</p>
+						<p>
+							そして同じ加速のなかで、私たちは地球環境を不可逆に変え続けています。消費のひとつひとつが、見えないところで未来に負荷を積み重ねている (Crutzen, 2000)。
+						</p>
+						<p>
+							加速、注意の搾取、環境への負荷。私にはこれらが別々の問題には見えません。ひとつの事態が見せる、異なる表情のように思えます。ではその結果、私たちは何を失ったのか。その中心にあるのは、身体なのではないかと考えています。
+						</p>
+
+						<h4 class="ethos-part" lang="en">II. Le corps vécu and Resonance</h4>
+						<p>
+							人間は、まず頭で世界を理解するのではないと言います。身体を通して、世界のなかに住み込んでいる。「生きられた身体（le corps vécu）」こそが、世界と私を繋ぐ最初の場である (Merleau-Ponty, 1945)。この考えに、私は強く惹かれます。
+						</p>
+						<p>
+							スクリーンに媒介され、液状化し、加速していく世界のなかで痩せていくのは、まさにこの「身体を通した経験」なのだと思います (Bauman, 2000)。触れること、待つこと、その場に居合わせること。実体として身体に残るものが、相対的に薄くなっている——その感覚が、私の出発点にあります。
+						</p>
+						<p>
+							加速の対極にあるものは、「共鳴（Resonance）」と呼ばれています。世界を所有し支配するのではなく、世界に呼びかけ、世界から応答される関係。加速する社会は、この共鳴を体系的に不可能にしてしまった (Rosa, 2016)。
+						</p>
+						<p>
+							私が「より根源的で確かな相互作用」と呼びたいものは、おそらくこの共鳴に近いものです。身体性へ、そして情緒へと焦点を移すこと。それは懐古ではなく、世界ともう一度共鳴するための回帰なのだと、私は捉えています。
+						</p>
+
+						<h4 class="ethos-part" lang="en">III. Defuturing</h4>
+						<p>
+							持続不可能なものを作り続けるという行為は、未来を作っているのではありません。それは、次の世代から選択肢を静かに奪っている——「脱未来化（defuturing）」と呼ばれる事態です (Fry, 1999)。
+						</p>
+						<p>
+							デザイナーは、形而上のものを形而下へと具象化できる職能です。生活様式や物的価値、消費の様態といった、人間の営みの広い範囲に介入し得る。その責任の重さは、すでに半世紀前から指摘されてきました (Papanek, 1971)。そして私たち自身が、日々、消費を加速させ、負荷を積み重ねている当事者でもあります。
+						</p>
+						<p>
+							何がどのように世界に作用しているのか。そして、何が世界を形作っているのか。その全体を、私たちはまだほとんど知りません。だからこそ、答えを持っているふりをするのではなく、学び続けなければならないのだと思います。わずかでも次代に手渡せるものを残すために。
 						</p>
 					</div>
 				</div>
@@ -315,6 +382,8 @@
 		color: var(--color-text);
 		/* Absorb Footer's margin-top so the page flows straight into the black Footer */
 		margin-bottom: -120px;
+		/* Smooth white→dark shift, driven by .is-dark (toggled on scroll) */
+		transition: background-color 0.7s ease, color 0.7s ease;
 	}
 
 	/* base.css sets color: var(--color-text) directly on div, p, span, headings,
@@ -322,6 +391,19 @@
 	   descendant here. */
 	.Office :global(*) {
 		color: var(--color-text);
+		transition: color 0.7s ease, border-color 0.7s ease;
+	}
+
+	/* Dark phase — from 02 Services onward. The scroll handler adds .is-dark
+	   once Services crosses the viewport middle; it stays on below that point. */
+	.Office.is-dark {
+		background: #181818;
+		color: #fff;
+		--color-line: rgba(255, 255, 255, 0.2);
+	}
+
+	.Office.is-dark :global(*) {
+		color: #fff;
 	}
 
 	/* Roomier horizontal margins for all content sections (hero stays full-bleed) */
@@ -512,8 +594,9 @@
 
 	/* 01 Office — lead line above the body copy (slightly larger) */
 	.Office .section-lead {
-		font-size: 18px;
-		line-height: 1.3;
+		font-size: 32px;
+		line-height: 1.1;
+		font-weight: var(--fw-lead); /* exception — large display lead */
 		margin-top: 40px;
 		margin-bottom: 0;
 		text-align: left;
@@ -523,13 +606,27 @@
 		margin-top: 10px;
 	}
 
+	/* Small 5px gap at the EN/JA body seam */
 	.Office .body + .body {
-		margin-top: 8px;
+		margin-top: 5px;
 	}
 
 	/* Body copy follows base.css p (lang-aware). Only paragraph spacing here. */
 	.Office .body p + p {
 		margin-top: 14px;
+	}
+
+	/* Ethos — numbered part headings (I / II / III) */
+	.Office .ethos-part {
+		font-size: var(--fs-h5);
+		font-weight: var(--fw-medium);
+		line-height: 1.4;
+		margin: 36px 0 12px;
+		opacity: 0.6;
+	}
+
+	.Office .ethos-part:first-child {
+		margin-top: 0;
 	}
 
 	/* Tablet */
@@ -560,7 +657,7 @@
 
 		/* Body content sits in the right half on desktop; meta header stays full width */
 		.Office .content {
-			width: 50%;
+			width: 58%;
 			margin-left: auto;
 		}
 
@@ -587,13 +684,25 @@
 			margin-top: 16px;
 		}
 
-		/* PC type scale: sp→pc ratio ≈ 1.2x (matches general website convention) */
+		/* PC: section labels (Office / Services / Ethos …) read large */
 		.Office .label {
-			font-size: 14px;
+			font-size: var(--fs-h1);
+			line-height: 1.1;
 		}
 
 		.Office .service-title {
 			font-size: 20px;
+		}
+
+		.Office .section-lead {
+			font-size: 56px;
+			line-height: 1.05;
+		}
+
+		/* Company facts read a touch larger on PC */
+		.Office .cfact dt,
+		.Office .cfact dd {
+			font-size: 15px;
 		}
 	}
 

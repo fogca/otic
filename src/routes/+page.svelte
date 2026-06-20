@@ -200,7 +200,7 @@
 		align-items: baseline;
 		gap: 8px;
 		font-size: var(--fs-h6);
-		font-weight: 400;
+		font-weight: var(--fw-base);
 	}
 
 	/* base.css sets color directly on span — keep meta text black */
@@ -217,7 +217,7 @@
 	.Home .Archives .card .meta .brand {
 		text-align: right;
 		opacity: 0.6;
-		font-weight: 400;
+		font-weight: var(--fw-base);
 	}
 
 	/* ----- Mobile only: per-project widths on the CARD itself ----- */
@@ -358,7 +358,11 @@
 		}
 
 		.Home .Archives .card:not(.card-01) .image img {
-			width: auto;
+			/* The card is already capped to the image's real width at 90vh via
+			   max-width: min(px, calc(90vh * aspect)), so width:100% makes
+			   image width == card width == meta width (no centering gap). The
+			   height stays card-width / aspect <= 90vh, so nothing is cropped. */
+			width: 100%;
 			height: auto;
 			max-width: 100%;
 			max-height: 90vh;

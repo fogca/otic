@@ -137,7 +137,7 @@
 		font-size: 11px;
 		line-height: 1;
 		color: var(--color-text);
-		font-weight: 470;
+		font-weight: var(--fw-base);
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 

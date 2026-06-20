@@ -78,7 +78,7 @@
     font-family: var(--font-en);
     font-size: var(--fs-title-en);
     line-height: var(--lh-title-en);
-    font-weight: 400;
+    font-weight: var(--fw-base);
     margin-top: 20px;
 
   }
@@ -87,7 +87,7 @@
     font-family: var(--font-ja);
     font-size: var(--fs-title-ja);
     line-height: var(--lh-title-ja);
-    font-weight: 400;
+    font-weight: var(--fw-base);
     margin-top: 8px;
   }
 

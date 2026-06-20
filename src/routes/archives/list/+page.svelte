@@ -57,7 +57,7 @@
 
 	.Archives .ViewSwitch .link {
 		font-size: var(--fs-h6);
-		font-weight: 400;
+		font-weight: var(--fw-base);
 	}
 
 	.Archives .ViewSwitch .link.is-mute {

@@ -26,11 +26,11 @@
    ------------------------------------------------------------ */
 
 /* Primary Latin face — August Type Foundry / Steiner (in-house face,
-   formerly Aether / Scheteiner). VF11 variable font (wght 1–950:
+   formerly Aether / Scheteiner). VF21 variable font (wght 1–950:
    Hair / Book / Ultra masters). */
 @font-face {
   font-family: 'Steiner';
-  src: url('/fonts/Steiner-VF11.woff2?v=20260612') format('woff2');
+  src: url('/fonts/Steiner-VF37.woff2?v=20260617t') format('woff2');
   font-weight: 1 950;
   font-style: normal;
   font-display: swap;
@@ -143,6 +143,12 @@ a {
   --fs-p-en: 12.5px;   /* Body copy (Latin) — SP */
   --fs-p-ja: 11.5px;   /* Body copy (JP) — SP */
 
+  /* --- Font weights (single source of truth — no per-component weights) --- */
+  --fw-base:   320;   /* default for all text unless emphasized */
+  --fw-medium: 450;   /* medium emphasis */
+  --fw-bold:   450;   /* bold — same as medium per spec */
+  --fw-lead:   300;   /* exception: large display lead (Radix. For what endures.) */
+
   /* --- Line heights --- */
   --lh-h1:   1.2;
   --lh-h2:   1.2;
@@ -243,12 +249,12 @@ a {
 :lang(en) {
   --heading-font: var(--font-en);
   --text-font:    var(--font-en);
-  font-weight: 400;
+  font-weight: var(--fw-base);
 }
 
 :lang(ja) {
-  --heading-font: var(--font-ja);
-  --text-font:    var(--font-ja);
+  --heading-font: var(--font-ja-light);
+  --text-font:    var(--font-ja-light);
 }
 
 /* ------------------------------------------------------------
@@ -275,7 +281,7 @@ body {
 
 body {
   font-family: var(--text-font);
-  font-weight: 400;
+  font-weight: var(--fw-base);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   color: var(--color-text);
@@ -286,8 +292,8 @@ body {
   line-height: var(--lh-ja);
   /* Tazugane Book (font-weight: 400) pairs with Steiner wght400.
      For Tazugane Light, use --font-ja-light + font-variation-settings: 'wght' 330. */
-  font-weight: 400;
-  font-variation-settings: 'wght' 400;
+  font-weight: var(--fw-base);
+  font-variation-settings: 'wght' var(--fw-base);
 }
 
 /* ------------------------------------------------------------
@@ -334,7 +340,7 @@ h4, .h4 {
   font-family:  var(--heading-font);
   font-size:    var(--fs-h4);
   line-height:  var(--lh-h4);
-  font-weight:  470;
+  font-weight: var(--fw-medium);
 }
 
 h5, .h5 {
@@ -358,7 +364,7 @@ p, .p {
 /* Body copy size is language-aware and scales up on PC (vars in :root) */
 p:lang(en), .p:lang(en) {
   font-size: var(--fs-p-en);
-  font-weight: 420;   /* Steiner for body copy */
+  font-weight: var(--fw-base);   /* Steiner body copy */
   line-height: 1.4;
   text-align: justify;
   hyphens: auto;
@@ -394,9 +400,9 @@ input::placeholder {
    ------------------------------------------------------------ */
 
 /* Weight */
-.regular { font-weight: 450; }
-.medium  { font-weight: 500; }
-.bold    { font-weight: 700; }
+.regular { font-weight: var(--fw-base); }
+.medium  { font-weight: var(--fw-medium); }
+.bold    { font-weight: var(--fw-bold); }
 
 /* Color */
 .white   { color: var(--white); }

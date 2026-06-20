@@ -141,7 +141,7 @@
 
 	.Contact .title {
 		font-size: var(--fs-h2);
-		font-weight: 500;
+		font-weight: var(--fw-medium);
 		margin: 0 0 40px;
 	}
 

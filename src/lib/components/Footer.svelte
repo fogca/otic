@@ -65,8 +65,9 @@
 		<div class="Footer__col Footer__col--cta">
 			<h3 class="Footer__heading" lang="en">For new projects</h3>
 			<p class="Footer__note" lang="en">
-				Currently accepting select collaborations across visual identity, type,
-				product, and digital. Please reach out.
+				Currently we are accepting select collaborations across<br />
+				product, furniture, typeface, web and branding &amp; V.I. projects.<br />
+				Please feel free to reach out.
 			</p>
 			<a href="/contact" class="Footer__cta" lang="en">Get in touch →</a>
 		</div>
@@ -163,7 +164,7 @@
 
 	.Footer__heading {
 		font-size: 12px;
-		font-weight: 470;
+		font-weight: var(--fw-medium);
 		letter-spacing: 0;
 		opacity: 0.6;
 		margin: 0;
@@ -201,7 +202,7 @@
 
 	.Footer__cta {
 		font-size: 14px;
-		font-weight: 470;
+		font-weight: var(--fw-medium);
 		color: inherit;
 		text-decoration: none;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.4);

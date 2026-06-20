@@ -15,7 +15,8 @@
 			return {
 				...img,
 				url: optimised,
-				aspectRatio: `${img.width} / ${img.height}`
+				// Videos have no CMS dimensions; aspect is set from <video> metadata at runtime.
+				aspectRatio: img.isVideo ? undefined : `${img.width} / ${img.height}`
 			};
 		})
 	);
@@ -72,27 +73,55 @@
 	onMount(() => {
 		if (!browser) return;
 
-		const imageElements = document.querySelectorAll('.grid_gallery_item img');
-		let loaded = 0;
+		const imageElements = document.querySelectorAll<HTMLImageElement>('.grid_gallery_item img');
+		const videoElements = document.querySelectorAll<HTMLVideoElement>('.grid_gallery_item video');
 
-		const checkAllLoaded = () => {
-			loaded++;
-			if (loaded === imageElements.length) {
-				layoutMasonry();
-				setTimeout(() => {
-					isLoading = false;
-				}, 80);
-			}
-		};
-
+		// Reveal each media element individually as its bytes arrive (own
+		// lazy-load blur fade). This is decoupled from layout below.
 		imageElements.forEach((img) => {
-			if ((img as HTMLImageElement).complete) {
-				checkAllLoaded();
+			if (img.complete && img.naturalWidth > 0) {
+				img.classList.add('loaded');
 			} else {
-				img.addEventListener('load', checkAllLoaded);
-				img.addEventListener('error', checkAllLoaded);
+				img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+				img.addEventListener('error', () => img.classList.add('loaded'), { once: true });
 			}
 		});
+		videoElements.forEach((video) => {
+			video.addEventListener('loadeddata', () => video.classList.add('loaded'), { once: true });
+		});
+
+		// Masonry layout needs DIMENSIONS, not bytes: images carry CMS
+		// width/height (aspect known up-front), videos only need metadata. So we
+		// lay out as soon as every video has reported its size — the grid gets
+		// its real height immediately and the Footer never peeks through.
+		let pendingVideoMeta = videoElements.length;
+		const runLayout = () => {
+			layoutMasonry();
+			setTimeout(() => {
+				isLoading = false;
+			}, 80);
+		};
+		const onVideoMeta = (video: HTMLVideoElement) => {
+			const wrapper = video.closest<HTMLElement>('.image-wrapper');
+			if (wrapper && video.videoWidth && video.videoHeight) {
+				wrapper.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
+			}
+			pendingVideoMeta--;
+			if (pendingVideoMeta <= 0) runLayout();
+		};
+
+		if (videoElements.length === 0) {
+			runLayout();
+		} else {
+			videoElements.forEach((video) => {
+				if (video.readyState >= 1 /* HAVE_METADATA */) {
+					onVideoMeta(video);
+				} else {
+					video.addEventListener('loadedmetadata', () => onVideoMeta(video), { once: true });
+					video.addEventListener('error', () => onVideoMeta(video), { once: true });
+				}
+			});
+		}
 
 		const handleResize = () => {
 			clearTimeout(resizeTimer);
@@ -134,14 +163,27 @@
 				aria-label={image.workTitle}
 			>
 				<div class="image-wrapper" style:aspect-ratio={image.aspectRatio}>
-					<img
-						src={image.url}
-						alt={image.workTitle}
-						loading="lazy"
-						width={image.width}
-						height={image.height}
-						draggable="false"
-					/>
+					{#if image.isVideo}
+						<video
+							src={image.url}
+							autoplay
+							loop
+							muted
+							playsinline
+							preload="metadata"
+							aria-label={image.workTitle}
+							draggable="false"
+						></video>
+					{:else}
+						<img
+							src={image.url}
+							alt={image.workTitle}
+							loading="lazy"
+							width={image.width}
+							height={image.height}
+							draggable="false"
+						/>
+					{/if}
 				</div>
 			</div>
 		{/each}
@@ -179,7 +221,7 @@
 
 	.Archives .Title .title {
 		font-size: var(--fs-h1);
-		font-weight: 400;
+		font-weight: var(--fw-base);
 		margin: 0;
 	}
 
@@ -195,7 +237,7 @@
 
 	.Archives .ViewSwitch .link {
 		font-size: var(--fs-h6);
-		font-weight: 400;
+		font-weight: var(--fw-base);
 	}
 
 	.Archives .ViewSwitch .link.is-mute {
@@ -216,6 +258,9 @@
 
 	.Archives .Gallery.loading {
 		opacity: 0;
+		/* Hold a viewport of height before the first layout so the Footer
+		   can't peek through while dimensions are still resolving. */
+		min-height: 100vh;
 	}
 
 	.Archives .grid_gallery_item {
@@ -230,11 +275,23 @@
 		background: var(--color-bg-gray);
 	}
 
-	.Archives .image-wrapper img {
+	.Archives .image-wrapper img,
+	.Archives .image-wrapper video {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		display: block;
+		/* Self lazy-load reveal: blur + fade in once the bytes arrive.
+		   The gray wrapper background acts as the placeholder underneath. */
+		opacity: 0;
+		filter: blur(12px);
+		transition: opacity 0.6s ease, filter 0.6s ease;
+	}
+
+	.Archives .image-wrapper img:global(.loaded),
+	.Archives .image-wrapper video:global(.loaded) {
+		opacity: 1;
+		filter: blur(0);
 	}
 
 	@media (min-width: 1024px) {

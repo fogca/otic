@@ -220,7 +220,7 @@
 	.Archive .Hero .title {
 		font-size: var(--fs-h1);
 		line-height: 1.25;
-		font-weight: 400;
+		font-weight: var(--fw-base);
 	}
 
 	/* ----- Gallery (image stream) ----- */
@@ -302,7 +302,7 @@
 
 	.Archive .Colophon .title {
 		font-size: var(--fs-h4);
-		font-weight: 500;
+		font-weight: var(--fw-medium);
 		margin-bottom: 28px;
 	}
 
@@ -328,7 +328,7 @@
 	.Archive .Colophon .row dd {
 		font-size: var(--fs-h5);
 		line-height: 24px;
-		font-weight: 400;
+		font-weight: var(--fw-base);
 	}
 
 	/* ----- Tablet+ ----- */

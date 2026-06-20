@@ -17,6 +17,10 @@ export type Work = {
 	title: string;
 	brand?: string;
 	order?: number;
+	/** CMS boolean field. When true, the work is dropped from the archives
+	    grid/list. Used instead of microCMS "公開終了" (CLOSED lags in the
+	    Content API and isn't exposed there). */
+	hidden?: boolean;
 	description: string;
 	scope: string[];
 	body_jp: string;
@@ -66,6 +70,13 @@ export type WorkResponse = {
 // API calls
 export const getList = async (queries?: MicroCMSQueries) => {
 	return await client.get<WorkResponse>({ endpoint: 'works', queries });
+};
+
+/** getList + drop works flagged `hidden`. Prefer this for public listings.
+    When narrowing with `fields`, include 'hidden' or the flag won't be read. */
+export const getVisibleWorks = async (queries?: MicroCMSQueries) => {
+	const data = await getList(queries);
+	return { ...data, contents: data.contents.filter((w) => w.hidden !== true) };
 };
 
 export const getDetail = async (contentId: string, queries?: MicroCMSQueries) => {

@@ -1,4 +1,4 @@
-import { getList } from '$lib/js/microcms';
+import { getVisibleWorks } from '$lib/js/microcms';
 import type { PageServerLoad } from './$types';
 
 // Deterministic string hash → number
@@ -19,6 +19,9 @@ type GalleryImage = {
 	workId: string;
 	workTitle: string;
 	isThumbnail: boolean;
+	/** Cloudflare-hosted video row (pj_videos). Dimensions are 0 — the client
+	    reads them from the <video> metadata to size the masonry cell. */
+	isVideo?: boolean;
 };
 
 // Fixed-seed shuffle that biases thumbnails toward the upper half so they
@@ -41,10 +44,10 @@ function patternShuffle(items: GalleryImage[], seed: number): GalleryImage[] {
 }
 
 export const load: PageServerLoad = async () => {
-	const data = await getList({
+	const data = await getVisibleWorks({
 		limit: 100,
 		orders: 'order',
-		fields: ['id', 'title', 'thumbnail', 'repeat', 'repeatImg']
+		fields: ['id', 'title', 'thumbnail', 'repeat', 'repeatImg', 'hidden']
 	});
 
 	// Per-PJ image selection override. Listed PJs skip thumbnail and use only
@@ -92,7 +95,19 @@ export const load: PageServerLoad = async () => {
 
 			if (work.repeat) {
 				for (const row of work.repeat) {
-					if (row.pj_images?.url) {
+					const videoUrl = row.pj_videos?.trim();
+					if (videoUrl) {
+						// Mix Cloudflare videos into the grid alongside images.
+						workImages.push({
+							url: videoUrl,
+							width: 0,
+							height: 0,
+							workId: work.id,
+							workTitle: work.title,
+							isThumbnail: false,
+							isVideo: true
+						});
+					} else if (row.pj_images?.url) {
 						workImages.push({
 							url: row.pj_images.url,
 							width: row.pj_images.width,
