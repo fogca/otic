@@ -30,7 +30,7 @@
    Hair / Book / Ultra masters). */
 @font-face {
   font-family: 'Steiner';
-  src: url('/fonts/Steiner-VF37.woff2?v=20260617t') format('woff2');
+  src: url('/fonts/Steiner-VF41.woff2?v=20260621') format('woff2');
   font-weight: 1 950;
   font-style: normal;
   font-display: swap;
@@ -140,11 +140,11 @@ a {
   --fs-p:    11.5px;
 
   /* Body copy is language-aware (Latin runs larger than JP) */
-  --fs-p-en: 12.5px;   /* Body copy (Latin) — SP */
-  --fs-p-ja: 11.5px;   /* Body copy (JP) — SP */
+  --fs-p-en: 12px;   /* Body copy (Latin) — SP */
+  --fs-p-ja: 10.5px;   /* Body copy (JP) — SP */
 
   /* --- Font weights (single source of truth — no per-component weights) --- */
-  --fw-base:   320;   /* default for all text unless emphasized */
+  --fw-base:   330;   /* default for all text unless emphasized */
   --fw-medium: 450;   /* medium emphasis */
   --fw-bold:   450;   /* bold — same as medium per spec */
   --fw-lead:   300;   /* exception: large display lead (Radix. For what endures.) */

@@ -147,10 +147,10 @@
 		position: absolute;
 		right: 100%;
 		top: 50%;
-		transform: translateY(calc(-50% + 1px));
+		transform: translateY(-50%);
 		margin-right: 3px;
-		width: 4px;
-		height: 4px;
+		width: 3px;
+		height: 3px;
 		border-radius: 50%;
 		background: currentColor;
 	}

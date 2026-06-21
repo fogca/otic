@@ -77,14 +77,16 @@
 
 	onMount(() => {
 		const office = document.querySelector('.Office');
-		const svc = office?.querySelector('.Service');
-		if (!office || !svc) return;
+		// 03 Company = the first .Founder block
+		const company = office?.querySelector('.Founder');
+		if (!office || !company) return;
 
 		let ticking = false;
 		const update = () => {
 			ticking = false;
 			const vh = window.innerHeight;
-			const enteredDark = svc.getBoundingClientRect().top <= vh / 2;
+			// Go dark once 03 Company scrolls into view (its top reaches the viewport bottom)
+			const enteredDark = company.getBoundingClientRect().top <= vh;
 			// Close the dark section back to white just before the black Footer
 			// scrolls in (office.bottom accounts for the -120px margin).
 			const nearFooter = office.getBoundingClientRect().bottom <= vh + 120;
@@ -300,15 +302,24 @@
 						<p>
 							わたしたちが生きる21世紀は、生産と消費の絶え間ない循環——資本主義によって駆動されています。デザイナーもまた、その歯車のひとつとして、形のないものに輪郭を与え、消費を促し、世に送り出すことを生業としています。その消費を促進させる身として、わたしたちはこの時代をよく捉え、学んでいく必要があると感じています。
 						</p>
-						<h4 class="ethos-part" lang="en">I. Acceleration and Attention Economy ｜ 加速主義とアテンションエコノミー</h4>
+						<h4 class="ethos-part">
+							<span class="ethos-part-en" lang="en">I. Acceleration and Attention Economy</span>
+							<span class="ethos-part-ja" lang="ja">/ 加速主義とアテンション経済</span>
+						</h4>
 						<p>
 							わたしたちの生きる今は、産業革命が起きた時よりも、デジタル革命が起きた時よりも、なお速く、深い混乱のただ中にあります。技術が加速し、社会の変化が加速し、生活のペースそのものが加速していく。立ち止まるための余白は失われ、わたしたちは絶えず何かに追い立てられています (Rosa, 2005)。加速の上では、人の注意や行動そのものが資本的価値とみなされ、搾取されていきます。そのデータをもとに、ドーパミンを刺激するよう設計された仕組みがわたしたちの習慣を支配し、内面は商品へと変わっていきます (Zuboff, 2019)。簡便な幸福がインスタントに摂取できるものになったと同時に、それはわたしたちが選び取ったものではなく、構造がもたらした帰結にすぎないのだと思わされます。またその加速のなかで、わたしたちは地球環境を不可逆に変容させ続けています。消費のひとつひとつが、見えないところで未来に負荷を積み重ねています (Crutzen, 2000)。この加速とアテンションエコノミー、そして環境への負荷によってわたしたちが失ったのは、身体性なのではないかと考えています。
 						</p>
-						<h4 class="ethos-part" lang="en">II. Le corps vécu and Resonance</h4>
+						<h4 class="ethos-part">
+							<span class="ethos-part-en" lang="en">II. Le corps vécu and Resonance</span>
+							<span class="ethos-part-ja" lang="ja">/ 生きられた身体と共鳴</span>
+						</h4>
 						<p>
 							「人間は、まず頭で世界を理解するのではなく、身体を通して世界のなかに住み込んでいる。『生きられた身体（le corps vécu）』こそが、世界とわたしたちを繋ぐ最初の場である」と、メルロー＝ポンティはその著書『知覚の現象学』で説いています (Merleau-Ponty, 1945)。加速していく世界のなかで痩せていくのは、まさにこの「身体を通した経験」なのだと思います (Bauman, 2000)。見て、触れて、その肌で感じること、実体として身体に残るものが、相対的に薄くなっている——その感覚が、わたしたちの出発点にあります。その加速の対極に位置するのが、「共鳴（Resonance）」と呼ばれる、世界を所有し支配するのではなく、世界に呼びかけ、世界から応答される関係です (Rosa, 2016)。わたしたちが「より根源的で確かな相互作用」と呼びたいものは、おそらくこの共鳴に近いものだと感じています。身体性、そして情緒へと焦点を移すこと。それは懐古ではなく、世界と共鳴するための回帰なのだと、わたしたちは捉えています。
 						</p>
-						<h4 class="ethos-part" lang="en">III. Defuturing</h4>
+						<h4 class="ethos-part">
+							<span class="ethos-part-en" lang="en">III. Defuturing</span>
+							<span class="ethos-part-ja" lang="ja">/ 脱未来化</span>
+						</h4>
 						<p>
 							持続不可能なものを作り続けるという行為は、未来を作っているのではありません。それは、次の世代から選択肢を静かに奪っている——「脱未来化（defuturing）」と呼ばれる事態です (Fry, 1999)。デザイナーは、形而上のものを形而下へと具象化できる職能です。生活様式や物的価値、消費の様態といった、人間の営みの広い範囲に介入し得る。その責任の重さは、すでに半世紀前から指摘されてきました (Papanek, 1971)。そしてわたしたち自身が、日々、消費を加速させ、負荷を積み重ねている当事者でもあります。何がどのように世界に作用しているのか、そして何が世界を形作っているのか、驚くほどわたしたちは知りません。だからこそ、日々学びを重ね続けなければならないのだと思います。わたしたちがそれぞれのキャリアを終えるその時に、わずかでも次代に手渡せるものを残すために、日々思考を止めず、学びを続けてまいります。
 						</p>
@@ -384,8 +395,8 @@
 
 	/* Roomier horizontal margins for all content sections (hero stays full-bleed) */
 	.Office section:not(.OfficeHero) {
-		padding-left: calc(var(--padding) * 2);
-		padding-right: calc(var(--padding) * 2);
+		padding-left: calc(var(--padding) * 1.5);
+		padding-right: calc(var(--padding) * 1.5);
 	}
 
 	/* First view — full-screen PV video (100vw × 100vh) */
@@ -511,9 +522,8 @@
 		opacity: 0.6;
 	}
 
+	/* Size & line-height come from p:lang(en/ja) (en>ja). Only spacing here. */
 	.Office .service-body {
-		font-size: var(--fs-h6);
-		line-height: 1.7;
 		margin: 12px 0 0;
 	}
 
@@ -592,9 +602,9 @@
 		margin-top: 10px;
 	}
 
-	/* 20px gap at the EN/JA body seam */
+	/* 10px gap at the EN/JA body seam */
 	.Office .body + .body {
-		margin-top: 20px;
+		margin-top: 10px;
 	}
 
 	/* Body copy follows base.css p (lang-aware). Only paragraph spacing here. */
@@ -614,6 +624,30 @@
 
 	.Office .ethos-part:first-child {
 		margin-top: 0;
+	}
+
+	/* Ethos heading: EN line + JA subtitle on its own line (Tazugane, smaller) */
+	.Office .ethos-part-en {
+		display: block;
+	}
+
+	.Office .ethos-part-ja {
+		display: block;
+		font-family: var(--font-ja);
+		font-size: var(--fs-p-ja);
+		font-weight: var(--fw-base);
+		margin-top: 2px;
+		opacity: 0.85;
+	}
+
+	/* Ethos EN body: left-aligned (override p:lang justify), slightly wider */
+	.Office .Ethos .body[lang='en'] p {
+		text-align: left;
+		width: 103%;
+	}
+
+	.Office .Ethos .body[lang='ja'] p {
+		text-align: justify;
 	}
 
 	/* Tablet */
