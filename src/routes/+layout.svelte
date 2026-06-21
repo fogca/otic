@@ -33,6 +33,23 @@
 	let needsEntryAnim = false;
 	let isHomeNav = false; // navigating to "/" — use black panel + hand off to Loader
 
+	// FONTPLUS (Tazugane webfont) loads via a deferred <script> in app.html, so the
+	// global may not exist yet when navigation callbacks fire. Poll briefly, then run.
+	type FontplusApi = { reload: (init?: boolean) => void };
+	function whenFontplusReady(cb: (fp: FontplusApi) => void, timeoutMs = 6000) {
+		const startedAt = performance.now();
+		const poll = () => {
+			const fp = (window as unknown as { FONTPLUS?: FontplusApi }).FONTPLUS;
+			if (fp && typeof fp.reload === 'function') {
+				cb(fp);
+				return;
+			}
+			if (performance.now() - startedAt > timeoutMs) return; // give up silently
+			setTimeout(poll, 60);
+		};
+		poll();
+	}
+
 	onMount(() => {
 		if (!browser) return;
 
@@ -150,13 +167,13 @@
 	});
 
 	// ── Incoming: fade in over the white panel (or hand off to Loader on home) ──
-	afterNavigate(() => {
-		// SvelteKit navigates client-side (no full reload), so FONTPLUS never
-		// re-scans the new page. Re-trigger it so Tazugane is applied on the
-		// freshly rendered DOM. Runs on every navigation, before the early returns.
+	afterNavigate((nav) => {
+		// SvelteKit navigates client-side, so FONTPLUS never re-scans the new DOM
+		// on its own — re-extract the freshly rendered page so Tazugane is applied.
+		// First load (type 'enter') → reload(true): reset + fetch all.
+		// Real navigations → reload(false): keep subset, fetch newly seen chars.
 		if (browser) {
-			const fp = (window as unknown as { FONTPLUS?: { reload: (init?: boolean) => void } }).FONTPLUS;
-			if (fp?.reload) requestAnimationFrame(() => fp.reload());
+			whenFontplusReady((fp) => fp.reload(nav.type === 'enter'));
 		}
 
 		if (!needsEntryAnim) return;
@@ -196,7 +213,8 @@
 <svelte:head>
 	<link rel="icon" type="image/png" href="/favicon.png" />
 	<title>TAKUMIISOBE.com</title>
-	<script src="https://webfont.fontplus.jp/accessor/script/fontplus.js?kqbwQX--jVA%3D&box=-1MT0mUgg4A%3D&aa=1&ab=2"></script>
+	<!-- FONTPLUS (Tazugane) loader lives in app.html <head>: loads once and
+	     survives SPA navigation. Re-applied per navigation via afterNavigate. -->
 </svelte:head>
 
 <div class="transition-bg">
