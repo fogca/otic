@@ -7,6 +7,7 @@
 	import { intro } from '$lib/state/intro.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { setLenis } from '$lib/state/lenis';
 
 	gsap.registerPlugin(CustomEase);
 
@@ -67,6 +68,7 @@
 				wheelMultiplier: 1,
 				smoothWheel: true
 			});
+			setLenis(lenisInstance);
 
 			const raf = (time: number) => {
 				lenisInstance?.raf(time);
