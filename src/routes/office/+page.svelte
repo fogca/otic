@@ -69,6 +69,9 @@
 		}
 	];
 
+	// Per-service copy expansion (Show toggle). Clamped + faded by default.
+	let openCopy = $state(services.map(() => false));
+
 	// Scroll-driven background: white through 01 Office, then fade to dark
 	// (#181818 / white text) once 02 Services reaches the viewport middle.
 	// Once dark, it stays dark for everything below. Reactive class (not
@@ -158,7 +161,7 @@
 				</div>
 				<div class="content">
 				<ul class="service-list">
-					{#each services as service}
+					{#each services as service, i}
 						<li class="service-item">
 							{#if service.split}
 								<div class="service-visual service-visual--split">
@@ -186,11 +189,25 @@
 							{#if service.subtitle}
 								<p class="service-subtitle" lang="ja">{service.subtitle}</p>
 							{/if}
-							{#if service.bodyEn}
-								<p class="service-body service-body-en" lang="en">{service.bodyEn}</p>
-							{/if}
-							{#if service.body}
-								<p class="service-body service-body-ja" lang="ja">{service.body}</p>
+							{#if service.bodyEn || service.body}
+								<div class="service-copy" class:is-open={openCopy[i]}>
+									{#if service.bodyEn}
+										<p class="service-body service-body-en" lang="en">{service.bodyEn}</p>
+									{/if}
+									{#if service.body}
+										<p class="service-body service-body-ja" lang="ja">{service.body}</p>
+									{/if}
+									<span class="service-copy__fade" aria-hidden="true"></span>
+								</div>
+								<button
+									type="button"
+									class="service-copy__toggle"
+									aria-expanded={openCopy[i]}
+									onclick={() => (openCopy[i] = !openCopy[i])}
+									lang="en"
+								>
+									{openCopy[i] ? 'Close −' : 'Show +'}
+								</button>
 							{/if}
 							{#if service.link}
 								<a
@@ -390,6 +407,7 @@
 		background: #181818;
 		color: #fff;
 		--color-line: rgba(255, 255, 255, 0.2);
+		--copy-bg: #181818; /* fade tracks the dark background */
 	}
 
 	.Office.is-dark :global(*) {
@@ -557,6 +575,49 @@
 	/* EN body keeps a tighter line-height than JA (don't inherit JA's 1.7) */
 	.Office .service-body-en {
 		line-height: 1.45;
+		text-align: left; /* override base p:lang(en) justify */
+	}
+
+	/* Service copy — clamped + faded by default, revealed via the Show toggle.
+	   The fade tracks the background through the dark reversal via --copy-bg. */
+	.Office .service-copy {
+		position: relative;
+		max-height: 7.5em;
+		overflow: hidden;
+		transition: max-height 0.6s var(--ease-default);
+	}
+	.Office .service-copy.is-open {
+		max-height: 80em; /* large enough for the full copy */
+	}
+	.Office .service-copy__fade {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 4.5em;
+		background: linear-gradient(to bottom, transparent, var(--copy-bg, #fff));
+		pointer-events: none;
+		transition: opacity 0.3s var(--ease-default);
+	}
+	.Office .service-copy.is-open .service-copy__fade {
+		opacity: 0;
+	}
+	.Office .service-copy__toggle {
+		display: inline-block;
+		margin-top: 12px;
+		font-size: var(--fs-h5);
+		font-family: var(--font-en);
+		background: none;
+		border: 0;
+		padding: 0;
+		color: inherit;
+		cursor: pointer;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		transition: opacity var(--duration-fast) var(--ease-default);
+	}
+	.Office .service-copy__toggle:hover {
+		opacity: 0.6;
 	}
 
 	.Office .service-link {
@@ -671,8 +732,8 @@
 	/* Hairline between the EN and JA Ethos bodies (my 20px); currentColor so it
 	   follows the dark/light reversal. */
 	.Office .Ethos .body[lang='ja'] {
-		margin-top: 20px;
-		padding-top: 20px;
+		margin-top: 40px;
+		padding-top: 40px;
 		border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
 	}
 
