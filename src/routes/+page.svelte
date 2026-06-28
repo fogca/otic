@@ -2,19 +2,60 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import Loader from '$lib/components/Loader.svelte';
+	import HeroShow, { type Slide } from '$lib/components/HeroShow.svelte';
 	import { intro } from '$lib/state/intro.svelte';
 	import { imgOpt, imgSrcset } from '$lib/js/img';
+	import type { MicroCMSImage } from 'microcms-js-sdk';
+	import type { Work } from '$lib/js/microcms';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	let introCompleted = $state(false);
 
+	// PC gets the Figma hero-show; SP keeps the existing vertical archives stream.
+	let isPC = $state(false);
+
 	const padNumber = (n: number) => String(n + 1).padStart(2, '0');
 
 	const works = $derived(data.works);
 	const firstWork = $derived(works[0]);
 	const restWorks = $derived(works.slice(1, 10));
+
+	// Pick a secondary image (a different crop of the same project) for the
+	// small floating "detail" image. Falls back to the thumbnail.
+	const detailImage = (w: Work): MicroCMSImage | undefined => {
+		const fromRepeat = w.repeat?.find((r) => r.pj_images?.url)?.pj_images;
+		if (fromRepeat?.url) return fromRepeat;
+		const ri = w.repeatImg;
+		if (Array.isArray(ri)) {
+			const f = ri.find((x) => x.images?.url);
+			if (f?.images?.url) return f.images;
+		} else if (ri && typeof ri === 'object') {
+			if ('images' in ri && ri.images?.url) return ri.images;
+			if ('url' in ri && ri.url) return ri as MicroCMSImage;
+		}
+		return w.thumbnail;
+	};
+
+	const slides = $derived.by<Slide[]>(() =>
+		works
+			.filter((w) => w.thumbnail?.url)
+			.slice(0, 10)
+			.map((w) => {
+				const detail = detailImage(w) ?? w.thumbnail!;
+				return {
+					id: w.id,
+					title: w.title,
+					brand: w.brand ?? '',
+					heroSrc: imgOpt(w.thumbnail!.url, 2000),
+					heroSrcset: imgSrcset(w.thumbnail!.url, [1000, 1600, 2000, 2800]),
+					detailSrc: imgOpt(detail.url, 900),
+					detailSrcset: imgSrcset(detail.url, [500, 700, 900, 1200]),
+					href: `/archives/${w.id}`
+				};
+			})
+	);
 
 	// 3 filler frames + firstWork = 4 frames revealed in the loader.
 	// The last frame matches Archives card-01 so the handoff is seamless.
@@ -45,6 +86,11 @@
 	onMount(() => {
 		if (!browser) return;
 
+		const pcMq = window.matchMedia('(min-width: 1024px)');
+		isPC = pcMq.matches;
+		const onPcChange = (e: MediaQueryListEvent) => (isPC = e.matches);
+		pcMq.addEventListener('change', onPcChange);
+
 		const prefersReducedMotion = window.matchMedia(
 			'(prefers-reduced-motion: reduce)'
 		).matches;
@@ -52,13 +98,14 @@
 		if (prefersReducedMotion) {
 			introCompleted = true;
 			intro.completed = true;
-			return;
+			return () => pcMq.removeEventListener('change', onPcChange);
 		}
 
 		// Hide Header until loader completes
 		intro.completed = false;
 
 		return () => {
+			pcMq.removeEventListener('change', onPcChange);
 			intro.completed = true;
 		};
 	});
@@ -90,8 +137,12 @@
 		onComplete={handleLoaderComplete}
 	/>
 
-	<!-- Archives stream: 01 → 10 -->
-	<section class="Archives">
+	{#if isPC}
+		<!-- PC: Figma hero-show — auto-cycling image stage, no vertical scroll -->
+		<HeroShow {slides} playing={introCompleted} />
+	{:else}
+		<!-- SP: Archives stream 01 → 10 (unchanged) -->
+		<section class="Archives">
 		<div class="wrapper">
 			{#if firstWork}
 				<a class="card card-01" href="/archives/{firstWork.id}">
@@ -149,6 +200,7 @@
 			{/each}
 		</div>
 	</section>
+	{/if}
 </main>
 
 <style>
