@@ -132,19 +132,12 @@
 					<p class="section-lead" lang="en">Radix.<br />For what endures.</p>
 					<div class="body" lang="en">
 					<p>
-						We are a design office dedicated to the development of visual
-						identity and design engineering. From brand design, product design,
-						and furniture design to type development, CG visualisation, and
-						digital communication, we have built work that crosses the visual
-						domain, in collaboration with partners across many fields. The Radix
-						— our unwavering pursuit of the root — is a posture of converging
-						toward the form that must inevitably exist in a given time and place.
-						Day by day, learning further, we strive toward better creation.
+						Office / TAKUMI ISOBE is a creative office based in Tokyo working across visual identity and design engineering — experience, brand, product, type, furniture, and digital communication. By blending culture, philosophy, and design, we create strategies that speak to what makes us human — our physicality, our emotion. Day by day, learning further, we strive toward better creation.
 					</p>
 				</div>
 				<div class="body body-ja" lang="ja">
 					<p>
-						私たちは、ビジュアルアイデンティティの開発とデザインエンジニアリングを担うデザイン事務所です。ブランドデザインから、プロダクトデザイン、ファニチャーデザイン、書体開発、CGビジュアライゼーション、デジタルコミュニケーションまで、視覚領域を横断するクリエイションを、多様な分野のパートナーとともに重ねてきました。私たちが貫徹する「Radix——根源——の探求」は、その時その場所に必然として在るべきかたちへと収斂させていく姿勢です。日々学びを重ねながら、よりよいクリエイションを行うために努めてまいります。
+						Office / TAKUMI ISOBEは、ビジュアルアイデンティティとデザインエンジニアリングを横断する、東京を拠点とするクリエイティブオフィスです。体験、ブランド、プロダクト、書体、家具、デジタルコミュニケーション——文化・哲学・意匠を融合させることで、私たちの持つ身体性や情緒といった人間性に刺激を与えるデザイン戦略を創出します。日々学びを重ねながら、よりよいクリエイションへと努めています。
 					</p>
 				</div>
 				</div>
@@ -199,26 +192,32 @@
 									{/if}
 									<span class="service-copy__fade" aria-hidden="true"></span>
 								</div>
-								<button
-									type="button"
-									class="service-copy__toggle"
-									aria-expanded={openCopy[i]}
-									onclick={() => (openCopy[i] = !openCopy[i])}
-									lang="en"
-								>
-									{openCopy[i] ? 'Close −' : 'Show +'}
-								</button>
 							{/if}
-							{#if service.link}
-								<a
-									class="service-link"
-									href={`https://${service.link}`}
-									target="_blank"
-									rel="noopener noreferrer"
-									lang="en"
-								>
-									{service.link} ↗
-								</a>
+							{#if service.link || service.bodyEn || service.body}
+								<div class="service-actions">
+									{#if service.link}
+										<a
+											class="service-link"
+											href={`https://${service.link}`}
+											target="_blank"
+											rel="noopener noreferrer"
+											lang="en"
+										>
+											{service.link} ↗
+										</a>
+									{/if}
+									{#if service.bodyEn || service.body}
+										<button
+											type="button"
+											class="service-copy__toggle"
+											aria-expanded={openCopy[i]}
+											onclick={() => (openCopy[i] = !openCopy[i])}
+											lang="en"
+										>
+											{openCopy[i] ? 'Close −' : 'Show +'}
+										</button>
+									{/if}
+								</div>
 							{/if}
 							{#if service.projects.length}
 								<ul class="project-list" lang="en">
@@ -438,8 +437,8 @@
 		margin: 0;
 		font-size: 40px;
 		line-height: 1.2;
-		font-weight: 450;
-		font-variation-settings: 'wght' 450; /* Steiner VF — medium */
+		font-weight: var(--fw-lead);
+		font-variation-settings: 'wght' var(--fw-lead);
 	}
 
 	/* First-view credit, pinned to the bottom */
@@ -450,8 +449,8 @@
 		transform: translateX(-50%);
 		margin: 0;
 		font-size: var(--fs-h6);
-		font-weight: 450;
-		font-variation-settings: 'wght' 450;
+		font-weight: var(--fw-lead);
+		font-variation-settings: 'wght' var(--fw-lead);
 		white-space: nowrap;
 	}
 
@@ -602,9 +601,15 @@
 	.Office .service-copy.is-open .service-copy__fade {
 		opacity: 0;
 	}
+	/* Actions row: external link (left) + Show toggle (right), baseline-aligned */
+	.Office .service-actions {
+		display: flex;
+		align-items: baseline;
+		gap: 16px;
+		margin-top: 20px;
+	}
 	.Office .service-copy__toggle {
-		display: inline-block;
-		margin-top: 12px;
+		margin-left: auto; /* push to the right edge, aligned with the link */
 		font-size: var(--fs-h5);
 		font-family: var(--font-en);
 		background: none;
@@ -621,8 +626,6 @@
 	}
 
 	.Office .service-link {
-		display: inline-block;
-		margin-top: 20px;
 		font-size: var(--fs-h5);
 		text-decoration: underline;
 		text-underline-offset: 3px;

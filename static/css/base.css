@@ -144,10 +144,10 @@ a {
   --fs-p-ja: 10.5px;   /* Body copy (JP) — SP */
 
   /* --- Font weights (single source of truth — no per-component weights) --- */
-  --fw-base:   330;   /* default for all text unless emphasized */
+  --fw-base:   350;   /* default for all text unless emphasized */
   --fw-medium: 450;   /* medium emphasis */
   --fw-bold:   450;   /* bold — same as medium per spec */
-  --fw-lead:   300;   /* exception: large display lead (Radix. For what endures.) */
+  --fw-lead:   325;   /* exception: large display lead (Radix. For what endures.) */
 
   /* --- Line heights --- */
   --lh-h1:   1.2;
@@ -366,7 +366,7 @@ p:lang(en), .p:lang(en) {
   font-size: var(--fs-p-en);
   font-weight: var(--fw-base);   /* Steiner body copy */
   line-height: 1.4;
-  text-align: justify;
+  text-align: left;
   hyphens: auto;
 }
 
