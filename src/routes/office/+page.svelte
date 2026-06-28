@@ -85,8 +85,8 @@
 		const update = () => {
 			ticking = false;
 			const vh = window.innerHeight;
-			// Go dark once 03 Company scrolls into view (its top reaches the viewport bottom)
-			const enteredDark = company.getBoundingClientRect().top <= vh;
+			// Reverse to dark once 03 Company reaches the upper 30% of the viewport
+			const enteredDark = company.getBoundingClientRect().top <= vh * 0.3;
 			// Close the dark section back to white just before the black Footer
 			// scrolls in (office.bottom accounts for the -120px margin).
 			const nearFooter = office.getBoundingClientRect().bottom <= vh + 120;
@@ -110,9 +110,12 @@
 
 <main class="Office" class:is-dark={isDark}>
 	<!-- First view: full-screen PV video (placeholder until the file is ready) -->
-	<section class="OfficeHero" aria-label="PV">
-		<!-- Replace with: <video class="OfficeHero__media" src="…" autoplay muted loop playsinline poster="…"></video> -->
-		<div class="OfficeHero__media" aria-hidden="true"></div>
+	<!-- First view: centered lead statement (copy provisional — to finalize) -->
+	<section class="OfficeHero">
+		<h2 class="OfficeHero__lead" lang="en">
+			We pursue the radix — the inevitable form for a given time and place.
+		</h2>
+		<p class="OfficeHero__meta" lang="en">Office / TAKUMI ISOBE, 2026</p>
 	</section>
 
 	<section class="Section1">
@@ -399,20 +402,39 @@
 		padding-right: calc(var(--padding) * 1.5);
 	}
 
-	/* First view — full-screen PV video (100vw × 100vh) */
+	/* First view — centered lead statement (full-screen) */
 	.Office .OfficeHero {
+		position: relative;
 		width: 100%;
-		height: 100vh;
-		height: 100dvh;
-		padding: 0;
-		overflow: hidden;
+		min-height: 100vh;
+		min-height: 100dvh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0 calc(var(--padding) * 1.5);
+		text-align: center;
 	}
 
-	.Office .OfficeHero__media {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		background: #eaeaea; /* placeholder until the video is in */
+	.Office .OfficeHero__lead {
+		width: 90%;
+		margin: 0;
+		font-size: 40px;
+		line-height: 1.2;
+		font-weight: 450;
+		font-variation-settings: 'wght' 450; /* Steiner VF — medium */
+	}
+
+	/* First-view credit, pinned to the bottom */
+	.Office .OfficeHero__meta {
+		position: absolute;
+		bottom: 24px;
+		left: 50%;
+		transform: translateX(-50%);
+		margin: 0;
+		font-size: var(--fs-h6);
+		font-weight: 450;
+		font-variation-settings: 'wght' 450;
+		white-space: nowrap;
 	}
 
 	.Office .Section1 {
@@ -646,6 +668,14 @@
 		width: 103%;
 	}
 
+	/* Hairline between the EN and JA Ethos bodies (my 20px); currentColor so it
+	   follows the dark/light reversal. */
+	.Office .Ethos .body[lang='ja'] {
+		margin-top: 20px;
+		padding-top: 20px;
+		border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+	}
+
 	.Office .Ethos .body[lang='ja'] p {
 		text-align: justify;
 	}
@@ -731,6 +761,11 @@
 		/* PC: Ethos part headings step up to fs-h3 (SP stays body-size) */
 		.Office .ethos-part {
 			font-size: var(--fs-h3);
+		}
+
+		.Office .OfficeHero__lead {
+			font-size: 64px;
+			line-height: 1.15;
 		}
 
 		.Office .section-lead {
