@@ -220,6 +220,9 @@ a {
   :root {
     --fs-h1: 40px;
     --fs-h2: 28px;
+    --fs-h3: 24px;   /* was 16px — keep the step under h2 on PC (no 2× jump) */
+    --fs-h4: 20px;   /* was 14px */
+    --fs-h5: 16px;   /* was 12px */
     --fs-h6: 13.5px;
     --fs-body: 12px;
     --fs-p:    14px;
@@ -235,7 +238,7 @@ a {
 @media (min-width: 1440px) {
   :root {
     --fs-h1: 48px;
-    --fs-h2: 32px;
+    --fs-h2: 28px;   /* was 32px — too close to h1; h3–h5 inherit @1024 */
     --padding:    3vw;
     --gutter:     48px;
     --gutter-alt: 48px;

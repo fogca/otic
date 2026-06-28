@@ -439,7 +439,7 @@
 		opacity: 0.4;
 	}
 	.pt {
-		font-size: var(--fs-h1);
+		font-size: var(--fs-h2);
 		font-weight: var(--fw-lead);
 		font-variation-settings: 'wght' var(--fw-lead);
 		line-height: 1.15;
@@ -465,6 +465,8 @@
 	.service-title {
 		font-size: var(--fs-h3);
 		margin: 0;
+		/* Reserve 2 lines so subtitle + body start at the same Y across cards */
+		min-height: 2.66em;
 	}
 	.service-sub {
 		font-size: 10px;
@@ -616,6 +618,10 @@
 		}
 		.service-link {
 			margin-top: 16px;
+		}
+		/* Stacked cards don't need the 2-line reserve */
+		.service-title {
+			min-height: 0;
 		}
 	}
 
