@@ -83,17 +83,7 @@
 							</p>
 						</div>
 
-						<!-- Col 2: Services -->
-						<div class="col col--services">
-							<ul class="col-list" lang="en">
-								<li>Product & Furniture Design</li>
-								<li>V.I. & Typography</li>
-								<li>Image Visualisation</li>
-								<li>Digital Infrastructure</li>
-							</ul>
-						</div>
-
-						<!-- Col 3: Connect -->
+						<!-- Col 2: Connect -->
 						<div class="col col--connect">
 							<ul class="col-list" lang="en">
 								<li><a href="mailto:hi@takumiisobe.com">Email ↗</a></li>
@@ -216,11 +206,13 @@
 		padding-bottom: 0;
 	}
 
-	/* 3-column info grid — full-bleed (no side padding) */
+	/* 2-column info grid — full-bleed (no side padding).
+	   3fr/1fr = 75:25 ratio, but gap-aware: the columns split the space
+	   left AFTER the gap, so 75% 25% + gap never overflows the panel. */
 	.intro-grid {
 		display: grid;
-		grid-template-columns: 45% 22% 1fr;
-		gap: 48px;
+		grid-template-columns: 3fr 1fr;
+		column-gap: 48px;
 		align-items: start;
 	}
 
