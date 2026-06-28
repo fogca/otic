@@ -9,35 +9,51 @@
 	let inner: HTMLElement | undefined = $state();
 
 	onMount(() => {
-		if (!track || !inner || !browser) return;
+		if (!browser) return;
 
-		// Pause global vertical Lenis + lock body vertical scroll
-		stopLenis();
-		document.documentElement.style.overflowY = 'hidden';
+		// Horizontal Lenis is desktop-only. On SP the panels stack vertically,
+		// so the page keeps native vertical scroll (global Lenis stays active).
+		const mq = window.matchMedia('(min-width: 1024px)');
+		let lenis: Lenis | null = null;
+		let rafId = 0;
 
-		// Local Lenis instance for horizontal scroll.
-		// gestureOrientation:'both' maps trackpad vertical swipe → horizontal.
-		const lenis = new Lenis({
-			wrapper: track,
-			content: inner,
-			orientation: 'horizontal',
-			gestureOrientation: 'both',
-			smoothWheel: true,
-			duration: 1.2,
-		});
-
-		let rafId: number;
-		const raf = (time: number) => {
-			lenis.raf(time);
+		const enable = () => {
+			if (lenis || !track || !inner) return;
+			// Hand off from global vertical Lenis; lock page vertical scroll.
+			stopLenis();
+			document.documentElement.style.overflowY = 'hidden';
+			// gestureOrientation:'both' maps trackpad/wheel vertical → horizontal.
+			lenis = new Lenis({
+				wrapper: track,
+				content: inner,
+				orientation: 'horizontal',
+				gestureOrientation: 'both',
+				smoothWheel: true,
+				duration: 1.2
+			});
+			const raf = (time: number) => {
+				lenis?.raf(time);
+				rafId = requestAnimationFrame(raf);
+			};
 			rafId = requestAnimationFrame(raf);
 		};
-		rafId = requestAnimationFrame(raf);
 
-		return () => {
+		const disable = () => {
+			if (!lenis) return;
 			cancelAnimationFrame(rafId);
 			lenis.destroy();
+			lenis = null;
 			document.documentElement.style.overflowY = '';
 			startLenis();
+		};
+
+		const onChange = (e: MediaQueryListEvent) => (e.matches ? enable() : disable());
+		if (mq.matches) enable();
+		mq.addEventListener('change', onChange);
+
+		return () => {
+			mq.removeEventListener('change', onChange);
+			disable();
 		};
 	});
 </script>
@@ -158,13 +174,13 @@
 		background: var(--color-bg);
 	}
 
-	/* ── Horizontal scroll track (Lenis drives scrollLeft) ── */
+	/* ── Horizontal scroll track (Lenis drives scrollLeft) ──
+	   No scroll-snap: it fights Lenis's per-frame scrollLeft writes. */
 	.h-track {
 		width: 100%;
 		height: 100%;
 		overflow-x: auto;
 		overflow-y: hidden;
-		scroll-snap-type: x mandatory;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 	}
@@ -184,7 +200,6 @@
 		flex: none;
 		width: 100vw;
 		height: 100dvh;
-		scroll-snap-align: start;
 		overflow: hidden;
 		position: relative;
 	}
@@ -201,20 +216,18 @@
 		padding-bottom: 0;
 	}
 
-	/* 3-column info grid — with inner padding so text isn't edge-flush */
+	/* 3-column info grid — full-bleed (no side padding) */
 	.intro-grid {
 		display: grid;
 		grid-template-columns: 45% 22% 1fr;
 		gap: 48px;
 		align-items: start;
-		padding: 0 calc(var(--padding) * 1.5);
 	}
 
-	/* Studio body copy */
+	/* Studio body copy — size/line-height/align come from base.css p:lang(en).
+	   Only bump one type step above the list items. */
 	.col-body {
-		font-size: var(--fs-p-en);
-		line-height: 1.55;
-		text-align: left;
+		font-size: var(--fs-h2);
 		margin: 0;
 	}
 
@@ -251,9 +264,7 @@
 		flex: none;
 		width: 100%;
 		overflow: hidden;
-		/* push SVG descenders to viewport bottom edge */
-		padding-bottom: 0;
-		margin-bottom: -0.04em;
+		padding-bottom: 10px;
 		line-height: 1;
 	}
 	/* Scale SVG to fill full container width */
@@ -296,7 +307,6 @@
 		.h-track {
 			overflow: visible;
 			height: auto;
-			scroll-snap-type: none;
 		}
 		.h-inner {
 			flex-direction: column;
@@ -306,12 +316,10 @@
 			width: 100%;
 			height: auto;
 			min-height: 100dvh;
-			scroll-snap-align: none;
 		}
 		.intro-grid {
 			grid-template-columns: 1fr;
 			gap: 32px;
-			padding: 0 var(--padding);
 		}
 		.panel-inner {
 			padding: 80px var(--padding) var(--padding);
