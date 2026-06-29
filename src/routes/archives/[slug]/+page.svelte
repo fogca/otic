@@ -1,10 +1,29 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { onNavigate, afterNavigate } from '$app/navigation';
 	import type { PageData } from './$types';
 	import { imgOpt, imgSrcset } from '$lib/js/img';
 
 	let { data }: { data: PageData } = $props();
 	const archive = $derived(data.archive);
+
+	// Fade the portaled (fixed) lead out while the page-shrink transition runs.
+	let leaving = $state(false);
+	let leadNode: HTMLElement | null = $state(null);
+	onNavigate(() => {
+		leaving = true;
+	});
+	afterNavigate(() => {
+		leaving = false;
+	});
+
+	// Drive the fade via inline opacity (scoped CSS is unreliable once the node
+	// is portaled to <body>). Only applies when actually portaled (PC).
+	$effect(() => {
+		if (leadNode && leadNode.parentElement === document.body) {
+			leadNode.style.opacity = leaving ? '0' : '1';
+		}
+	});
 
 	// The layout's .page-wrapper has will-change:transform → it's a containing
 	// block, which breaks position:fixed/sticky for any descendant. On PC we
@@ -21,10 +40,16 @@
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'center',
-		zIndex: '5'
+		zIndex: '5',
+		// Non-interactive text — let clicks fall through to the header nav it overlaps.
+		pointerEvents: 'none',
+		// Fade out during the page-shrink transition (it lives outside the scaled
+		// .page-wrapper, so it can't shrink with the rest of the page).
+		transition: 'opacity 0.5s var(--ease-default)'
 	};
 	function leadPortal(node: HTMLElement) {
 		if (!browser) return;
+		leadNode = node;
 		const mq = window.matchMedia('(min-width: 1024px)');
 		const anchor = document.createComment('lead');
 		let out = false;
@@ -44,6 +69,7 @@
 		mq.addEventListener('change', sync);
 		return {
 			destroy() {
+				leadNode = null;
 				mq.removeEventListener('change', sync);
 				if (out) node.remove();
 			}
