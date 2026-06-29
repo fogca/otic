@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { intro } from '$lib/state/intro.svelte';
+	import { lang } from '$lib/state/lang.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 
 	// Underline only on the Archives index/list — not on individual project
@@ -84,11 +85,34 @@
 		</a>
 	</nav>
 
-	<!-- SP keeps the top-right wordmark. On PC it's hidden and the wordmark is
-	     pinned bottom-left globally by CornerLogo in the layout. -->
-	<a href="/" class="logo" aria-label="Home">
-		<Logo />
-	</a>
+	<div class="head-end">
+		<!-- JP/EN language toggle (switches bilingual body copy site-wide) -->
+		<div class="lang" role="group" aria-label="Language">
+			<button
+				type="button"
+				class="lang__opt"
+				class:is-current={lang.current === 'en'}
+				aria-pressed={lang.current === 'en'}
+				onclick={() => (lang.current = 'en')}
+				lang="en">EN</button
+			>
+			<span class="lang__sep" aria-hidden="true">/</span>
+			<button
+				type="button"
+				class="lang__opt"
+				class:is-current={lang.current === 'ja'}
+				aria-pressed={lang.current === 'ja'}
+				onclick={() => (lang.current = 'ja')}
+				lang="ja">日本語</button
+			>
+		</div>
+
+		<!-- SP keeps the top-right wordmark. On PC it's hidden and the wordmark is
+		     pinned bottom-left globally by CornerLogo in the layout. -->
+		<a href="/" class="logo" aria-label="Home">
+			<Logo />
+		</a>
+	</div>
 </header>
 
 <style>
@@ -161,6 +185,37 @@
 		opacity: 1;
 	}
 
+	/* ----- Right cluster (lang toggle + SP logo) ----- */
+	.head-end {
+		display: flex;
+		align-items: center;
+		gap: 24px;
+	}
+
+	.lang {
+		display: flex;
+		align-items: baseline;
+		gap: 6px;
+		font-size: 11px;
+		line-height: 1;
+	}
+	.lang__opt {
+		color: var(--color-text);
+		opacity: 0.4;
+		font-weight: var(--fw-base);
+		line-height: 1;
+		transition: opacity var(--duration-fast) var(--ease-default);
+	}
+	.lang__opt.is-current {
+		opacity: 1;
+	}
+	.lang__opt:hover {
+		opacity: 0.7;
+	}
+	.lang__sep {
+		opacity: 0.3;
+	}
+
 	/* ----- Logo (right) ----- */
 	.Header .logo {
 		width: 200px;
@@ -183,6 +238,10 @@
 		}
 
 		.Header .link {
+			font-size: var(--fs-h5);
+		}
+
+		.lang {
 			font-size: var(--fs-h5);
 		}
 

@@ -308,6 +308,24 @@
 </main>
 
 <style>
+	/* ── Language toggle: show only the active language's body copy.
+	   English headings/labels (service title, section labels, nav) stay;
+	   JA glosses (subtitles, etc.) appear only in JA. [data-lang] is on <html>. ── */
+	:global([data-lang='en']) .service-sub,
+	:global([data-lang='en']) .service-ja,
+	:global([data-lang='en']) .ethos-part-ja,
+	:global([data-lang='en']) .ethos-ja,
+	:global([data-lang='en']) .cfacts[lang='ja'],
+	:global([data-lang='en']) .director-text p[lang='ja'] {
+		display: none;
+	}
+	:global([data-lang='ja']) .service-en,
+	:global([data-lang='ja']) .ethos-en,
+	:global([data-lang='ja']) .cfacts[lang='en'],
+	:global([data-lang='ja']) .director-text p[lang='en'] {
+		display: none;
+	}
+
 	/* ── Page host: fills viewport, no spacing ── */
 	.OfficePage {
 		width: 100vw;

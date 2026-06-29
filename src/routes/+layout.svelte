@@ -6,6 +6,7 @@
 	import gsap from 'gsap';
 	import { CustomEase } from 'gsap/CustomEase';
 	import { intro } from '$lib/state/intro.svelte';
+	import { lang } from '$lib/state/lang.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Logo from '$lib/components/Logo.svelte';
@@ -13,6 +14,12 @@
 
 	// Office has its own prominent wordmark + dark reversal — skip the corner logo there.
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
+
+	// Reflect the chosen language onto <html data-lang> so the show/hide CSS
+	// (in pages with bilingual copy) switches between EN and JA.
+	$effect(() => {
+		if (browser) document.documentElement.dataset.lang = lang.current;
+	});
 
 	gsap.registerPlugin(CustomEase);
 

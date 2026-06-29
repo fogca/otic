@@ -194,6 +194,16 @@
 </main>
 
 <style>
+	/* Language toggle: show only the active language's description body. The EN
+	   project title + tagline stay in both. [data-lang] is on <html> (an
+	   ancestor of both the in-flow and portaled lead). */
+	:global([data-lang='en']) .lead__body--ja {
+		display: none;
+	}
+	:global([data-lang='ja']) .lead__body:not(.lead__body--ja) {
+		display: none;
+	}
+
 	.Archive {
 		color: #000;
 		display: flex;
