@@ -9,7 +9,8 @@
 	import { lang } from '$lib/state/lang.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import Logo from '$lib/components/Logo.svelte';
+	// Wordmark = current (2026) lock-up; the previous one lives in Logo.svelte.
+	import Wordmark from '$lib/components/Wordmark.svelte';
 	import { setLenis } from '$lib/state/lenis';
 
 	// Office has its own prominent wordmark + dark reversal — skip the corner logo there.
@@ -249,7 +250,7 @@
 	href="/"
 	aria-label="Home"
 >
-	<Logo />
+	<Wordmark />
 </a>
 
 <div class="darken-overlay" aria-hidden="true"></div>

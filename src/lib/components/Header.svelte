@@ -4,7 +4,8 @@
 	import { page } from '$app/state';
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
-	import Logo from '$lib/components/Logo.svelte';
+	// Wordmark = current (2026) lock-up; the previous one lives in Logo.svelte.
+	import Wordmark from '$lib/components/Wordmark.svelte';
 
 	// Underline only on the Archives index/list — not on individual project
 	// pages (/archives/[slug]).
@@ -110,7 +111,7 @@
 		<!-- SP keeps the top-right wordmark. On PC it's hidden and the wordmark is
 		     pinned bottom-left globally by CornerLogo in the layout. -->
 		<a href="/" class="logo" aria-label="Home">
-			<Logo />
+			<Wordmark />
 		</a>
 	</div>
 </header>

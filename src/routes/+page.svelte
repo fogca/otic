@@ -20,11 +20,11 @@
 	const firstWork = $derived(works[0]);
 	const restWorks = $derived(works.slice(1, 10));
 
-	// Square work tiles for the right-hand vertical marquee.
+	// Square work tiles for the right-hand vertical feed (5 selected projects).
 	const feedTiles = $derived.by<Tile[]>(() =>
 		works
 			.filter((w) => w.thumbnail?.url)
-			.slice(0, 10)
+			.slice(0, 5)
 			.map((w) => ({
 				src: imgOpt(w.thumbnail!.url, 800),
 				srcset: imgSrcset(w.thumbnail!.url, [400, 600, 800, 1200]),
