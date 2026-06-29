@@ -22,79 +22,64 @@
 </svelte:head>
 
 <main class="Archive">
-	<!-- First view: centered thumbnail + title/tag pinned to the bottom -->
-	<section class="Hero">
-		<div class="image-wrap">
+	<!-- LEFT: project title + descriptions (PC: left rail, center height) -->
+	<div class="lead">
+		<h1 class="lead__title" lang="en">{archive.title}</h1>
+		{#if archive.headline}
+			<p class="lead__tag" lang="ja">{archive.headline}</p>
+		{/if}
+		{#if archive.descriptionEn}
+			<p class="lead__body" lang="en">{archive.descriptionEn}</p>
+		{/if}
+		{#if archive.descriptionJa}
+			<p class="lead__body lead__body--ja" lang="ja">{archive.descriptionJa}</p>
+		{/if}
+	</div>
+
+	<!-- RIGHT: media — hero + gallery, editorial vertical flow -->
+	<div class="media">
+		<div class="media__hero">
 			<picture>
 				{#if archive.heroImageSp}
 					<source
 						media="(max-width: 1023px)"
 						srcset={imgSrcset(archive.heroImageSp, [640, 900, 1200])}
-						sizes="90vw"
+						sizes="100vw"
 					/>
 				{/if}
 				<img
 					src={imgOpt(archive.heroImage, 1600)}
 					srcset={imgSrcset(archive.heroImage, [900, 1400, 2000])}
-					sizes="90vw"
+					sizes="(min-width: 1024px) 60vw, 100vw"
 					alt={archive.title}
 				/>
 			</picture>
 		</div>
-		<div class="hero-caption">
-			<h1 class="title" lang="en">{archive.title}</h1>
-			<p class="brand-tag" lang="ja">{archive.headline}</p>
-		</div>
-	</section>
 
-	{#if archive.descriptionEn || archive.descriptionJa}
-		<section class="Captions">
-			<div class="wrapper">
-				<div class="captions">
-					{#if archive.descriptionEn}
-						<div class="caption" lang="en">
-							<p>{archive.descriptionEn}</p>
-						</div>
-					{/if}
-					{#if archive.descriptionJa}
-						<div class="caption caption-ja" lang="ja">
-							<p>{archive.descriptionJa}</p>
-						</div>
-					{/if}
-				</div>
+		{#each archive.gallery as item, i (i)}
+			<div class="media__item mp-{(i % 6) + 1}">
+				{#if item.isVideo}
+					<video
+						src={item.src}
+						autoplay
+						loop
+						muted
+						playsinline
+						preload="metadata"
+						aria-label={`${archive.title} ${i + 1}`}
+					></video>
+				{:else}
+					<img
+						src={imgOpt(item.src, 1600)}
+						srcset={imgSrcset(item.src, [800, 1200, 1600, 2000])}
+						sizes="(min-width: 1024px) 50vw, 100vw"
+						alt={`${archive.title} ${i + 1}`}
+						loading="lazy"
+					/>
+				{/if}
 			</div>
-		</section>
-	{/if}
-
-	<section class="Gallery">
-		<div class="wrapper">
-			<!-- Gallery: every uploaded image / video, in original aspect ratio.
-			     Each item gets one of 9 width patterns cycled by index. -->
-			{#each archive.gallery as item, i (i)}
-				<div class="image gp-{(i % 9) + 1}">
-					{#if item.isVideo}
-						<video
-							src={item.src}
-							autoplay
-							loop
-							muted
-							playsinline
-							preload="metadata"
-							aria-label={`${archive.title} ${i + 1}`}
-						></video>
-					{:else}
-						<img
-							src={imgOpt(item.src, 1600)}
-							srcset={imgSrcset(item.src, [800, 1200, 1600, 2000])}
-							sizes="100vw"
-							alt={`${archive.title} ${i + 1}`}
-							loading="lazy"
-						/>
-					{/if}
-				</div>
-			{/each}
-		</div>
-	</section>
+		{/each}
+	</div>
 
 	{#if hasColophon}
 		<section class="Colophon">
@@ -138,343 +123,193 @@
 
 <style>
 	.Archive {
-		padding-top: 0;
-		display: grid;
-		grid-template-columns: 1fr;
-		grid-template-areas:
-			'hero'
-			'captions'
-			'gallery'
-			'colophon';
 		color: #000;
+		display: flex;
+		flex-direction: column;
 	}
-
 	/* base.css sets color directly on text elements — override to black here. */
 	.Archive :global(*) {
 		color: #000;
 	}
 
-	.Archive .Hero {
-		grid-area: hero;
+	/* ── Lead (title + descriptions) ── */
+	.lead {
+		padding: 88px var(--padding) 0;
+		max-width: 560px;
 	}
-
-	.Archive .Captions {
-		grid-area: captions;
-	}
-
-	.Archive .Gallery {
-		grid-area: gallery;
-	}
-
-	.Archive .Colophon {
-		grid-area: colophon;
-	}
-
-	/* ----- Hero — first view: thumbnail centered, title/tag at the bottom ----- */
-	.Archive .Hero {
-		position: relative;
-		width: 100vw;
-		height: 100vh;
-		height: 100dvh;
-		margin-left: 0;
-		padding-inline: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		overflow: hidden;
-	}
-
-	.Archive .Hero .image-wrap {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.Archive .Hero .image-wrap img {
-		max-width: 90vw;
-		max-height: 70vh;
-		width: auto;
-		height: auto;
-		object-fit: contain;
-		display: block;
-	}
-
-	.Archive .Hero .hero-caption {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 30px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 5px;
-		padding-inline: var(--padding);
-		text-align: center;
-	}
-
-	.Archive .Hero .brand-tag {
-		font-size: var(--fs-h6);
-		opacity: 1;
-	}
-
-	.Archive .Hero .title {
-		font-size: var(--fs-h1);
+	.lead__title {
+		font-size: var(--fs-h4); /* 20px PC — compact project label */
 		line-height: 1.25;
 		font-weight: var(--fw-base);
+		margin: 0;
+	}
+	.lead__tag {
+		font-size: var(--fs-h6);
+		margin: 8px 0 0;
+		opacity: 0.6;
+	}
+	.lead__body {
+		font-size: var(--fs-h6);
+		line-height: 1.7;
+		margin: 20px 0 0;
+		white-space: pre-line;
+	}
+	.lead__body--ja {
+		margin-top: 14px;
 	}
 
-	/* ----- Gallery (image stream) ----- */
-	.Archive .Gallery {
-		margin-top: 100px;
-	}
-
-	.Archive .Gallery .wrapper {
+	/* ── Media (hero + gallery) ── */
+	.media {
 		display: flex;
 		flex-direction: column;
-		gap: 100px;
+		gap: 48px;
+		margin-top: 48px;
 	}
-
-	.Archive .Gallery .image img,
-	.Archive .Gallery .image video {
+	.media__hero img,
+	.media__item img,
+	.media__item video {
 		width: 100%;
 		height: auto;
-		/* Honour the source's native aspect ratio — no cropping. */
 		object-fit: initial;
 		display: block;
 	}
 
-	/* ── Mobile width patterns (cycled by index) ──
-	   Mirrors the home page Archives stream: alternating centred-narrow /
-	   full-bleed slots so the gallery has visual rhythm without per-image
-	   manual layout. */
-	.Archive .Gallery .gp-1 { width: 90%; margin-inline: auto; }
-	.Archive .Gallery .gp-2 {
-		width: 100%;
-		margin-inline: 0;
+	/* SP width patterns (centred-narrow / full-bleed rhythm) */
+	.media__hero {
+		width: 90%;
+		margin-inline: auto;
 	}
-	.Archive .Gallery .gp-4,
-	.Archive .Gallery .gp-8 {
+	.media__item {
+		width: 90%;
+		margin-inline: auto;
+	}
+	.media__item.mp-2,
+	.media__item.mp-5 {
 		width: 100vw;
 		margin-inline: calc(-1 * var(--padding));
 	}
-	.Archive .Gallery .gp-3,
-	.Archive .Gallery .gp-9 {
-		width: 62.5vw;
-		margin-inline: auto;
-	}
-	.Archive .Gallery .gp-5 { width: 85%; margin-inline: auto; }
-	.Archive .Gallery .gp-6 { width: 70%; margin-inline: auto; }
-	.Archive .Gallery .gp-7 { width: 80%; margin-inline: auto; }
-
-	/* ----- Captions (body text, en + jp) ----- */
-	.Archive .Captions {
-		margin-top: 40px;
+	.media__item.mp-3 {
+		width: 70%;
 	}
 
-	.Archive .Captions .captions {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	.Archive .Captions .caption {
-		padding-inline: 25px;
-		max-width: 100%;
-	}
-
-	.Archive .Captions .caption p {
-		line-height: 1.7;
-		white-space: pre-line;
-	}
-
-	.Archive .Captions .caption[lang='en'] p {
-		line-height: 1.4;
-	}
-
-	/* ----- Colophon ----- */
-	.Archive .Colophon {
+	/* ── Colophon ── */
+	.Colophon {
 		padding-top: 80px;
 	}
-
-	.Archive .Colophon .wrapper {
+	.Colophon .wrapper {
 		padding-inline: 30px;
 	}
-
-	.Archive .Colophon .title {
+	.Colophon .title {
 		font-size: var(--fs-h4);
 		font-weight: var(--fw-medium);
 		margin-bottom: 28px;
 	}
-
-	.Archive .Colophon .line {
+	.Colophon .line {
 		height: 1px;
 		background: var(--color-text);
 		margin-bottom: 12px;
 	}
-
-	.Archive .Colophon .rows {
+	.Colophon .rows {
 		display: flex;
 		flex-direction: column;
 	}
-
-	.Archive .Colophon .row {
+	.Colophon .row {
 		display: grid;
 		grid-template-columns: 90px 1fr;
 		gap: 8px;
 		padding-block: 4px;
 	}
-
-	.Archive .Colophon .row dt,
-	.Archive .Colophon .row dd {
+	.Colophon .row dt,
+	.Colophon .row dd {
 		font-size: var(--fs-h5);
 		line-height: 24px;
 		font-weight: var(--fw-base);
 	}
 
-	/* ----- Tablet+ ----- */
-	@media (min-width: 768px) {
-		.Archive .Gallery .wrapper {
-			gap: 80px;
-		}
-
-		.Archive .Colophon .wrapper {
-			padding-inline: 40px;
-		}
-	}
-
-	/* ----- Desktop: editorial single-column flow -----
-	   Row 1: Hero (100vh, image centered W/H).
-	   Row 2: Title (full bleed-aligned).
-	   Row 3: Captions (centered readable column).
-	   Row 4: Gallery (varied widths for editorial rhythm).
-	   Row 5: Colophon (when present). */
+	/* ──────────────────────────────────────────────────────────────
+	   Desktop: left lead rail + right editorial media column
+	   ────────────────────────────────────────────────────────────── */
 	@media (min-width: 1024px) {
 		.Archive {
-			grid-template-columns: 1fr;
+			display: grid;
+			grid-template-columns: 38% 62%;
 			grid-template-areas:
-				'hero'
-				'captions'
-				'gallery'
-				'colophon';
-			padding-inline: 0;
+				'info media'
+				'colophon colophon';
+			column-gap: 2vw;
 		}
 
-		/* First view styling (centered thumb + bottom caption) is shared with SP. */
-
-		/* Captions — readable centered text column */
-		.Archive .Captions {
-			margin-top: 56px;
-			max-width: 720px;
-			margin-inline: auto;
-			padding-inline: var(--padding);
+		/* Lead: pinned in the left rail, vertically around mid first-screen */
+		.lead {
+			grid-area: info;
+			max-width: 380px;
+			padding: 44vh 0 0 var(--padding);
+		}
+		.lead__body {
+			margin-top: 24px;
 		}
 
-		.Archive .Captions .wrapper {
-			padding-inline: 0;
+		/* Media: editorial vertical flow within the right column */
+		.media {
+			grid-area: media;
+			margin-top: 0;
+			padding: 25px var(--padding) 0 0;
+			gap: 12vh;
 		}
-
-		.Archive .Captions .captions {
-			gap: 28px;
+		.media__hero,
+		.media__item {
+			width: auto;
+			margin-inline: 0;
 		}
-
-		.Archive .Captions .caption {
-			padding-inline: 0;
-		}
-
-		.Archive .Captions .caption p {
-			line-height: 1.7;
-		}
-
-		/* Gallery — editorial rhythm with varied widths */
-		.Archive .Gallery {
-			margin-top: 120px;
-		}
-
-		.Archive .Gallery .wrapper {
-			gap: 120px;
-		}
-
-		.Archive .Gallery .image {
-			display: block;
-		}
-
-		.Archive .Gallery .image img,
-		.Archive .Gallery .image video {
-			width: 100%;
-			height: auto;
-			max-height: 90vh;
+		.media__hero img,
+		.media__item img,
+		.media__item video {
+			max-height: 88vh;
 			object-fit: contain;
+			object-position: left top;
 		}
 
-		/* Per-image PC width patterns (override SP) */
-		.Archive .Gallery .gp-1 {
-			width: 60vw;
-			max-width: 900px;
-			margin-inline: auto;
+		/* Varied widths / offsets — editorial scatter inside the column */
+		.media__hero {
+			width: 82%;
+			margin-left: auto; /* hero bleeds toward the right edge */
+		}
+		.media__item.mp-1 {
+			width: 58%;
+			margin-left: 0;
+		}
+		.media__item.mp-2 {
+			width: 80%;
 			margin-left: auto;
 		}
-		.Archive .Gallery .gp-2 {
-			width: 90vw;
-			max-width: 1400px;
-			margin-inline: auto;
+		.media__item.mp-3 {
+			width: 48%;
+			margin-left: 16%;
+		}
+		.media__item.mp-4 {
+			width: 72%;
 			margin-left: auto;
 		}
-		.Archive .Gallery .gp-3 {
-			width: 40vw;
-			max-width: 600px;
-			margin-left: 8vw;
-			margin-right: auto;
+		.media__item.mp-5 {
+			width: 54%;
+			margin-left: 6%;
 		}
-		.Archive .Gallery .gp-4 {
-			width: 90vw;
-			max-width: 1400px;
-			margin-inline: auto;
+		.media__item.mp-6 {
+			width: 76%;
 			margin-left: auto;
-		}
-		.Archive .Gallery .gp-5 {
-			width: 50vw;
-			max-width: 800px;
-			margin-left: auto;
-			margin-right: 8vw;
-		}
-		.Archive .Gallery .gp-6 {
-			width: 70vw;
-			max-width: 1100px;
-			margin-inline: auto;
-			margin-left: auto;
-		}
-		.Archive .Gallery .gp-7 {
-			width: 45vw;
-			max-width: 700px;
-			margin-inline: auto;
-			margin-left: auto;
-		}
-		.Archive .Gallery .gp-8 {
-			width: 90vw;
-			max-width: 1400px;
-			margin-inline: auto;
-			margin-left: auto;
-		}
-		.Archive .Gallery .gp-9 {
-			width: 38vw;
-			max-width: 580px;
-			margin-left: 8vw;
-			margin-right: auto;
 		}
 
-
-		/* Colophon — tight info block */
-		.Archive .Colophon {
+		/* Colophon — tight info block, left-aligned under the lead */
+		.Colophon {
+			grid-area: colophon;
 			padding-top: 160px;
 		}
-
-		.Archive .Colophon .wrapper {
+		.Colophon .wrapper {
 			max-width: 720px;
-			margin-inline: auto;
+			margin-inline: 0;
 			padding-inline: var(--padding);
 		}
-
-		.Archive .Colophon .row {
+		.Colophon .row {
 			grid-template-columns: 140px 1fr;
 		}
 	}
