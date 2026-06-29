@@ -24,7 +24,7 @@
 	<!-- Left: ethos statement (Figma "Log") -->
 	<div class="ethos">
 		<p class="ethos__eyebrow" lang="en">Our Ethos</p>
-		<p class="ethos__line" lang="en">Radix, tangible.</p>
+		<p class="ethos__line" lang="en">Embodied humanism.</p>
 	</div>
 
 	<!-- Right: vertical work feed (manual scroll) -->
