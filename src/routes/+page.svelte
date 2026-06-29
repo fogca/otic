@@ -116,6 +116,32 @@
 	{#if isPC}
 		<!-- PC: Figma "Log" — vertical work feed + ethos statement -->
 		<HomeFeed tiles={feedTiles} />
+
+		<!-- After the feed: a dark band, then a light band (placeholder content
+		     — Contact / studio info), then the global black Footer. -->
+		<section class="band band--dark">
+			<div class="band__inner">
+				<p class="band__eyebrow" lang="en">Contact</p>
+				<a class="band__lead" href="mailto:hi@takumiisobe.com" lang="en"
+					>hi@takumiisobe.com</a
+				>
+				<p class="band__note" lang="en">
+					For new projects across product, furniture, typeface, web and
+					branding — we'd love to hear from you.
+				</p>
+			</div>
+		</section>
+
+		<section class="band band--light">
+			<div class="band__inner">
+				<p class="band__eyebrow" lang="en">Office</p>
+				<p class="band__lead band__lead--text" lang="en">
+					Office / TAKUMI ISOBE — a multi-disciplinary design office working
+					across visual identity and design engineering.
+				</p>
+				<p class="band__note" lang="en">Tokyo, Japan</p>
+			</div>
+		</section>
 	{:else}
 		<!-- SP: Archives stream 01 → 10 (unchanged) -->
 		<section class="Archives">
@@ -182,6 +208,53 @@
 <style>
 	.Home {
 		min-height: 100dvh;
+	}
+
+	/* ----- Bands after the feed (dark Contact / light Office) ----- */
+	.Home .band {
+		min-height: 88vh;
+		display: flex;
+		align-items: center;
+		padding: 120px var(--padding);
+	}
+	.Home .band--dark {
+		background: var(--color-bg-dark);
+	}
+	.Home .band--dark :global(*) {
+		color: #fff;
+	}
+	.Home .band--light {
+		background: var(--color-bg);
+	}
+	.Home .band__inner {
+		max-width: 760px;
+	}
+	.Home .band__eyebrow {
+		margin: 0 0 24px;
+		font-size: var(--fs-h6);
+		font-weight: var(--fw-medium);
+		opacity: 0.5;
+	}
+	.Home .band__lead {
+		display: block;
+		margin: 0;
+		font-size: var(--fs-h2);
+		line-height: 1.2;
+		text-decoration: none;
+		transition: opacity var(--duration-fast) var(--ease-default);
+	}
+	.Home a.band__lead:hover {
+		opacity: 0.6;
+	}
+	.Home .band__lead--text {
+		font-weight: var(--fw-lead);
+		font-variation-settings: 'wght' var(--fw-lead);
+	}
+	.Home .band__note {
+		margin: 24px 0 0;
+		font-size: var(--fs-p-en);
+		opacity: 0.6;
+		max-width: 48ch;
 	}
 
 	/* ----- Archives stream ----- */

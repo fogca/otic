@@ -19,3 +19,10 @@ export function startLenis(): void {
 	_pendingStop = false;
 	_instance?.start();
 }
+
+// The shared Lenis instance (or null until +layout has created it). Pages that
+// attach plugins (e.g. lenis/snap) poll this until it's available.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getLenis(): any {
+	return _instance;
+}

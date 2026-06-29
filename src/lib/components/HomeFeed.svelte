@@ -1,132 +1,132 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { stopLenis, startLenis } from '$lib/state/lenis';
+	import { getLenis } from '$lib/state/lenis';
 
 	export type Tile = { src: string; srcset: string; alt: string; href: string };
 
 	let { tiles = [] }: { tiles?: Tile[] } = $props();
 
-	let stageEl: HTMLElement | undefined = $state();
+	let ethosEl: HTMLElement | undefined = $state();
 	let feedEl: HTMLElement | undefined = $state();
-	let trackEl: HTMLElement | undefined = $state();
 	let tileEls = $state<HTMLElement[]>([]);
+
+	// Ethos is pinned bottom... no — centred-left while the thumbnails scroll.
+	// .page-wrapper's transform breaks position:fixed for descendants, so we
+	// portal it to <body> (same trick as the slug lead).
+	const ETHOS_FIXED: Record<string, string> = {
+		position: 'fixed',
+		left: 'var(--padding)',
+		top: '50%',
+		transform: 'translateY(-50%)',
+		zIndex: '4',
+		pointerEvents: 'none',
+		transition: 'opacity 0.4s var(--ease-default)'
+	};
+
+	function ethosPortal(node: HTMLElement) {
+		if (!browser) return;
+		const mq = window.matchMedia('(min-width: 1024px)');
+		const anchor = document.createComment('ethos');
+		let out = false;
+		const sync = () => {
+			if (mq.matches && !out) {
+				node.replaceWith(anchor);
+				document.body.appendChild(node);
+				Object.assign(node.style, ETHOS_FIXED);
+				out = true;
+			} else if (!mq.matches && out) {
+				node.removeAttribute('style');
+				anchor.replaceWith(node);
+				out = false;
+			}
+		};
+		sync();
+		mq.addEventListener('change', sync);
+		return {
+			destroy() {
+				mq.removeEventListener('change', sync);
+				if (out) node.remove();
+			}
+		};
+	}
 
 	onMount(() => {
 		if (!browser) return;
+		if (!window.matchMedia('(min-width: 1024px)').matches) return; // PC only
 		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-		// Single ambient screen: lock the page; the thumbnail column scrolls
-		// internally (smooth, via its own Lenis).
-		stopLenis();
-		document.documentElement.style.overflowY = 'hidden';
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let lenis: any = null;
-		let rafId = 0;
-		let snapTimer: ReturnType<typeof setTimeout> | undefined;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let snap: any = null;
 		let cancelled = false;
+		let pollId = 0;
 
-		// Snap the nearest project tile to the vertical centre once scrolling
-		// settles. (lenis/snap assumes window scroll, so it can't be used on a
-		// custom wrapper — we compute the centre target ourselves.)
-		const snapToNearest = () => {
-			if (!lenis || !feedEl || tileEls.length === 0) return;
-			const feedTop = feedEl.getBoundingClientRect().top;
-			const viewCenter = feedEl.clientHeight / 2;
-			let target: number | null = null;
-			let best = Infinity;
-			for (const tile of tileEls) {
-				if (!tile) continue;
-				const r = tile.getBoundingClientRect();
-				const centerInScroll = r.top - feedTop + lenis.scroll + r.height / 2;
-				const candidate = centerInScroll - viewCenter;
-				const dist = Math.abs(candidate - lenis.scroll);
-				if (dist < best) {
-					best = dist;
-					target = candidate;
-				}
-			}
-			if (target != null && Math.abs(target - lenis.scroll) > 4) {
-				lenis.scrollTo(target, { duration: 0.6 });
-			}
+		// Fade the fixed ethos out once the thumbnails have scrolled past, so it
+		// doesn't overlap the sections below.
+		const onScroll = () => {
+			if (!ethosEl || !feedEl) return;
+			const heroEnd = feedEl.offsetTop + feedEl.offsetHeight - window.innerHeight * 0.6;
+			const y = lenis ? lenis.scroll : window.scrollY;
+			ethosEl.style.opacity = y > heroEnd ? '0' : '1';
 		};
 
-		if (!reduced && feedEl && trackEl && stageEl) {
-			import('lenis').then(({ default: Lenis }) => {
+		const attach = async () => {
+			if (cancelled) return;
+			lenis = getLenis();
+			if (!lenis) {
+				pollId = window.setTimeout(attach, 80); // wait for layout to create it
+				return;
+			}
+			lenis.on('scroll', onScroll);
+			onScroll();
+			if (!reduced) {
+				const { default: Snap } = await import('lenis/snap');
 				if (cancelled) return;
-				lenis = new Lenis({
-					wrapper: feedEl,
-					content: trackEl,
-					// Listen for wheel/touch on the whole stage so scrolling
-					// anywhere drives the thumbnail column.
-					eventsTarget: stageEl,
-					orientation: 'vertical',
-					gestureOrientation: 'vertical',
-					smoothWheel: true,
-					duration: 1.1
-				});
-				// Debounce: snap to the nearest tile centre after scrolling stops.
-				lenis.on('scroll', () => {
-					clearTimeout(snapTimer);
-					snapTimer = setTimeout(snapToNearest, 130);
-				});
-				const raf = (time: number) => {
-					lenis?.raf(time);
-					rafId = requestAnimationFrame(raf);
-				};
-				rafId = requestAnimationFrame(raf);
-			});
-		}
+				// Snap each project tile to the viewport centre (proximity: the
+				// sections below still scroll freely).
+				snap = new Snap(lenis, { type: 'proximity', duration: 0.6 });
+				snap.addElements([...tileEls].filter(Boolean), { align: ['center'] });
+			}
+		};
+		attach();
 
 		return () => {
 			cancelled = true;
-			clearTimeout(snapTimer);
-			if (rafId) cancelAnimationFrame(rafId);
-			lenis?.destroy();
-			document.documentElement.style.overflowY = '';
-			startLenis();
+			if (pollId) clearTimeout(pollId);
+			snap?.destroy();
+			lenis?.off?.('scroll', onScroll);
 		};
 	});
 </script>
 
-<div class="feed-stage" bind:this={stageEl}>
-	<!-- Left: ethos statement (Figma "Log") -->
-	<div class="ethos">
+<section class="home-hero">
+	<!-- Left: ethos statement (portaled to <body>, fixed centre-left on PC) -->
+	<div class="ethos" bind:this={ethosEl} use:ethosPortal>
 		<p class="ethos__eyebrow" lang="en">Our Ethos</p>
 		<p class="ethos__line" lang="en">Embodied humanism.</p>
 	</div>
 
-	<!-- Right: vertical work feed — smooth (Lenis) + centre-snap per project -->
-	<div class="feed" bind:this={feedEl}>
-		<ul class="feed__track" bind:this={trackEl}>
-			{#each tiles as t, i (t.href)}
-				<li class="feed__item" bind:this={tileEls[i]}>
-					<a class="feed__tile" href={t.href} aria-label={t.alt}>
-						<img src={t.src} srcset={t.srcset} sizes="36vw" alt={t.alt} loading="lazy" />
-					</a>
-				</li>
-			{/each}
-		</ul>
-	</div>
-</div>
+	<!-- Right: vertical work feed (5 projects) — page scroll, centre-snap -->
+	<ul class="feed" bind:this={feedEl}>
+		{#each tiles as t, i (t.href)}
+			<li class="feed__item" bind:this={tileEls[i]}>
+				<a class="feed__tile" href={t.href} aria-label={t.alt}>
+					<img src={t.src} srcset={t.srcset} sizes="36vw" alt={t.alt} loading={i < 2 ? 'eager' : 'lazy'} />
+				</a>
+			</li>
+		{/each}
+	</ul>
+</section>
 
 <style>
-	.feed-stage {
+	.home-hero {
 		position: relative;
-		width: 100vw;
-		height: 100dvh;
-		overflow: hidden;
-		background: var(--color-bg);
+		width: 100%;
 	}
 
-	/* ── Left: ethos caption ── */
-	.ethos {
-		position: absolute;
-		left: var(--padding);
-		top: 43vh;
-		z-index: 2;
-	}
+	/* ── Ethos (centre-left, fixed via portal on PC) ── */
 	.ethos__eyebrow {
 		margin: 0 0 10px;
 		font-size: var(--fs-h6);
@@ -138,26 +138,15 @@
 		line-height: 1.3;
 	}
 
-	/* ── Right: feed column (Lenis-driven smooth scroll + centre snap) ── */
+	/* ── Feed: right-aligned column, scrolls with the page ── */
 	.feed {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		right: 1.3vw;
-		width: min(520px, 36vw);
-		overflow-y: auto;
-		overflow-x: hidden;
-		scrollbar-width: none;
-		-ms-overflow-style: none;
-	}
-	.feed::-webkit-scrollbar {
-		display: none;
-	}
-	.feed__track {
 		list-style: none;
 		margin: 0;
-		/* Top/bottom room so the first/last tile can reach the vertical centre. */
+		/* Room so the first/last tile can reach the viewport centre when snapping. */
 		padding-block: calc(50dvh - min(260px, 18vw));
+		width: min(520px, 36vw);
+		margin-left: auto;
+		margin-right: 1.3vw;
 		display: flex;
 		flex-direction: column;
 		gap: 2vh;
@@ -179,10 +168,15 @@
 		display: block;
 	}
 
-	/* PC-only experience */
+	/* ── SP: simple stacked feed (ethos on top, full-bleed-ish tiles) ── */
 	@media (max-width: 1023px) {
-		.feed-stage {
-			display: none;
+		.ethos {
+			padding: 88px var(--padding) 0;
+		}
+		.feed {
+			width: 90%;
+			margin-inline: auto;
+			padding-block: 40px;
 		}
 	}
 </style>

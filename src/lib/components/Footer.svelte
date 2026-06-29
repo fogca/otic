@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Logo from './Logo.svelte';
+	// Wordmark = current (2026) lock-up; previous one is in Logo.svelte.
+	import Wordmark from './Wordmark.svelte';
 
 	type LinkItem = { label: string; href: string };
 
@@ -30,7 +31,7 @@
 		<!-- Column 1: brand + tagline -->
 		<div class="Footer__col Footer__col--brand">
 			<a href="/" class="Footer__logo" aria-label="Home">
-				<Logo />
+				<Wordmark />
 			</a>
 			<p class="Footer__tagline">
 				A multi-disciplinary design office.<br />
