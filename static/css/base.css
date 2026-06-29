@@ -157,7 +157,8 @@ a {
   --lh-h5:   1.4;
   --lh-h6:   1.5;
   --lh-body: 1.5;
-  --lh-ja:   1.8;
+  --lh-en:   1.4;   /* Latin body line-height — used by p:lang(en) */
+  --lh-ja:   1.8;   /* JP body line-height — used by p:lang(ja) */
   --lh-row:  2;
 
   /* --- Spacing scale (component padding/gap, 4px base) --- */
@@ -368,7 +369,7 @@ p, .p {
 p:lang(en), .p:lang(en) {
   font-size: var(--fs-p-en);
   font-weight: var(--fw-base);   /* Steiner body copy */
-  line-height: 1.4;
+  line-height: var(--lh-en);
   text-align: left;
   hyphens: auto;
 }

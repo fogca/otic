@@ -1,9 +1,54 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { imgOpt, imgSrcset } from '$lib/js/img';
 
 	let { data }: { data: PageData } = $props();
 	const archive = $derived(data.archive);
+
+	// The layout's .page-wrapper has will-change:transform → it's a containing
+	// block, which breaks position:fixed/sticky for any descendant. On PC we
+	// portal the lead out to <body> so it can be truly viewport-fixed (pinned +
+	// vertically centred). SP keeps it in normal flow.
+	const FIXED_STYLE: Record<string, string> = {
+		position: 'fixed',
+		top: '0',
+		left: 'var(--padding)',
+		width: '34vw',
+		height: '100dvh',
+		padding: '0',
+		margin: '0',
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center',
+		zIndex: '5'
+	};
+	function leadPortal(node: HTMLElement) {
+		if (!browser) return;
+		const mq = window.matchMedia('(min-width: 1024px)');
+		const anchor = document.createComment('lead');
+		let out = false;
+		const sync = () => {
+			if (mq.matches && !out) {
+				node.replaceWith(anchor);
+				document.body.appendChild(node);
+				Object.assign(node.style, FIXED_STYLE);
+				out = true;
+			} else if (!mq.matches && out) {
+				node.removeAttribute('style');
+				anchor.replaceWith(node);
+				out = false;
+			}
+		};
+		sync();
+		mq.addEventListener('change', sync);
+		return {
+			destroy() {
+				mq.removeEventListener('change', sync);
+				if (out) node.remove();
+			}
+		};
+	}
 
 	// Show Colophon section only if at least one curated field is filled.
 	// Brand is excluded (auto-populated from work meta).
@@ -22,8 +67,9 @@
 </svelte:head>
 
 <main class="Archive">
-	<!-- LEFT: project title + descriptions (PC: left rail, center height) -->
-	<div class="lead">
+	<!-- LEFT: project title + descriptions (PC: portaled to a fixed,
+	     vertically-centred left rail; SP: normal flow) -->
+	<div class="lead" use:leadPortal>
 		<h1 class="lead__title" lang="en">{archive.title}</h1>
 		{#if archive.headline}
 			<p class="lead__tag" lang="ja">{archive.headline}</p>
@@ -149,8 +195,8 @@
 		opacity: 0.6;
 	}
 	.lead__body {
-		font-size: var(--fs-h6);
-		line-height: 1.7;
+		/* Typography (size/line-height) comes from the base.css p:lang(en|ja)
+		   presets — no per-element overrides. */
 		margin: 20px 0 0;
 		white-space: pre-line;
 	}
@@ -239,12 +285,9 @@
 			column-gap: 2vw;
 		}
 
-		/* Lead: pinned in the left rail, vertically around mid first-screen */
-		.lead {
-			grid-area: info;
-			max-width: 380px;
-			padding: 44vh 0 0 var(--padding);
-		}
+		/* Lead is portaled to <body> and positioned fixed by leadPortal()
+		   (see the action — .page-wrapper's transform blocks fixed otherwise).
+		   The 38% info column is left empty as its visual slot. */
 		.lead__body {
 			margin-top: 24px;
 		}
