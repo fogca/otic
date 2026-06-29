@@ -2,18 +2,16 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import Loader from '$lib/components/Loader.svelte';
-	import HeroShow, { type Slide } from '$lib/components/HeroShow.svelte';
+	import HomeFeed, { type Tile } from '$lib/components/HomeFeed.svelte';
 	import { intro } from '$lib/state/intro.svelte';
 	import { imgOpt, imgSrcset } from '$lib/js/img';
-	import type { MicroCMSImage } from 'microcms-js-sdk';
-	import type { Work } from '$lib/js/microcms';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	let introCompleted = $state(false);
 
-	// PC gets the Figma hero-show; SP keeps the existing vertical archives stream.
+	// PC gets the Figma "Log" feed; SP keeps the existing vertical archives stream.
 	let isPC = $state(false);
 
 	const padNumber = (n: number) => String(n + 1).padStart(2, '0');
@@ -22,39 +20,17 @@
 	const firstWork = $derived(works[0]);
 	const restWorks = $derived(works.slice(1, 10));
 
-	// Pick a secondary image (a different crop of the same project) for the
-	// small floating "detail" image. Falls back to the thumbnail.
-	const detailImage = (w: Work): MicroCMSImage | undefined => {
-		const fromRepeat = w.repeat?.find((r) => r.pj_images?.url)?.pj_images;
-		if (fromRepeat?.url) return fromRepeat;
-		const ri = w.repeatImg;
-		if (Array.isArray(ri)) {
-			const f = ri.find((x) => x.images?.url);
-			if (f?.images?.url) return f.images;
-		} else if (ri && typeof ri === 'object') {
-			if ('images' in ri && ri.images?.url) return ri.images;
-			if ('url' in ri && ri.url) return ri as MicroCMSImage;
-		}
-		return w.thumbnail;
-	};
-
-	const slides = $derived.by<Slide[]>(() =>
+	// Square work tiles for the right-hand vertical marquee.
+	const feedTiles = $derived.by<Tile[]>(() =>
 		works
 			.filter((w) => w.thumbnail?.url)
 			.slice(0, 10)
-			.map((w) => {
-				const detail = detailImage(w) ?? w.thumbnail!;
-				return {
-					id: w.id,
-					title: w.title,
-					brand: w.brand ?? '',
-					heroSrc: imgOpt(w.thumbnail!.url, 2000),
-					heroSrcset: imgSrcset(w.thumbnail!.url, [1000, 1600, 2000, 2800]),
-					detailSrc: imgOpt(detail.url, 900),
-					detailSrcset: imgSrcset(detail.url, [500, 700, 900, 1200]),
-					href: `/archives/${w.id}`
-				};
-			})
+			.map((w) => ({
+				src: imgOpt(w.thumbnail!.url, 800),
+				srcset: imgSrcset(w.thumbnail!.url, [400, 600, 800, 1200]),
+				alt: w.title,
+				href: `/archives/${w.id}`
+			}))
 	);
 
 	// 3 filler frames + firstWork = 4 frames revealed in the loader.
@@ -138,8 +114,8 @@
 	/>
 
 	{#if isPC}
-		<!-- PC: Figma hero-show — auto-cycling image stage, no vertical scroll -->
-		<HeroShow {slides} playing={introCompleted} />
+		<!-- PC: Figma "Log" — vertical work feed + ethos statement -->
+		<HomeFeed tiles={feedTiles} />
 	{:else}
 		<!-- SP: Archives stream 01 → 10 (unchanged) -->
 		<section class="Archives">

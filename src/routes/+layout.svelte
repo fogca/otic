@@ -1,13 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import { onNavigate, afterNavigate } from '$app/navigation';
 	import gsap from 'gsap';
 	import { CustomEase } from 'gsap/CustomEase';
 	import { intro } from '$lib/state/intro.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import Logo from '$lib/components/Logo.svelte';
 	import { setLenis } from '$lib/state/lenis';
+
+	// Office has its own prominent wordmark + dark reversal — skip the corner logo there.
+	const isOffice = $derived(page.url.pathname.startsWith('/office'));
 
 	gsap.registerPlugin(CustomEase);
 
@@ -227,6 +232,19 @@
 	</div>
 </div>
 
+<!-- Global wordmark, pinned bottom-left on PC. Lives OUTSIDE .page-wrapper so
+     its position:fixed resolves to the viewport (the wrapper's will-change
+     transform would otherwise make it a containing block). -->
+<a
+	class="corner-logo"
+	class:is-revealed={intro.completed}
+	class:is-suppressed={isOffice}
+	href="/"
+	aria-label="Home"
+>
+	<Logo />
+</a>
+
 <div class="darken-overlay" aria-hidden="true"></div>
 <div class="transition-panel" aria-hidden="true"></div>
 
@@ -238,6 +256,38 @@
 	.transition-bg {
 		background: black;
 		min-height: 100vh;
+	}
+
+	/* ── Global corner wordmark (PC, bottom-left) ── */
+	.corner-logo {
+		position: fixed;
+		left: var(--padding);
+		bottom: 28px;
+		width: 420px;
+		max-width: 32vw;
+		color: var(--color-text);
+		opacity: 0;
+		pointer-events: none;
+		display: none; /* SP: hidden (Header keeps the top-right logo) */
+		z-index: var(--z-header);
+		transition: opacity 600ms var(--ease-out);
+	}
+	.corner-logo :global(svg) {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+	.corner-logo.is-revealed {
+		opacity: 1;
+		pointer-events: auto;
+	}
+	@media (min-width: 1024px) {
+		.corner-logo {
+			display: block;
+		}
+		.corner-logo.is-suppressed {
+			display: none;
+		}
 	}
 
 	.page-wrapper {

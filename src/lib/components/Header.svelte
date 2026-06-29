@@ -84,6 +84,8 @@
 		</a>
 	</nav>
 
+	<!-- SP keeps the top-right wordmark. On PC it's hidden and the wordmark is
+	     pinned bottom-left globally by CornerLogo in the layout. -->
 	<a href="/" class="logo" aria-label="Home">
 		<Logo />
 	</a>
@@ -184,8 +186,10 @@
 			font-size: var(--fs-h5);
 		}
 
+		/* PC: hide the top-right wordmark site-wide — the wordmark is pinned
+		   bottom-left globally by CornerLogo in the layout. */
 		.Header .logo {
-			width: 280px;
+			display: none;
 		}
 	}
 </style>
