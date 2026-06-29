@@ -246,10 +246,11 @@
 		display: block;
 	}
 
-	/* SP width patterns (centred-narrow / full-bleed rhythm) */
+	/* SP: hero full-width; gallery thumbnails keep their centred-narrow /
+	   full-bleed rhythm. */
 	.media__hero {
-		width: 90%;
-		margin-inline: auto;
+		width: 100%;
+		margin-inline: 0;
 	}
 	.media__item {
 		width: 90%;
