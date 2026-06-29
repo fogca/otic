@@ -227,8 +227,8 @@ a {
     --fs-h6: 13.5px;
     --fs-body: 12px;
     --fs-p:    14px;
-    --fs-p-en: 16px;   /* Body copy (Latin) — PC */
-    --fs-p-ja: 14px;   /* Body copy (JP) — PC */
+    --fs-p-en: 12.5px;   /* Body copy (Latin) — PC */
+    --fs-p-ja: 11.5px;   /* Body copy (JP) — PC */
     --padding:       3vw;
     --gutter:        40px;
     --gutter-alt:    40px;
