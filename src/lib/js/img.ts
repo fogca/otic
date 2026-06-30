@@ -5,6 +5,7 @@
 // compress    → extra lossless/lossy optimization.
 // q (def 72)  → output quality. fit=max → never upscales past the source.
 
+import type { MicroCMSImage } from 'microcms-js-sdk';
 import type { Work } from './microcms';
 
 /** A work's primary visual: the `main_visual` custom field (Cloudflare video
@@ -27,6 +28,12 @@ export const mainVisual = (w: Work): Visual | null => {
 		return { src: w.thumbnail.url, isVideo: false, width: w.thumbnail.width, height: w.thumbnail.height };
 	return null;
 };
+
+/** Image-only resolution for contexts that can't play video (intro Loader,
+    SP archive cards): main_visual's image, falling back to the legacy
+    thumbnail. */
+export const mainVisualImage = (w: Work): MicroCMSImage | undefined =>
+	w.main_visual?.pj_images ?? w.thumbnail;
 
 export const imgOpt = (url: string | undefined, width: number, quality = 72): string => {
 	if (!url) return '';

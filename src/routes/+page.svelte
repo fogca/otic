@@ -4,7 +4,7 @@
 	import Loader from '$lib/components/Loader.svelte';
 	import HomeFeed, { type Tile } from '$lib/components/HomeFeed.svelte';
 	import { intro } from '$lib/state/intro.svelte';
-	import { imgOpt, imgSrcset, mainVisual } from '$lib/js/img';
+	import { imgOpt, imgSrcset, mainVisual, mainVisualImage } from '$lib/js/img';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -42,28 +42,23 @@
 
 	// 3 filler frames + firstWork = 4 frames revealed in the loader.
 	// The last frame matches Archives card-01 so the handoff is seamless.
+	// Image-only (the loader can't play video) — main_visual image / thumbnail.
 	const loaderFrames = $derived.by(() => {
 		const fw = firstWork;
-		if (!fw || !fw.thumbnail) {
-			return works
-				.filter((w) => w.thumbnail)
-				.slice(0, 4)
-				.map((w) => ({
-					id: w.id,
-					src: imgOpt(w.thumbnail!.url, 1600),
-					srcset: imgSrcset(w.thumbnail!.url, [800, 1200, 1600, 2400]),
-					alt: w.title
-				}));
+		const frame = (w: (typeof works)[number]) => {
+			const img = mainVisualImage(w)!;
+			return {
+				id: w.id,
+				src: imgOpt(img.url, 1600),
+				srcset: imgSrcset(img.url, [800, 1200, 1600, 2400]),
+				alt: w.title
+			};
+		};
+		if (!fw || !mainVisualImage(fw)) {
+			return works.filter((w) => mainVisualImage(w)).slice(0, 4).map(frame);
 		}
-		const others = works
-			.filter((w) => w.thumbnail && w.id !== fw.id)
-			.slice(0, 3);
-		return [...others, fw].map((w) => ({
-			id: w.id,
-			src: imgOpt(w.thumbnail!.url, 1600),
-			srcset: imgSrcset(w.thumbnail!.url, [800, 1200, 1600, 2400]),
-			alt: w.title
-		}));
+		const others = works.filter((w) => mainVisualImage(w) && w.id !== fw.id).slice(0, 3);
+		return [...others, fw].map(frame);
 	});
 
 	onMount(() => {
@@ -154,12 +149,13 @@
 		<section class="Archives">
 		<div class="wrapper">
 			{#if firstWork}
+				{@const fwImg = mainVisualImage(firstWork)}
 				<a class="card card-01" href="/archives/{firstWork.id}">
 					<div class="image">
-						{#if firstWork.thumbnail}
+						{#if fwImg}
 							<img
-								src={imgOpt(firstWork.thumbnail.url, 1600)}
-								srcset={imgSrcset(firstWork.thumbnail.url, [800, 1200, 1600, 2400])}
+								src={imgOpt(fwImg.url, 1600)}
+								srcset={imgSrcset(fwImg.url, [800, 1200, 1600, 2400])}
 								sizes="(min-width: 1024px) 60vw, 100vw"
 								alt={firstWork.title}
 								loading="eager"
@@ -180,20 +176,18 @@
 			     shrinks the card for portrait images so the meta below aligns
 			     with the rendered image width. -->
 			{#each restWorks as work, i (work.id)}
-				{@const aspect =
-					work.thumbnail && work.thumbnail.height
-						? work.thumbnail.width / work.thumbnail.height
-						: 1}
+				{@const wImg = mainVisualImage(work)}
+				{@const aspect = wImg && wImg.width && wImg.height ? wImg.width / wImg.height : 1}
 				<a
 					class="card card-{padNumber(i + 1)}"
 					href="/archives/{work.id}"
 					style="--aspect: {aspect}"
 				>
 					<div class="image">
-						{#if work.thumbnail}
+						{#if wImg}
 							<img
-								src={imgOpt(work.thumbnail.url, 1200)}
-								srcset={imgSrcset(work.thumbnail.url, [600, 900, 1200, 1800])}
+								src={imgOpt(wImg.url, 1200)}
+								srcset={imgSrcset(wImg.url, [600, 900, 1200, 1800])}
 								sizes="(min-width: 1024px) 45vw, 90vw"
 								alt={work.title}
 								loading="lazy"
