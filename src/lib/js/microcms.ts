@@ -30,6 +30,14 @@ export type Work = {
 	thumbnail?: MicroCMSImage;
 	/** Optional SP-specific thumbnail; falls back to `thumbnail` when absent. */
 	sp_thumbnail?: MicroCMSImage;
+	/** Primary visual (custom field) — supports a Cloudflare video (`pj_videos`)
+	    or an image (`pj_images`). Migrated from `thumbnail`. */
+	main_visual?: {
+		fieldId: string;
+		pj_images?: MicroCMSImage;
+		pj_videos?: string;
+		pj_images_title?: string;
+	};
 	repeat: Array<{
 		fieldId: string;
 		pj_images?: MicroCMSImage;

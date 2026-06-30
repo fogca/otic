@@ -110,23 +110,37 @@
 
 	<!-- RIGHT: media — hero + gallery, editorial vertical flow -->
 	<div class="media">
-		<div class="media__hero">
-			<picture>
-				{#if archive.heroImageSp}
-					<source
-						media="(max-width: 1023px)"
-						srcset={imgSrcset(archive.heroImageSp, [640, 900, 1200])}
-						sizes="100vw"
+		{#if archive.hero?.isVideo}
+			<div class="media__hero">
+				<video
+					src={archive.hero.src}
+					autoplay
+					loop
+					muted
+					playsinline
+					preload="metadata"
+					aria-label={archive.title}
+				></video>
+			</div>
+		{:else if archive.hero}
+			<div class="media__hero">
+				<picture>
+					{#if archive.heroImageSp}
+						<source
+							media="(max-width: 1023px)"
+							srcset={imgSrcset(archive.heroImageSp, [640, 900, 1200])}
+							sizes="100vw"
+						/>
+					{/if}
+					<img
+						src={imgOpt(archive.hero.src, 1600)}
+						srcset={imgSrcset(archive.hero.src, [900, 1400, 2000])}
+						sizes="(min-width: 1024px) 60vw, 100vw"
+						alt={archive.title}
 					/>
-				{/if}
-				<img
-					src={imgOpt(archive.heroImage, 1600)}
-					srcset={imgSrcset(archive.heroImage, [900, 1400, 2000])}
-					sizes="(min-width: 1024px) 60vw, 100vw"
-					alt={archive.title}
-				/>
-			</picture>
-		</div>
+				</picture>
+			</div>
+		{/if}
 
 		{#each archive.gallery as item, i (i)}
 			<div class="media__item mp-{(i % 6) + 1}">
@@ -248,6 +262,7 @@
 		margin-top: 48px;
 	}
 	.media__hero img,
+	.media__hero video,
 	.media__item img,
 	.media__item video {
 		width: 100%;
@@ -342,6 +357,7 @@
 			margin-inline: 0;
 		}
 		.media__hero img,
+		.media__hero video,
 		.media__item img,
 		.media__item video {
 			max-height: 88vh;

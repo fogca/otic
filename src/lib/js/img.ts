@@ -5,6 +5,29 @@
 // compress    → extra lossless/lossy optimization.
 // q (def 72)  → output quality. fit=max → never upscales past the source.
 
+import type { Work } from './microcms';
+
+/** A work's primary visual: the `main_visual` custom field (Cloudflare video
+    via `pj_videos`, else its `pj_images` image), falling back to the legacy
+    `thumbnail` image. Returns null when nothing is set. Client-safe (this file
+    holds no env access), so components can derive visuals directly. */
+export type Visual = {
+	src: string;
+	isVideo: boolean;
+	width?: number;
+	height?: number;
+};
+
+export const mainVisual = (w: Work): Visual | null => {
+	const video = w.main_visual?.pj_videos?.trim();
+	if (video) return { src: video, isVideo: true };
+	const img = w.main_visual?.pj_images;
+	if (img?.url) return { src: img.url, isVideo: false, width: img.width, height: img.height };
+	if (w.thumbnail?.url)
+		return { src: w.thumbnail.url, isVideo: false, width: w.thumbnail.width, height: w.thumbnail.height };
+	return null;
+};
+
 export const imgOpt = (url: string | undefined, width: number, quality = 72): string => {
 	if (!url) return '';
 	const sep = url.includes('?') ? '&' : '?';

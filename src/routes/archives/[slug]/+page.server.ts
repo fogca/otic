@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { getDetail } from '$lib/js/microcms';
+import { mainVisual } from '$lib/js/img';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -29,7 +30,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		slug: work.id,
 		title: work.title,
 		brand: work.brand ?? '',
-		heroImage: work.thumbnail?.url ?? '',
+		// Hero = main_visual (Cloudflare video or image), falling back to thumbnail.
+		hero: mainVisual(work),
 		heroImageSp: work.sp_thumbnail?.url ?? '',
 		descriptionJa: work.body_jp ?? work.description ?? '',
 		descriptionEn: work.body_en ?? '',

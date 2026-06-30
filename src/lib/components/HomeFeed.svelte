@@ -3,7 +3,13 @@
 	import { browser } from '$app/environment';
 	import { getLenis } from '$lib/state/lenis';
 
-	export type Tile = { src: string; srcset: string; alt: string; href: string };
+	export type Tile = {
+		src: string;
+		srcset: string;
+		alt: string;
+		href: string;
+		isVideo: boolean;
+	};
 
 	let { tiles = [] }: { tiles?: Tile[] } = $props();
 
@@ -113,7 +119,17 @@
 		{#each tiles as t, i (t.href)}
 			<li class="feed__item" bind:this={tileEls[i]}>
 				<a class="feed__tile" href={t.href} aria-label={t.alt}>
-					<img src={t.src} srcset={t.srcset} sizes="36vw" alt={t.alt} loading={i < 2 ? 'eager' : 'lazy'} />
+					{#if t.isVideo}
+						<video src={t.src} autoplay loop muted playsinline preload="metadata"></video>
+					{:else}
+						<img
+							src={t.src}
+							srcset={t.srcset}
+							sizes="36vw"
+							alt={t.alt}
+							loading={i < 2 ? 'eager' : 'lazy'}
+						/>
+					{/if}
 				</a>
 			</li>
 		{/each}
@@ -161,7 +177,8 @@
 		overflow: hidden;
 		background: var(--color-bg-gray);
 	}
-	.feed__tile img {
+	.feed__tile img,
+	.feed__tile video {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;

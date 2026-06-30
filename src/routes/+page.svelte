@@ -4,7 +4,7 @@
 	import Loader from '$lib/components/Loader.svelte';
 	import HomeFeed, { type Tile } from '$lib/components/HomeFeed.svelte';
 	import { intro } from '$lib/state/intro.svelte';
-	import { imgOpt, imgSrcset } from '$lib/js/img';
+	import { imgOpt, imgSrcset, mainVisual } from '$lib/js/img';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -21,16 +21,23 @@
 	const restWorks = $derived(works.slice(1, 10));
 
 	// Square work tiles for the right-hand vertical feed (5 selected projects).
+	// Uses main_visual (Cloudflare video or image), falling back to thumbnail.
 	const feedTiles = $derived.by<Tile[]>(() =>
 		works
-			.filter((w) => w.thumbnail?.url)
+			.map((w) => ({ w, v: mainVisual(w) }))
+			.filter((x): x is { w: (typeof works)[number]; v: NonNullable<typeof x.v> } => x.v !== null)
 			.slice(0, 5)
-			.map((w) => ({
-				src: imgOpt(w.thumbnail!.url, 800),
-				srcset: imgSrcset(w.thumbnail!.url, [400, 600, 800, 1200]),
-				alt: w.title,
-				href: `/archives/${w.id}`
-			}))
+			.map(({ w, v }) =>
+				v.isVideo
+					? { src: v.src, srcset: '', isVideo: true, alt: w.title, href: `/archives/${w.id}` }
+					: {
+							src: imgOpt(v.src, 800),
+							srcset: imgSrcset(v.src, [400, 600, 800, 1200]),
+							isVideo: false,
+							alt: w.title,
+							href: `/archives/${w.id}`
+						}
+			)
 	);
 
 	// 3 filler frames + firstWork = 4 frames revealed in the loader.

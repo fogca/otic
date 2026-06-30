@@ -1,4 +1,5 @@
 import { getVisibleWorks } from '$lib/js/microcms';
+import { mainVisual } from '$lib/js/img';
 import type { PageServerLoad } from './$types';
 
 // Deterministic string hash → number
@@ -47,7 +48,7 @@ export const load: PageServerLoad = async () => {
 	const data = await getVisibleWorks({
 		limit: 100,
 		orders: 'order',
-		fields: ['id', 'title', 'thumbnail', 'repeat', 'repeatImg', 'hidden']
+		fields: ['id', 'title', 'thumbnail', 'main_visual', 'repeat', 'repeatImg', 'hidden']
 	});
 
 	// Per-PJ image selection override. Listed PJs skip thumbnail and use only
@@ -81,15 +82,18 @@ export const load: PageServerLoad = async () => {
 				}
 			}
 		} else {
-			// Normal rule: thumbnail + all repeat + repeatImg
-			if (work.thumbnail) {
+			// Normal rule: main_visual (video/image, falls back to thumbnail)
+			// + all repeat + repeatImg
+			const mv = mainVisual(work);
+			if (mv) {
 				workImages.push({
-					url: work.thumbnail.url,
-					width: work.thumbnail.width,
-					height: work.thumbnail.height,
+					url: mv.src,
+					width: mv.width ?? 0,
+					height: mv.height ?? 0,
 					workId: work.id,
 					workTitle: work.title,
-					isThumbnail: true
+					isThumbnail: true,
+					isVideo: mv.isVideo
 				});
 			}
 
