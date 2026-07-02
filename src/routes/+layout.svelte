@@ -10,8 +10,9 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import LangSwitchOverlay from '$lib/components/LangSwitchOverlay.svelte';
-	// Wordmark = current (2026) lock-up; the previous one lives in Logo.svelte.
-	import Wordmark from '$lib/components/Wordmark.svelte';
+	// Reverted to the "Office / TAKUMIISOBE.com" wordmark (Wordmark.svelte
+	// stays available if we swap back later).
+	import Logo from '$lib/components/Logo.svelte';
 	import { setLenis } from '$lib/state/lenis';
 
 	// Office has its own prominent wordmark + dark reversal — skip the corner logo there.
@@ -257,7 +258,7 @@
 	href="/"
 	aria-label="Home"
 >
-	<Wordmark />
+	<Logo />
 </a>
 
 <div class="darken-overlay" aria-hidden="true"></div>

@@ -4,8 +4,9 @@
 	import { page } from '$app/state';
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
-	// Wordmark = current (2026) lock-up; the previous one lives in Logo.svelte.
-	import Wordmark from '$lib/components/Wordmark.svelte';
+	// Reverted to the "Office / TAKUMIISOBE.com" wordmark (Wordmark.svelte
+	// stays available if we swap back later).
+	import Logo from '$lib/components/Logo.svelte';
 
 	// Underline only on the Archives index/list — not on individual project
 	// pages (/archives/[slug]).
@@ -84,9 +85,6 @@
 		>
 			Office
 		</a>
-	</nav>
-
-	<div class="head-end">
 		<!-- Language toggle: shows the CURRENT language only; click switches to
 		     the other (site-wide bilingual body copy) and fires the confirmation
 		     overlay (LangSwitchOverlay). -->
@@ -99,11 +97,13 @@
 		>
 			{lang.current === 'en' ? 'EN' : 'JP'}
 		</button>
+	</nav>
 
+	<div class="head-end">
 		<!-- SP keeps the top-right wordmark. On PC it's hidden and the wordmark is
 		     pinned bottom-left globally by CornerLogo in the layout. -->
 		<a href="/" class="logo" aria-label="Home">
-			<Wordmark />
+			<Logo />
 		</a>
 	</div>
 </header>
@@ -145,10 +145,12 @@
 		color: var(--color-text);
 	}
 
-	/* ----- Nav (left) ----- */
+	/* ----- Nav (left): Archives / Office / lang toggle ----- */
 	.Header .nav {
 		display: flex;
-		gap: 20px;
+		align-items: center;
+		/* SP: tight 10px rhythm across all three items */
+		gap: 10px;
 	}
 
 	.Header .link {

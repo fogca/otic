@@ -100,7 +100,7 @@
 
 	.Legal .title {
 		font-size: var(--fs-h1);
-		font-weight: var(--fw-medium);
+		font-weight: var(--fw-base);
 		line-height: 1.2;
 		margin: 0 0 4px;
 	}

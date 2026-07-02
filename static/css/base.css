@@ -254,6 +254,7 @@ a {
   --heading-font: var(--font-en);
   --text-font:    var(--font-en);
   font-weight: var(--fw-base);
+  letter-spacing: 0.015em;
 }
 
 :lang(ja) {

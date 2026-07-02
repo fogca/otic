@@ -49,8 +49,8 @@
 	}
 
 	.lang-switch__badge {
-		background: rgba(24, 24, 24, 0.92);
-		color: #fff;
+		background: var(--color-bg-gray);
+		color: var(--color-text);
 		border-radius: 18px;
 		padding: 30px 44px;
 		font-size: 30px;

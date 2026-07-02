@@ -36,6 +36,12 @@
 		left: 'var(--padding)',
 		width: '34vw',
 		height: '100dvh',
+		// PC keeps padding at 0: the block is vertically centred on the true
+		// screen centre (an explicit earlier requirement) via justify-content:
+		// center over the full 100dvh box — adding top padding here would
+		// pull that centre down off-screen-centre. The 120px padding-top in
+		// the .lead CSS rule below is therefore SP-only in practice (PC is
+		// portaled out to <body> with this inline style, which wins).
 		padding: '0',
 		margin: '0',
 		display: 'flex',
@@ -232,11 +238,11 @@
 
 	/* ── Lead (title + descriptions) ── */
 	.lead {
-		padding: 88px var(--padding) 0;
+		padding: 120px var(--padding) 0;
 		max-width: 560px;
 	}
 	.lead__title {
-		font-size: var(--fs-h4); /* 20px PC — compact project label */
+		font-size: var(--fs-h1);
 		line-height: 1.25;
 		font-weight: var(--fw-base);
 		margin: 0;
@@ -260,7 +266,7 @@
 	.media {
 		display: flex;
 		flex-direction: column;
-		gap: 48px;
+		gap: 80px;
 		margin-top: 48px;
 	}
 	.media__hero img,
@@ -282,6 +288,9 @@
 	.media__item {
 		width: 90%;
 		margin-inline: auto;
+	}
+	.media__item.mp-1 {
+		width: 80%;
 	}
 	.media__item.mp-2 {
 		width: 100vw;

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { lazyVideo } from '$lib/actions/lazyVideo';
+	import { lazyGridVideo } from '$lib/actions/lazyGridVideo';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -16,8 +16,11 @@
 			return {
 				...img,
 				url: optimised,
-				// Videos have no CMS dimensions; aspect is set from <video> metadata at runtime.
-				aspectRatio: img.isVideo ? undefined : `${img.width} / ${img.height}`
+				// Videos have no CMS dimensions and their `src` is deferred (loaded
+				// only near the viewport — see lazyGridVideo) — start at a neutral
+				// 1:1 guess so the FIRST layout pass never waits on video network;
+				// handleVideoMeta() corrects it once the real size is known.
+				aspectRatio: img.isVideo ? '1 / 1' : `${img.width} / ${img.height}`
 			};
 		})
 	);
@@ -77,6 +80,19 @@
 	}
 
 	let resizeTimer: number;
+	let metaTimer: number;
+
+	// Video `src` is deferred by lazyGridVideo until near the viewport, so a
+	// real <video> only reports metadata once it actually starts loading —
+	// this corrects that one item's aspect-ratio from the 1:1 default and
+	// re-runs layout. Debounced: a scroll can bring several videos into range
+	// at once, and each would otherwise trigger its own full re-layout.
+	function handleVideoMeta(node: HTMLVideoElement, width: number, height: number) {
+		const wrapper = node.closest<HTMLElement>('.image-wrapper');
+		if (wrapper) wrapper.style.aspectRatio = `${width} / ${height}`;
+		clearTimeout(metaTimer);
+		metaTimer = window.setTimeout(layoutMasonry, 120);
+	}
 
 	onMount(() => {
 		if (!browser) return;
@@ -98,38 +114,14 @@
 			video.addEventListener('loadeddata', () => video.classList.add('loaded'), { once: true });
 		});
 
-		// Masonry layout needs DIMENSIONS, not bytes: images carry CMS
-		// width/height (aspect known up-front), videos only need metadata. So we
-		// lay out as soon as every video has reported its size — the grid gets
-		// its real height immediately and the Footer never peeks through.
-		let pendingVideoMeta = videoElements.length;
-		const runLayout = () => {
-			layoutMasonry();
-			setTimeout(() => {
-				isLoading = false;
-			}, 80);
-		};
-		const onVideoMeta = (video: HTMLVideoElement) => {
-			const wrapper = video.closest<HTMLElement>('.image-wrapper');
-			if (wrapper && video.videoWidth && video.videoHeight) {
-				wrapper.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
-			}
-			pendingVideoMeta--;
-			if (pendingVideoMeta <= 0) runLayout();
-		};
-
-		if (videoElements.length === 0) {
-			runLayout();
-		} else {
-			videoElements.forEach((video) => {
-				if (video.readyState >= 1 /* HAVE_METADATA */) {
-					onVideoMeta(video);
-				} else {
-					video.addEventListener('loadedmetadata', () => onVideoMeta(video), { once: true });
-					video.addEventListener('error', () => onVideoMeta(video), { once: true });
-				}
-			});
-		}
+		// Every item already has a definite size (images: real CMS dimensions;
+		// videos: the 1:1 default) — layout can run immediately, no waiting on
+		// any network request. This is what used to block on every video's
+		// metadata before showing anything.
+		layoutMasonry();
+		setTimeout(() => {
+			isLoading = false;
+		}, 80);
 
 		const handleResize = () => {
 			clearTimeout(resizeTimer);
@@ -140,6 +132,7 @@
 		return () => {
 			window.removeEventListener('resize', handleResize);
 			clearTimeout(resizeTimer);
+			clearTimeout(metaTimer);
 		};
 	});
 </script>
@@ -173,12 +166,10 @@
 				<div class="image-wrapper" style:aspect-ratio={image.aspectRatio}>
 					{#if image.isVideo}
 						<video
-							src={image.url}
-							use:lazyVideo
+							use:lazyGridVideo={{ src: image.url, onMeta: handleVideoMeta }}
 							loop
 							muted
 							playsinline
-							preload="metadata"
 							aria-label={image.workTitle}
 							draggable="false"
 						></video>
