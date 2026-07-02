@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { lazyVideo } from '$lib/actions/lazyVideo';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -50,9 +51,16 @@
 			item.style.width = `${columnWidth}px`;
 		});
 
+		// Greedy shortest-column placement (standard masonry balancing) — the
+		// previous `index % columnCount` round-robin ignored actual accumulated
+		// height, so columns could drift noticeably uneven when item heights
+		// varied a lot (e.g. a run of tall thumbnails landing in one column).
 		const columnHeights = Array(columnCount).fill(0);
-		items.forEach((item, index) => {
-			const column = index % columnCount;
+		items.forEach((item) => {
+			let column = 0;
+			for (let c = 1; c < columnCount; c++) {
+				if (columnHeights[c] < columnHeights[column]) column = c;
+			}
 			const x = column * (columnWidth + gap);
 			const y = columnHeights[column];
 			const itemHeight = item.offsetHeight;
@@ -166,7 +174,7 @@
 					{#if image.isVideo}
 						<video
 							src={image.url}
-							autoplay
+							use:lazyVideo
 							loop
 							muted
 							playsinline

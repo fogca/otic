@@ -4,6 +4,16 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#ffffff" />
+		<!-- Restore the session's chosen language before first paint (avoids a
+		     flash of EN content). sessionStorage clears when the tab/browser
+		     closes, so a fresh visit always defaults to EN as intended. -->
+		<script>
+			try {
+				if (sessionStorage.getItem('ti-lang') === 'ja') {
+					document.documentElement.dataset.lang = 'ja';
+				}
+			} catch (e) {}
+		</script>
 		<!-- FONTPLUS — Tazugane Gothic webfont loader (defer: non render-blocking) -->
 		<script defer src="https://webfont.fontplus.jp/accessor/script/fontplus.js?kqbwQX--jVA%3D&box=-1MT0mUgg4A%3D&aa=1&ab=2"></script>
 		<!-- base.css cache-bust: bump ?v= on every base.css edit -->

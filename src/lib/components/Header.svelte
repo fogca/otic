@@ -87,26 +87,18 @@
 	</nav>
 
 	<div class="head-end">
-		<!-- JP/EN language toggle (switches bilingual body copy site-wide) -->
-		<div class="lang" role="group" aria-label="Language">
-			<button
-				type="button"
-				class="lang__opt"
-				class:is-current={lang.current === 'en'}
-				aria-pressed={lang.current === 'en'}
-				onclick={() => (lang.current = 'en')}
-				lang="en">EN</button
-			>
-			<span class="lang__sep" aria-hidden="true">/</span>
-			<button
-				type="button"
-				class="lang__opt"
-				class:is-current={lang.current === 'ja'}
-				aria-pressed={lang.current === 'ja'}
-				onclick={() => (lang.current = 'ja')}
-				lang="ja">日本語</button
-			>
-		</div>
+		<!-- Language toggle: shows the CURRENT language only; click switches to
+		     the other (site-wide bilingual body copy) and fires the confirmation
+		     overlay (LangSwitchOverlay). -->
+		<button
+			type="button"
+			class="lang-toggle"
+			onclick={() => lang.toggle()}
+			aria-label={lang.current === 'en' ? 'Switch to Japanese' : 'Switch to English'}
+			lang="en"
+		>
+			{lang.current === 'en' ? 'EN' : 'JP'}
+		</button>
 
 		<!-- SP keeps the top-right wordmark. On PC it's hidden and the wordmark is
 		     pinned bottom-left globally by CornerLogo in the layout. -->
@@ -193,28 +185,16 @@
 		gap: 24px;
 	}
 
-	.lang {
-		display: flex;
-		align-items: baseline;
-		gap: 6px;
+	.lang-toggle {
 		font-size: 11px;
 		line-height: 1;
-	}
-	.lang__opt {
 		color: var(--color-text);
-		opacity: 0.4;
 		font-weight: var(--fw-base);
-		line-height: 1;
+		opacity: 0.7;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
-	.lang__opt.is-current {
+	.lang-toggle:hover {
 		opacity: 1;
-	}
-	.lang__opt:hover {
-		opacity: 0.7;
-	}
-	.lang__sep {
-		opacity: 0.3;
 	}
 
 	/* ----- Logo (right) ----- */
@@ -242,7 +222,7 @@
 			font-size: var(--fs-h5);
 		}
 
-		.lang {
+		.lang-toggle {
 			font-size: var(--fs-h5);
 		}
 

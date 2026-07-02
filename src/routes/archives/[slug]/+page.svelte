@@ -3,6 +3,7 @@
 	import { onNavigate, afterNavigate } from '$app/navigation';
 	import type { PageData } from './$types';
 	import { imgOpt, imgSrcset } from '$lib/js/img';
+	import { lazyVideo } from '$lib/actions/lazyVideo';
 
 	let { data }: { data: PageData } = $props();
 	const archive = $derived(data.archive);
@@ -111,6 +112,7 @@
 	<!-- RIGHT: media — hero + gallery, editorial vertical flow -->
 	<div class="media">
 		{#if archive.hero?.isVideo}
+			<!-- Hero is always above the fold — load eagerly, no intersection gate. -->
 			<div class="media__hero">
 				<video
 					src={archive.hero.src}
@@ -118,7 +120,7 @@
 					loop
 					muted
 					playsinline
-					preload="metadata"
+					preload="auto"
 					aria-label={archive.title}
 				></video>
 			</div>
@@ -147,7 +149,7 @@
 				{#if item.isVideo}
 					<video
 						src={item.src}
-						autoplay
+						use:lazyVideo
 						loop
 						muted
 						playsinline
@@ -281,7 +283,9 @@
 		width: 90%;
 		margin-inline: auto;
 	}
-	.media__item.mp-2,
+	.media__item.mp-2 {
+		width: 100vw;
+	}
 	.media__item.mp-5 {
 		width: 100vw;
 		margin-inline: calc(-1 * var(--padding));

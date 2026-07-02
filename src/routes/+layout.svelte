@@ -9,12 +9,19 @@
 	import { lang } from '$lib/state/lang.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import LangSwitchOverlay from '$lib/components/LangSwitchOverlay.svelte';
 	// Wordmark = current (2026) lock-up; the previous one lives in Logo.svelte.
 	import Wordmark from '$lib/components/Wordmark.svelte';
 	import { setLenis } from '$lib/state/lenis';
 
 	// Office has its own prominent wordmark + dark reversal — skip the corner logo there.
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
+
+	// Sync the reactive lang.current from the session (app.html's inline script
+	// already set <html data-lang> pre-paint — this just reconciles the store so
+	// UI reading lang.current, e.g. the Header's label, matches it). Runs during
+	// component init, not onMount, so it's settled before first render.
+	if (browser) lang.restore();
 
 	// Reflect the chosen language onto <html data-lang> so the show/hide CSS
 	// (in pages with bilingual copy) switches between EN and JA.
@@ -255,6 +262,8 @@
 
 <div class="darken-overlay" aria-hidden="true"></div>
 <div class="transition-panel" aria-hidden="true"></div>
+
+<LangSwitchOverlay />
 
 <style>
 	:global(body) {

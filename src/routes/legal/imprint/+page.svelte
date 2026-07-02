@@ -11,6 +11,8 @@
 	<div class="wrapper">
 		<header class="head">
 			<h1 class="title" lang="en">Imprint</h1>
+			<!-- JA-only subheading, directly under the (always-English) title -->
+			<p class="subtitle-ja" lang="ja">運営者情報</p>
 			<p class="meta" lang="en">Updated / {UPDATED}</p>
 		</header>
 
@@ -88,7 +90,6 @@
 
 		<section class="body body-ja" lang="ja">
 			<div class="block">
-				<h2 class="subtitle">運営者情報</h2>
 				<p>
 					本ウェブサイト（TAKUMIISOBE.COM）は、東京都を拠点とする磯部タクミによって個人事業として運営されています。
 				</p>
@@ -149,6 +150,16 @@
 </main>
 
 <style>
+	/* Language toggle: show only the active language's body + subheading.
+	   The EN title (h1) and "Updated" meta stay visible in both languages. */
+	:global([data-lang='en']) .Legal .subtitle-ja,
+	:global([data-lang='en']) .Legal .body.body-ja {
+		display: none;
+	}
+	:global([data-lang='ja']) .Legal .body:not(.body-ja) {
+		display: none;
+	}
+
 	.Legal {
 		padding: 100px calc(var(--padding) * 2) 80px;
 		max-width: 720px;
@@ -170,9 +181,17 @@
 		margin: 0 0 4px;
 	}
 
+	.Legal .subtitle-ja {
+		font-family: var(--font-ja);
+		font-size: var(--fs-h5);
+		font-weight: var(--fw-medium);
+		margin: 6px 0 0;
+	}
+
 	.Legal .meta {
 		font-size: 11px;
 		opacity: 0.5;
+		margin-top: 8px;
 	}
 
 	.Legal .body {
@@ -200,23 +219,11 @@
 		font-size: var(--fs-h5);
 	}
 
-	.Legal .body .subtitle {
-		font-size: var(--fs-h4);
-		font-weight: var(--fw-medium);
-		line-height: 1.3;
-	}
-
 	.Legal .body p {
 		font-size: 11px;
 		line-height: 1.3;
 		font-weight: var(--fw-medium);
 		margin: 0;
-	}
-
-	.Legal .body.body-ja {
-		margin-top: 24px;
-		padding-top: 20px;
-		border-top: 1px solid var(--color-line);
 	}
 
 	.Legal .body.body-ja p {

@@ -30,6 +30,8 @@
 			<div class="container">
 				<div class="header">
 					<h3 class="title" lang="en">Contact</h3>
+					<!-- JA-only subheading, directly under the (always-English) title -->
+					<p class="subtitle-ja" lang="ja">お問い合わせ</p>
 				</div>
 
 				<div class="content">
@@ -104,6 +106,17 @@
 </main>
 
 <style>
+	/* Language toggle: show only the active language's body copy. The EN
+	   title stays visible in both languages; form labels stay English (UI
+	   chrome, not translated content). */
+	:global([data-lang='en']) .Contact .subtitle-ja,
+	:global([data-lang='en']) .Contact .body.body-ja {
+		display: none;
+	}
+	:global([data-lang='ja']) .Contact .body:not(.body-ja) {
+		display: none;
+	}
+
 	.Contact {
 		background: #000;
 		color: #fff;
@@ -142,7 +155,19 @@
 	.Contact .title {
 		font-size: var(--fs-h2);
 		font-weight: var(--fw-medium);
-		margin: 0 0 40px;
+		margin: 0;
+	}
+
+	.Contact .subtitle-ja {
+		font-family: var(--font-ja);
+		font-size: var(--fs-h5);
+		font-weight: var(--fw-medium);
+		margin: 8px 0 0;
+		opacity: 0.85;
+	}
+
+	.Contact .header {
+		margin-bottom: 40px;
 	}
 
 	.Contact .body {
@@ -161,10 +186,6 @@
 
 	.Contact .body p + p {
 		margin-top: 16px;
-	}
-
-	.Contact .body.body-ja {
-		margin-top: 28px;
 	}
 
 	.Contact .form {
