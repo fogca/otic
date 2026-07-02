@@ -119,7 +119,7 @@
 		right: 0;
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: baseline;
 		padding: 25px var(--padding);
 		z-index: var(--z-header);
 		opacity: 0;

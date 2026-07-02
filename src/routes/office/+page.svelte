@@ -14,6 +14,8 @@
 		bodyEn: string;
 		body: string;
 		link?: string;
+		image?: string;
+		imageAlt?: string;
 	};
 
 	const services: Service[] = [
@@ -30,14 +32,18 @@
 			bodyEn:
 				'From brand strategy and direction through to logo, graphic, and package design, we work across the full arc of creation. Our in-house type foundry, August Type Foundry, develops typefaces in pursuit of new forms that reinterpret history within a contemporary context. The precision honed in type design runs through all our branding, shaping a coherent formal language at the core of each brand.',
 			body: '私たちは、ブランディングを始めとするクリエイティブ戦略の策定・ディレクションから、ロゴ・グラフィックデザイン・パッケージデザインといったクリエイションまで手掛けています。また弊社主宰のタイプファウンダリ——August Type Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。',
-			link: 'www.august.tf'
+			link: 'www.august.tf',
+			image: '/images/services_typefoundry_02.png',
+			imageAlt: 'V.I. & Typography'
 		},
 		{
 			title: 'Image Visualisation',
 			subtitle: 'イメージクリエイションとCGビジュアライゼーション',
 			bodyEn:
 				'We direct and produce image creation as a single, integrated practice. Extending the eye for light and texture honed in live-action photography into 3DCGI and visualisation, we pursue imagery with true substance — fixing into the image the atmosphere and mass latent within each subject.',
-			body: '私たちは、イメージクリエイションのディレクションと制作を一貫して手がけています。実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。'
+			body: '私たちは、イメージクリエイションのディレクションと制作を一貫して手がけています。実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。',
+			image: '/images/services_visualisation.png',
+			imageAlt: 'Image Visualisation'
 		},
 		{
 			title: 'Digital Infrastructure',
@@ -45,7 +51,9 @@
 			bodyEn:
 				'Our in-house engineering studio, Post Script, designs and builds digital products — brand sites, e-commerce, reservation systems, and web apps — and digital infrastructure, including AI / DX integration. With a modern stack and considered architecture, we refine experience and usability to give form to a brand in the digital world.',
 			body: '弊社主宰のエンジニアリングスタジオ——Post Scriptでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
-			link: 'www.joulejoule.com'
+			link: 'www.joulejoule.com',
+			image: '/images/services_production.png',
+			imageAlt: 'Digital Infrastructure'
 		}
 	];
 
@@ -197,11 +205,16 @@
 				<div class="panel-inner">
 					<header class="panel-hd">
 						<span class="pn" lang="en">02</span>
-						<h2 class="pt" lang="en">Services</h2>
+						<h2 class="pt" lang="en">Services &amp; Partners</h2>
 					</header>
 					<div class="panel-content services-row">
 						{#each services as s}
 							<article class="service-card">
+								{#if s.image}
+									<div class="service-image">
+										<img src={s.image} alt={s.imageAlt ?? s.title} loading="lazy" />
+									</div>
+								{/if}
 								<h3 class="service-title" lang="en">{s.title}</h3>
 								<p class="service-sub" lang="ja">{s.subtitle}</p>
 								<p class="service-en" lang="en">{s.bodyEn}</p>
@@ -480,6 +493,19 @@
 		display: flex;
 		flex-direction: column;
 	}
+	.service-image {
+		width: 100%;
+		aspect-ratio: 4 / 3;
+		overflow: hidden;
+		background: var(--color-bg-gray);
+		margin-bottom: 20px;
+	}
+	.service-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
 	.service-title {
 		font-size: var(--fs-h3);
 		margin: 0;
@@ -604,11 +630,23 @@
 			flex-direction: column;
 			height: auto;
 		}
-		.panel,
-		.panel--intro {
+		.panel {
 			width: 100%;
 			height: auto;
+		}
+		/* Intro stays a full first-view (hero-like); the rest size to their own
+		   content — the PC "one screen per panel" min-height was carried over
+		   here by mistake, forcing every panel to be at least 100dvh tall even
+		   when its stacked content (e.g. Services cards, Company facts) was far
+		   shorter, leaving large empty gaps before the next panel started. */
+		.panel--intro {
 			min-height: 100dvh;
+		}
+		.panel:not(.panel--intro) .panel-inner {
+			height: auto;
+		}
+		.panel-content {
+			flex: none;
 		}
 		.intro-grid {
 			grid-template-columns: 1fr;
