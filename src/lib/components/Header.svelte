@@ -162,18 +162,9 @@
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 
-	/* Current page: 3px dot to the left of the text (・Office) */
-	.Header .link.is-current::before {
-		content: '';
-		position: absolute;
-		right: 100%;
-		top: 50%;
-		transform: translateY(-50%);
-		margin-right: 3px;
-		width: 3px;
-		height: 3px;
-		border-radius: 50%;
-		background: currentColor;
+	/* Current page: dimmed instead of the dot marker */
+	.Header .link.is-current {
+		opacity: 0.5;
 	}
 
 	.Header .link:hover {
