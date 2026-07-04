@@ -243,7 +243,11 @@
 		top: 0;
 		left: 0;
 		width: 100vw;
+		/* 100vh on iOS Safari = toolbar-collapsed (large) height; 100dvh tracks
+		   the real current viewport so this full-screen backdrop always
+		   reaches the true visible bottom, matching the +layout.svelte fix. */
 		height: 100vh;
+		height: 100dvh;
 		background: var(--color-bg-dark, #121212);
 		z-index: 9999;
 		display: flex;

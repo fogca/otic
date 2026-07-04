@@ -120,9 +120,18 @@
 		// Hide Header during transition — it slides back in via existing animation when intro.completed = true
 		intro.completed = false;
 
-		// Set transform-origin to visible viewport center (in element coords)
+		// Set transform-origin to visible viewport center (in element coords).
+		// iOS Safari: window.innerHeight already tracks the CURRENT visible
+		// height (shrinks while the bottom toolbar is showing), but
+		// window.visualViewport.height is the more reliable, purpose-built API
+		// for "what's actually visible right now" — prefer it where available.
+		// (This must match the box's own sizing, which uses 100dvh below, not
+		// the static 100vh/100lvh a toolbar-state mismatch would otherwise
+		// cause the scale-down to pivot around the wrong point and appear to
+		// stop short of the true screen bottom.)
+		const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
 		const scrollY = window.scrollY;
-		const vhCenter = scrollY + window.innerHeight / 2;
+		const vhCenter = scrollY + viewportHeight / 2;
 		gsap.set('.page-wrapper', {
 			transformOrigin: `50% ${vhCenter}px`
 		});
@@ -273,14 +282,21 @@
 
 	.transition-bg {
 		background: black;
+		/* 100vh on iOS Safari is pinned to the toolbar-COLLAPSED (large)
+		   height, not what's currently visible — 100dvh tracks the real,
+		   current viewport so this box's height agrees with the JS
+		   (visualViewport-based) transform-origin math above. */
 		min-height: 100vh;
+		min-height: 100dvh;
 	}
 
 	/* ── Global corner wordmark (PC, bottom-left) ── */
 	.corner-logo {
 		position: fixed;
 		left: var(--padding);
-		bottom: 28px;
+		/* viewport-fit=cover lets this extend into the safe area (home
+		   indicator / rounded corners) — keep it clear of that. */
+		bottom: calc(28px + env(safe-area-inset-bottom, 0px));
 		width: 420px;
 		max-width: 32vw;
 		color: var(--color-text);
@@ -310,7 +326,10 @@
 
 	.page-wrapper {
 		background: var(--color-bg, white);
+		/* See .transition-bg above — dvh keeps this in sync with the
+		   visualViewport-based transform-origin used for the scale animation. */
 		min-height: 100vh;
+		min-height: 100dvh;
 		position: relative;
 		will-change: transform, opacity;
 	}
