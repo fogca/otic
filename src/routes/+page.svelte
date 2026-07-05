@@ -20,7 +20,8 @@
 	const firstWork = $derived(works[0]);
 	const restWorks = $derived(works.slice(1, 10));
 
-	// Square work tiles for the right-hand vertical feed (5 selected projects).
+	// Work tiles for the right-hand vertical feed (5 selected projects) — fixed
+	// width, each keeps its own natural aspect-ratio (no forced square crop).
 	// Uses main_visual (Cloudflare video or image), falling back to thumbnail.
 	const feedTiles = $derived.by<Tile[]>(() =>
 		works
@@ -35,7 +36,9 @@
 							srcset: imgSrcset(v.src, [400, 600, 800, 1200]),
 							isVideo: false,
 							alt: w.title,
-							href: `/archives/${w.id}`
+							href: `/archives/${w.id}`,
+							width: v.width,
+							height: v.height
 						}
 			)
 	);

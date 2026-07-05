@@ -9,13 +9,55 @@
 		alt: string;
 		href: string;
 		isVideo: boolean;
+		// Natural dimensions when known up front (CMS image data). Videos have
+		// none until their metadata loads — see videoMeta() below, which
+		// corrects the tile's aspect-ratio once it does.
+		width?: number;
+		height?: number;
 	};
 
 	let { tiles = [] }: { tiles?: Tile[] } = $props();
 
+	// Per-tile aspect-ratio, keyed by index — starts from the Tile's known
+	// dimensions (images) or a neutral 16:9 guess (videos, corrected below).
+	let tileRatios = $state<string[]>(tiles.map(defaultRatio));
+	$effect(() => {
+		tileRatios = tiles.map(defaultRatio);
+	});
+	function defaultRatio(t: Tile): string {
+		return t.width && t.height ? `${t.width} / ${t.height}` : '16 / 9';
+	}
+	function videoMeta(node: HTMLVideoElement, i: number) {
+		const onMeta = () => {
+			if (!node.videoWidth || !node.videoHeight) return;
+			tileRatios[i] = `${node.videoWidth} / ${node.videoHeight}`;
+			// Reflow shifted every tile below this one — the snap-centering
+			// padding needs the (possibly new) tallest tile's real height.
+			queueMicrotask(updateFeedPadding);
+		};
+		node.addEventListener('loadedmetadata', onMeta);
+		return {
+			destroy() {
+				node.removeEventListener('loadedmetadata', onMeta);
+			}
+		};
+	}
+
 	let ethosEl: HTMLElement | undefined = $state();
 	let feedEl: HTMLElement | undefined = $state();
 	let tileEls = $state<HTMLElement[]>([]);
+
+	// Tiles are no longer uniform squares (fixed width, natural height), so
+	// the top/bottom room needed for the first/last tile to reach true
+	// viewport-centre when snapping can't be a fixed CSS guess — measure the
+	// tallest rendered tile and pad by half of it.
+	function updateFeedPadding() {
+		if (!feedEl || tileEls.length === 0) return;
+		const tallest = Math.max(...tileEls.filter(Boolean).map((el) => el.offsetHeight));
+		const pad = Math.max(0, window.innerHeight / 2 - tallest / 2);
+		feedEl.style.paddingTop = `${pad}px`;
+		feedEl.style.paddingBottom = `${pad}px`;
+	}
 
 	// Ethos is pinned bottom... no — centred-left while the thumbnails scroll.
 	// .page-wrapper's transform breaks position:fixed for descendants, so we
@@ -68,6 +110,14 @@
 		let snap: any = null;
 		let cancelled = false;
 		let pollId = 0;
+		let resizeTimer = 0;
+
+		updateFeedPadding();
+		const onResize = () => {
+			clearTimeout(resizeTimer);
+			resizeTimer = window.setTimeout(updateFeedPadding, 100);
+		};
+		window.addEventListener('resize', onResize);
 
 		// Fade the fixed ethos out once the thumbnails have scrolled past, so it
 		// doesn't overlap the sections below.
@@ -101,6 +151,8 @@
 		return () => {
 			cancelled = true;
 			if (pollId) clearTimeout(pollId);
+			clearTimeout(resizeTimer);
+			window.removeEventListener('resize', onResize);
 			snap?.destroy();
 			lenis?.off?.('scroll', onScroll);
 		};
@@ -118,9 +170,22 @@
 	<ul class="feed" bind:this={feedEl}>
 		{#each tiles as t, i (t.href)}
 			<li class="feed__item" bind:this={tileEls[i]}>
-				<a class="feed__tile" href={t.href} aria-label={t.alt}>
+				<a
+					class="feed__tile"
+					href={t.href}
+					aria-label={t.alt}
+					style:aspect-ratio={tileRatios[i]}
+				>
 					{#if t.isVideo}
-						<video src={t.src} autoplay loop muted playsinline preload="metadata"></video>
+						<video
+							use:videoMeta={i}
+							src={t.src}
+							autoplay
+							loop
+							muted
+							playsinline
+							preload="metadata"
+						></video>
 					{:else}
 						<img
 							src={t.src}
@@ -154,12 +219,16 @@
 		line-height: 1.3;
 	}
 
-	/* ── Feed: right-aligned column, scrolls with the page ── */
+	/* ── Feed: right-aligned column, scrolls with the page ──
+	   Fixed width; each tile keeps its own natural aspect-ratio (no forced
+	   square crop) — updateFeedPadding() sets the real top/bottom padding
+	   in JS since tile heights now vary per project instead of being a
+	   uniform, calculable square. */
 	.feed {
 		list-style: none;
 		margin: 0;
-		/* Room so the first/last tile can reach the viewport centre when snapping. */
-		padding-block: calc(50dvh - min(260px, 18vw));
+		/* Fallback for the instant before JS measures real tile heights. */
+		padding-block: 30dvh;
 		width: min(520px, 36vw);
 		margin-left: auto;
 		margin-right: 1.3vw;
@@ -173,7 +242,6 @@
 	.feed__tile {
 		display: block;
 		width: 100%;
-		aspect-ratio: 1 / 1;
 		overflow: hidden;
 		background: var(--color-bg-gray);
 	}
