@@ -219,7 +219,7 @@
 	}
 
 	.Archives .Title .title {
-		font-size: var(--fs-h1);
+		font-size: var(--fs-h2);
 		font-weight: var(--fw-base);
 		margin: 0;
 	}

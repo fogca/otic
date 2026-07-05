@@ -355,22 +355,44 @@
 
 		/* Lead is portaled to <body> and positioned fixed by leadPortal()
 		   (see the action — .page-wrapper's transform blocks fixed otherwise).
-		   The 38% info column is left empty as its visual slot. */
+		   The 38% info column is left empty as its visual slot. Smaller +
+		   narrower than the base/SP rule (per request — PC only). */
+		.lead {
+			max-width: 440px;
+		}
+		.lead__title {
+			font-size: var(--fs-h2);
+		}
 		.lead__body {
 			margin-top: 24px;
 		}
 
-		/* Media: editorial vertical flow within the right column */
+		/* Media: uniform-width column, tight gap (was editorial-scatter
+		   varied widths/offsets + a large 12vh gap). */
 		.media {
 			grid-area: media;
 			margin-top: 0;
 			padding: 25px var(--padding) 0 0;
-			gap: 12vh;
+			gap: 10px;
 		}
 		.media__hero,
 		.media__item {
-			width: auto;
-			margin-inline: 0;
+			width: 50vw;
+			margin-left: auto;
+			margin-right: 0;
+		}
+		/* Re-assert the uniform width against the SP mp-1/2/3/5 rules above —
+		   those use two classes (higher specificity) so they'd otherwise still
+		   win here even though this block comes later in the cascade. */
+		.media__item.mp-1,
+		.media__item.mp-2,
+		.media__item.mp-3,
+		.media__item.mp-4,
+		.media__item.mp-5,
+		.media__item.mp-6 {
+			width: 50vw;
+			margin-left: auto;
+			margin-right: 0;
 		}
 		.media__hero img,
 		.media__hero video,
@@ -381,34 +403,15 @@
 			object-position: left top;
 		}
 
-		/* Varied widths / offsets — editorial scatter inside the column */
+		/* First view: hero fills exactly one viewport height with its image
+		   bottom-anchored, so only the hero is visible before any scroll.
+		   .media's own 25px top padding is subtracted so the hero's bottom
+		   edge lands exactly on the true viewport bottom, not 25px past it. */
 		.media__hero {
-			width: 82%;
-			margin-left: auto; /* hero bleeds toward the right edge */
-		}
-		.media__item.mp-1 {
-			width: 58%;
-			margin-left: 0;
-		}
-		.media__item.mp-2 {
-			width: 80%;
-			margin-left: auto;
-		}
-		.media__item.mp-3 {
-			width: 48%;
-			margin-left: 16%;
-		}
-		.media__item.mp-4 {
-			width: 72%;
-			margin-left: auto;
-		}
-		.media__item.mp-5 {
-			width: 54%;
-			margin-left: 6%;
-		}
-		.media__item.mp-6 {
-			width: 76%;
-			margin-left: auto;
+			height: calc(100dvh - 25px);
+			display: flex;
+			align-items: flex-end;
+			justify-content: flex-end;
 		}
 
 		/* Colophon — tight info block, left-aligned under the lead */

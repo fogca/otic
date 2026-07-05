@@ -188,17 +188,22 @@
 				</p>
 			</div>
 
-			<!-- Office logo — full-bleed at rest; scroll-scrubbed to shrink down
-			     to the studio text's width (see the onMount ScrollTrigger above). -->
-			<div class="wordmark" bind:this={wordmarkEl}>
-				<Logo />
-			</div>
+			<!-- Wordmark stays the true last/bottom-anchored element (as before) —
+			     the reveal image below is absolutely positioned so its (invisible
+			     at rest) box doesn't push the wordmark up out of the bottom spot. -->
+			<div class="wordmark-group">
+				<!-- Office logo — full-bleed at rest; scroll-scrubbed to shrink down
+				     to the studio text's width (see the onMount ScrollTrigger above). -->
+				<div class="wordmark" bind:this={wordmarkEl}>
+					<Logo />
+				</div>
 
-			<!-- Reveal image — scales up from beneath the shrunk wordmark as the
-			     scroll sequence continues. Placeholder asset: swap {src} for the
-			     real image. -->
-			<div class="intro-reveal" bind:this={revealEl}>
-				<img src="/images/services_visualisation.png" alt="" />
+				<!-- Reveal image — scales up from beneath the shrunk wordmark as the
+				     scroll sequence continues. Placeholder asset: swap {src} for the
+				     real image. -->
+				<div class="intro-reveal" bind:this={revealEl}>
+					<img src="/images/services_visualisation.png" alt="" />
+				</div>
 			</div>
 		</div>
 	</section>
@@ -386,10 +391,18 @@
 		margin: 0;
 	}
 
+	/* Wrapper for wordmark + reveal — relative so the (absolutely positioned)
+	   reveal image doesn't add to this group's flow height, keeping the
+	   wordmark the true bottom-anchored element (as before). */
+	.wordmark-group {
+		flex: none;
+		position: relative;
+		width: 100%;
+	}
+
 	/* ── Logo wordmark — full-bleed at rest; scroll-scrubbed to shrink down
 	   to the studio text's width (see the onMount ScrollTrigger). ── */
 	.wordmark {
-		flex: none;
 		width: 100%;
 		margin-inline: auto;
 		overflow: hidden;
@@ -403,10 +416,17 @@
 	}
 
 	/* ── Reveal image — scales up from beneath the shrunk wordmark.
-	   opacity:0 at rest as a no-JS-yet-applied baseline; the ScrollTrigger
-	   timeline drives scale/opacity from there once it loads. ── */
+	   Positioned absolute (not in flow) so its box — invisible at rest but
+	   still occupying space via aspect-ratio — can't push the wordmark up
+	   from the bottom. opacity:0 at rest as a no-JS-yet-applied baseline;
+	   the ScrollTrigger timeline drives scale/opacity from there. Centred
+	   via left/right+margin (not transform) so GSAP's scale transform is
+	   the only thing writing to this element's `transform`. ── */
 	.intro-reveal {
-		flex: none;
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
 		width: 100%;
 		max-width: 720px;
 		margin-inline: auto;
