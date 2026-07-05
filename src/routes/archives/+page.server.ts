@@ -26,7 +26,8 @@ type GalleryImage = {
 };
 
 // Fixed-seed shuffle that biases thumbnails toward the upper half so they
-// dominate the top of the masonry while remaining sprinkled below.
+// dominate the top of the masonry while remaining sprinkled below. Same
+// order on every load (deterministic) — this is the current default.
 function patternShuffle(items: GalleryImage[], seed: number): GalleryImage[] {
 	return [...items].sort((a, b) => {
 		const hashA = (hashString(a.url + a.workId) + seed) % 1_000_000;
@@ -43,6 +44,32 @@ function patternShuffle(items: GalleryImage[], seed: number): GalleryImage[] {
 		return scoreB - scoreA;
 	});
 }
+
+// True random shuffle (Fisher–Yates) — a genuinely fresh, unpredictable
+// order on every single page load/reload. No thumbnail bias: every image
+// has equal odds at every position. Alternate to patternShuffle above;
+// toggle which one runs via SHUFFLE_MODE below.
+function trueRandomShuffle(items: GalleryImage[]): GalleryImage[] {
+	const arr = [...items];
+	for (let i = arr.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+	return arr;
+}
+
+// ── Shuffle mode ──────────────────────────────────────────────────────
+// 'pattern' (default, current behaviour): fixed-seed, same order every
+//   load, thumbnails biased toward the top of the masonry.
+// 'random': genuinely reshuffles on every request via trueRandomShuffle.
+// Flip the return value here to switch — both implementations stay intact
+// so either is a one-line revert away. (Returned from a function, not a
+// literal-typed const, so TS doesn't narrow it to a single literal and flag
+// the SHUFFLE_MODE === 'random' check below as unreachable.)
+function getShuffleMode(): 'pattern' | 'random' {
+	return 'pattern';
+}
+const SHUFFLE_MODE = getShuffleMode();
 
 export const load: PageServerLoad = async () => {
 	const data = await getVisibleWorks({
@@ -153,7 +180,8 @@ export const load: PageServerLoad = async () => {
 	const main = images.filter((img) => !TRAILING_IDS.has(img.workId));
 	const trailing = images.filter((img) => TRAILING_IDS.has(img.workId));
 
-	const shuffledMain = patternShuffle(main, 23456);
+	const shuffledMain =
+		SHUFFLE_MODE === 'random' ? trueRandomShuffle(main) : patternShuffle(main, 23456);
 
 	return { images: [...shuffledMain, ...trailing], works: data.contents };
 };
