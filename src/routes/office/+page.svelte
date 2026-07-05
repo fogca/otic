@@ -150,47 +150,16 @@
 			<!-- ─── Panel 1: First view ─── -->
 			<section class="panel panel--intro">
 				<div class="intro-inner">
-					<div class="intro-grid">
-
-						<!-- Col 1: Studio description -->
-						<div class="col col--studio">
-							<p class="col-body" lang="en">
-								Office / TAKUMI ISOBE is a creative office based in Tokyo working across
-								visual identity and design engineering — experience, brand, product, type,
-								furniture, and digital communication. By blending culture, philosophy, and
-								design, we create strategies that speak to what makes us human — our
-								physicality, our emotion. Day by day, learning further, we strive toward
-								better creation.
-							</p>
-						</div>
-
-						<!-- Col 2: Connect -->
-						<div class="col col--connect">
-							<ul class="col-list" lang="en">
-								<li><a href="mailto:hi@takumiisobe.com">Email ↗</a></li>
-								<li>
-									<a
-										href="https://www.instagram.com/takumi.isobe"
-										target="_blank"
-										rel="noopener noreferrer">Instagram ↗</a
-									>
-								</li>
-								<li>
-									<a href="https://www.august.tf" target="_blank" rel="noopener noreferrer"
-										>August.tf ↗</a
-									>
-								</li>
-								<li>
-									<a
-										href="https://www.joulejoule.com"
-										target="_blank"
-										rel="noopener noreferrer">Post Script ↗</a
-									>
-								</li>
-							</ul>
-							<p class="col-meta" lang="en">Tokyo, Japan</p>
-						</div>
-
+					<!-- Studio description — centred (X/Y) in the space above the logo -->
+					<div class="intro-content">
+						<p class="intro-text" lang="en">
+							Office / TAKUMI ISOBE is a creative office based in Tokyo working across
+							visual identity and design engineering — experience, brand, product, type,
+							furniture, and digital communication. By blending culture, philosophy, and
+							design, we create strategies that speak to what makes us human — our
+							physicality, our emotion. Day by day, learning further, we strive toward
+							better creation.
+						</p>
 					</div>
 
 					<!-- Office logo full-width at the bottom -->
@@ -388,51 +357,28 @@
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
 		padding-top: 80px;
 		padding-bottom: 0;
 	}
 
-	/* 2-column info grid — full-bleed (no side padding).
-	   3fr/1fr = 75:25 ratio, but gap-aware. */
-	.intro-grid {
-		display: grid;
-		grid-template-columns: 3fr 1fr;
-		column-gap: 48px;
-		align-items: start;
-	}
-
-	/* Studio body copy — size/line-height/align come from base.css p:lang(en).
-	   Only bump one type step above the list items. */
-	.col-body {
-		font-size: var(--fs-h2);
-		margin: 0;
-	}
-
-	.col-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
+	/* Studio description — centred (X/Y) in the space above the logo.
+	   flex:1 claims all height not used by the wordmark strip below. */
+	.intro-content {
+		flex: 1;
 		display: flex;
-		flex-direction: column;
-		gap: 12px;
-	}
-	.col-list li {
-		font-size: var(--fs-h6);
-		line-height: 1.4;
-	}
-	:global(.OfficePage) .col-list a {
-		text-decoration: none;
-		transition: opacity 0.2s var(--ease-default);
-	}
-	:global(.OfficePage) .col-list a:hover {
-		opacity: 0.45;
+		align-items: center;
+		justify-content: center;
+		padding-inline: var(--padding);
 	}
 
-	.col-meta {
-		font-size: var(--fs-h6);
-		margin: 32px 0 0;
-		opacity: 0.45;
+	/* Line-height/weight come from base.css p:lang(en); one step down from
+	   the previous fs-h2 (per request — "a bit smaller"), centred, and
+	   width-capped so lines stay readable instead of stretching full-bleed. */
+	.intro-text {
+		font-size: var(--fs-h3);
+		text-align: center;
+		max-width: 720px;
+		margin: 0;
 	}
 
 	/* ── Logo wordmark — full-bleed, bottom-anchored ── */
@@ -648,10 +594,6 @@
 		.panel-content {
 			flex: none;
 		}
-		.intro-grid {
-			grid-template-columns: 1fr;
-			gap: 32px;
-		}
 		/* Stacked content: columns become rows, fluid width */
 		.panel:not(.panel--intro) .panel-inner {
 			padding: 90px var(--padding) var(--padding);
@@ -678,13 +620,6 @@
 		/* Stacked cards don't need the 2-line reserve */
 		.service-title {
 			min-height: 0;
-		}
-	}
-
-	/* ── Wide desktop ── */
-	@media (min-width: 1440px) {
-		.intro-grid {
-			gap: 64px;
 		}
 	}
 </style>
