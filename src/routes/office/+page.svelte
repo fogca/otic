@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import Lenis from 'lenis';
-	import { stopLenis, startLenis } from '$lib/state/lenis';
+	import gsap from 'gsap';
+	import { getLenis } from '$lib/state/lenis';
 	import Logo from '$lib/components/Logo.svelte';
 
-	let track: HTMLElement | undefined = $state();
-	let inner: HTMLElement | undefined = $state();
+	let introInnerEl: HTMLElement | undefined = $state();
+	let wordmarkEl: HTMLElement | undefined = $state();
+	let introTextEl: HTMLElement | undefined = $state();
+	let revealEl: HTMLElement | undefined = $state();
 
 	type Service = {
 		title: string;
@@ -89,52 +91,78 @@
 		}
 	];
 
+	// Scroll-linked intro sequence: as the user scrolls past the first view,
+	// the wordmark shrinks from full-bleed down to the width of the studio
+	// text above it, then the reveal image scales up from underneath it.
+	// Pinned + scrubbed (tied directly to scroll position, not a one-shot
+	// trigger) via GSAP ScrollTrigger.
 	onMount(() => {
 		if (!browser) return;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		if (!introInnerEl || !wordmarkEl || !introTextEl || !revealEl) return;
+		// Capture as locals: TS can't carry the narrowing from the guard above
+		// across the async `.then()` boundary, and these are $state fields
+		// that could theoretically be reassigned (they won't be, but the
+		// non-null guarantee needs to live on something stable).
+		const introInner = introInnerEl;
+		const wordmark = wordmarkEl;
+		const introText = introTextEl;
+		const reveal = revealEl;
 
-		// Horizontal Lenis is desktop-only. On SP the panels stack vertically,
-		// so the page keeps native vertical scroll (global Lenis stays active).
-		const mq = window.matchMedia('(min-width: 1024px)');
-		let lenis: Lenis | null = null;
-		let rafId = 0;
+		let cancelled = false;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let tl: any;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let lenis: any;
+		let onLenisScroll: (() => void) | undefined;
 
-		const enable = () => {
-			if (lenis || !track || !inner) return;
-			// Hand off from global vertical Lenis; lock page vertical scroll.
-			stopLenis();
-			document.documentElement.style.overflowY = 'hidden';
-			// gestureOrientation:'both' maps trackpad/wheel vertical → horizontal.
-			lenis = new Lenis({
-				wrapper: track,
-				content: inner,
-				orientation: 'horizontal',
-				gestureOrientation: 'both',
-				smoothWheel: true,
-				duration: 1.2
+		import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+			if (cancelled) return;
+			gsap.registerPlugin(ScrollTrigger);
+
+			// The global Lenis (site-wide smooth scroll, set up in +layout.svelte)
+			// virtualises scroll — ScrollTrigger needs to be nudged on every
+			// Lenis tick or its progress calculations lag behind what's on screen.
+			lenis = getLenis();
+			if (lenis) {
+				onLenisScroll = () => ScrollTrigger.update();
+				lenis.on('scroll', onLenisScroll);
+			}
+
+			const targetWidth = () => introText.getBoundingClientRect().width;
+
+			gsap.set(reveal, { scale: 0.4, opacity: 0, transformOrigin: '50% 0%' });
+
+			tl = gsap.timeline({
+				scrollTrigger: {
+					trigger: introInner,
+					start: 'top top',
+					end: '+=1200',
+					pin: true,
+					scrub: 1,
+					invalidateOnRefresh: true
+				}
 			});
-			const raf = (time: number) => {
-				lenis?.raf(time);
-				rafId = requestAnimationFrame(raf);
-			};
-			rafId = requestAnimationFrame(raf);
-		};
 
-		const disable = () => {
-			if (!lenis) return;
-			cancelAnimationFrame(rafId);
-			lenis.destroy();
-			lenis = null;
-			document.documentElement.style.overflowY = '';
-			startLenis();
-		};
-
-		const onChange = (e: MediaQueryListEvent) => (e.matches ? enable() : disable());
-		if (mq.matches) enable();
-		mq.addEventListener('change', onChange);
+			// Phase 1: wordmark shrinks to match the text's rendered width.
+			tl.to(wordmark, {
+				width: targetWidth,
+				duration: 1,
+				ease: 'none'
+			});
+			// Phase 2: reveal image scales up from beneath the (now-shrunk) wordmark.
+			tl.fromTo(
+				reveal,
+				{ scale: 0.4, opacity: 0 },
+				{ scale: 1, opacity: 1, duration: 1, ease: 'none' }
+			);
+		});
 
 		return () => {
-			mq.removeEventListener('change', onChange);
-			disable();
+			cancelled = true;
+			if (onLenisScroll) lenis?.off('scroll', onLenisScroll);
+			tl?.scrollTrigger?.kill();
+			tl?.kill();
 		};
 	});
 </script>
@@ -144,30 +172,36 @@
 </svelte:head>
 
 <main class="OfficePage">
-	<div class="h-track" bind:this={track}>
-		<div class="h-inner" bind:this={inner}>
 
-			<!-- ─── Panel 1: First view ─── -->
-			<section class="panel panel--intro">
-				<div class="intro-inner">
-					<!-- Studio description — centred (X/Y) in the space above the logo -->
-					<div class="intro-content">
-						<p class="intro-text" lang="en">
-							Office / TAKUMI ISOBE is a creative office based in Tokyo working across
-							visual identity and design engineering — experience, brand, product, type,
-							furniture, and digital communication. By blending culture, philosophy, and
-							design, we create strategies that speak to what makes us human — our
-							physicality, our emotion. Day by day, learning further, we strive toward
-							better creation.
-						</p>
-					</div>
+	<!-- ─── Panel 1: First view ─── -->
+	<section class="panel panel--intro">
+		<div class="intro-inner" bind:this={introInnerEl}>
+			<!-- Studio description — centred (X/Y) in the space above the logo -->
+			<div class="intro-content">
+				<p class="intro-text" bind:this={introTextEl} lang="en">
+					Office / TAKUMI ISOBE is a creative office based in Tokyo working across
+					visual identity and design engineering — experience, brand, product, type,
+					furniture, and digital communication. By blending culture, philosophy, and
+					design, we create strategies that speak to what makes us human — our
+					physicality, our emotion. Day by day, learning further, we strive toward
+					better creation.
+				</p>
+			</div>
 
-					<!-- Office logo full-width at the bottom -->
-					<div class="wordmark">
-						<Logo />
-					</div>
-				</div>
-			</section>
+			<!-- Office logo — full-bleed at rest; scroll-scrubbed to shrink down
+			     to the studio text's width (see the onMount ScrollTrigger above). -->
+			<div class="wordmark" bind:this={wordmarkEl}>
+				<Logo />
+			</div>
+
+			<!-- Reveal image — scales up from beneath the shrunk wordmark as the
+			     scroll sequence continues. Placeholder asset: swap {src} for the
+			     real image. -->
+			<div class="intro-reveal" bind:this={revealEl}>
+				<img src="/images/services_visualisation.png" alt="" />
+			</div>
+		</div>
+	</section>
 
 			<!-- ─── Panel 2: Services ─── -->
 			<section class="panel panel--services">
@@ -285,8 +319,6 @@
 				</div>
 			</section>
 
-		</div><!-- .h-inner -->
-	</div><!-- .h-track -->
 </main>
 
 <style>
@@ -308,47 +340,20 @@
 		display: none;
 	}
 
-	/* ── Page host: fills viewport, no spacing ── */
+	/* ── Page host: normal vertical document flow (no scroll-jacking) ── */
 	.OfficePage {
-		width: 100vw;
-		height: 100dvh;
-		overflow: hidden;
+		width: 100%;
 		padding: 0;
 		margin: 0;
 		background: var(--color-bg);
 	}
 
-	/* ── Horizontal scroll track (Lenis drives scrollLeft) ──
-	   No scroll-snap: it fights Lenis's per-frame scrollLeft writes. */
-	.h-track {
-		width: 100%;
-		height: 100%;
-		overflow-x: auto;
-		overflow-y: hidden;
-		scrollbar-width: none;
-		-ms-overflow-style: none;
-	}
-	.h-track::-webkit-scrollbar {
-		display: none;
-	}
-
-	/* ── Inner row: panels laid out horizontally ── */
-	.h-inner {
-		display: flex;
-		flex-direction: row;
-		height: 100%;
-	}
-
-	/* ── Each panel: full viewport height; width is content-driven
-	   (intro stays exactly one screen). ── */
+	/* Panels stack vertically and size to their own content. */
 	.panel {
-		flex: none;
-		height: 100dvh;
-		overflow: hidden;
 		position: relative;
 	}
 	.panel--intro {
-		width: 100vw;
+		min-height: 100dvh;
 	}
 
 	/* ── Panel 1: First view ── */
@@ -362,7 +367,7 @@
 	}
 
 	/* Studio description — centred (X/Y) in the space above the logo.
-	   flex:1 claims all height not used by the wordmark strip below. */
+	   flex:1 claims all height not used by the wordmark/reveal below. */
 	.intro-content {
 		flex: 1;
 		display: flex;
@@ -371,9 +376,9 @@
 		padding-inline: var(--padding);
 	}
 
-	/* Line-height/weight come from base.css p:lang(en); one step down from
-	   the previous fs-h2 (per request — "a bit smaller"), centred, and
-	   width-capped so lines stay readable instead of stretching full-bleed. */
+	/* Line-height/weight come from base.css p:lang(en). Width-capped so
+	   lines stay readable instead of stretching full-bleed; narrowed further
+	   on SP below. PC gets a smaller font-size override further down. */
 	.intro-text {
 		font-size: var(--fs-h3);
 		text-align: center;
@@ -381,10 +386,12 @@
 		margin: 0;
 	}
 
-	/* ── Logo wordmark — full-bleed, bottom-anchored ── */
+	/* ── Logo wordmark — full-bleed at rest; scroll-scrubbed to shrink down
+	   to the studio text's width (see the onMount ScrollTrigger). ── */
 	.wordmark {
 		flex: none;
 		width: 100%;
+		margin-inline: auto;
 		overflow: hidden;
 		padding-bottom: 10px;
 		line-height: 1;
@@ -395,13 +402,36 @@
 		display: block;
 	}
 
-	/* ── Content panels (Services / Company / Ethos / Director) ── */
-	.panel:not(.panel--intro) .panel-inner {
+	/* ── Reveal image — scales up from beneath the shrunk wordmark.
+	   opacity:0 at rest as a no-JS-yet-applied baseline; the ScrollTrigger
+	   timeline drives scale/opacity from there once it loads. ── */
+	.intro-reveal {
+		flex: none;
+		width: 100%;
+		max-width: 720px;
+		margin-inline: auto;
+		margin-top: 24px;
+		aspect-ratio: 4 / 3;
+		overflow: hidden;
+		background: var(--color-bg-gray);
+		opacity: 0;
+	}
+	.intro-reveal img {
+		width: 100%;
 		height: 100%;
-		padding: 100px calc(var(--padding) * 1.5) 56px;
+		object-fit: cover;
+		display: block;
+	}
+
+	/* ── Content panels (Services / Company / Ethos / Director) ──
+	   Mobile-first: stacked, content-sized. PC gets side-by-side columns
+	   via the min-width:1024px block further down. */
+	.panel:not(.panel--intro) .panel-inner {
+		height: auto;
+		padding: 90px var(--padding) var(--padding);
 		display: flex;
 		flex-direction: column;
-		gap: 44px;
+		gap: 32px;
 	}
 
 	/* Section header — number over title */
@@ -422,20 +452,18 @@
 		line-height: 1.15;
 	}
 
-	/* Content area: horizontal row of columns, fills remaining height */
+	/* Content area — mobile-first: stacked column. PC becomes a horizontal
+	   row of columns via the min-width:1024px block further down. */
 	.panel-content {
-		flex: 1;
-		min-height: 0;
+		flex: none;
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
 		gap: 48px;
 	}
 
 	/* ── Services ── */
 	.service-card {
-		flex: none;
-		width: 30vw;
-		max-width: 440px;
+		width: 100%;
 		display: flex;
 		flex-direction: column;
 	}
@@ -455,8 +483,6 @@
 	.service-title {
 		font-size: var(--fs-h3);
 		margin: 0;
-		/* Reserve 2 lines so subtitle + body start at the same Y across cards */
-		min-height: 2.66em;
 	}
 	.service-sub {
 		font-size: 10px;
@@ -473,7 +499,7 @@
 	}
 	.service-link {
 		font-size: var(--fs-h5);
-		margin-top: auto;
+		margin-top: 16px;
 		padding-top: 16px;
 		text-decoration: underline;
 		text-underline-offset: 3px;
@@ -485,13 +511,11 @@
 
 	/* ── Company ── */
 	.company-row {
-		gap: 80px;
+		gap: 40px;
 		align-items: flex-start;
 	}
 	.cfacts {
-		flex: none;
-		width: 30vw;
-		max-width: 440px;
+		width: 100%;
 		margin: 0;
 	}
 	.cfact {
@@ -515,17 +539,10 @@
 	}
 
 	/* ── Ethos ── */
-	/* Wider columns keep each part within one screen height (no v-scroll). */
 	.ethos-block {
-		flex: none;
-		width: 44vw;
-		max-width: 640px;
+		width: 100%;
 		display: flex;
 		flex-direction: column;
-	}
-	.ethos-block--intro {
-		width: 30vw;
-		max-width: 420px;
 	}
 	.ethos-part {
 		margin: 0 0 14px;
@@ -554,72 +571,73 @@
 
 	/* ── Director ── */
 	.director-text {
-		flex: none;
-		width: 44vw;
-		max-width: 640px;
+		width: 100%;
 	}
 	.director-text p + p {
 		margin-top: 24px;
 	}
 
-	/* ── Mobile: vertical stack (SP) ── */
+	/* SP: narrow the studio text a bit further than the page's standard
+	   side padding already does. */
 	@media (max-width: 1023px) {
-		.OfficePage {
-			height: auto;
-			overflow: visible;
+		.intro-text {
+			max-width: 78%;
 		}
-		.h-track {
-			overflow: visible;
-			height: auto;
+	}
+
+	/* ── Desktop: side-by-side columns within each panel (the panels
+	   themselves still stack vertically — this only affects layout inside
+	   a panel, e.g. Services' 4 cards in a row). ── */
+	@media (min-width: 1024px) {
+		/* "A bit smaller" than the shared fs-h3 (PC-only; SP keeps fs-h3). */
+		.intro-text {
+			font-size: var(--fs-h4);
 		}
-		.h-inner {
-			flex-direction: column;
-			height: auto;
-		}
-		.panel {
-			width: 100%;
-			height: auto;
-		}
-		/* Intro stays a full first-view (hero-like); the rest size to their own
-		   content — the PC "one screen per panel" min-height was carried over
-		   here by mistake, forcing every panel to be at least 100dvh tall even
-		   when its stacked content (e.g. Services cards, Company facts) was far
-		   shorter, leaving large empty gaps before the next panel started. */
-		.panel--intro {
-			min-height: 100dvh;
-		}
+
 		.panel:not(.panel--intro) .panel-inner {
-			height: auto;
+			padding: 100px calc(var(--padding) * 1.5) 56px;
+			gap: 44px;
 		}
 		.panel-content {
+			flex-direction: row;
+		}
+
+		.service-card {
 			flex: none;
+			width: 30vw;
+			max-width: 440px;
 		}
-		/* Stacked content: columns become rows, fluid width */
-		.panel:not(.panel--intro) .panel-inner {
-			padding: 90px var(--padding) var(--padding);
-			gap: 32px;
-		}
-		.panel-content {
-			flex-direction: column;
-			gap: 48px;
-		}
-		.service-card,
-		.ethos-block,
-		.ethos-block--intro,
-		.cfacts,
-		.director-text {
-			width: 100%;
-			max-width: none;
-		}
-		.company-row {
-			gap: 40px;
+		/* Reserve 2 lines so subtitle + body start at the same Y across cards */
+		.service-title {
+			min-height: 2.66em;
 		}
 		.service-link {
-			margin-top: 16px;
+			margin-top: auto;
 		}
-		/* Stacked cards don't need the 2-line reserve */
-		.service-title {
-			min-height: 0;
+
+		.company-row {
+			gap: 80px;
+		}
+		.cfacts {
+			flex: none;
+			width: 30vw;
+			max-width: 440px;
+		}
+
+		.ethos-block {
+			flex: none;
+			width: 44vw;
+			max-width: 640px;
+		}
+		.ethos-block--intro {
+			width: 30vw;
+			max-width: 420px;
+		}
+
+		.director-text {
+			flex: none;
+			width: 44vw;
+			max-width: 640px;
 		}
 	}
 </style>
