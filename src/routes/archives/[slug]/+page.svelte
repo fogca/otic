@@ -4,6 +4,7 @@
 	import type { PageData } from './$types';
 	import { imgOpt, imgSrcset } from '$lib/js/img';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
+	import { footerNear } from '$lib/state/footerNear.svelte';
 
 	let { data }: { data: PageData } = $props();
 	const archive = $derived(data.archive);
@@ -19,10 +20,12 @@
 	});
 
 	// Drive the fade via inline opacity (scoped CSS is unreliable once the node
-	// is portaled to <body>). Only applies when actually portaled (PC).
+	// is portaled to <body>). Only applies when actually portaled (PC). Also
+	// fades once the Footer is about to scroll into view — the fixed lead
+	// would otherwise sit on top of it as it scrolls up underneath.
 	$effect(() => {
 		if (leadNode && leadNode.parentElement === document.body) {
-			leadNode.style.opacity = leaving ? '0' : '1';
+			leadNode.style.opacity = leaving || footerNear.near ? '0' : '1';
 		}
 	});
 

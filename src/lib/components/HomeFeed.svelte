@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { getLenis } from '$lib/state/lenis';
+	import { footerNear } from '$lib/state/footerNear.svelte';
 
 	export type Tile = {
 		src: string;
@@ -120,12 +121,14 @@
 		window.addEventListener('resize', onResize);
 
 		// Fade the fixed ethos out once the thumbnails have scrolled past, so it
-		// doesn't overlap the sections below.
+		// doesn't overlap the sections below — and, defensively, once the
+		// Footer is about to scroll into view (it would otherwise sit on top
+		// of it as the Footer scrolls up underneath).
 		const onScroll = () => {
 			if (!ethosEl || !feedEl) return;
 			const heroEnd = feedEl.offsetTop + feedEl.offsetHeight - window.innerHeight * 0.6;
 			const y = lenis ? lenis.scroll : window.scrollY;
-			ethosEl.style.opacity = y > heroEnd ? '0' : '1';
+			ethosEl.style.opacity = y > heroEnd || footerNear.near ? '0' : '1';
 		};
 
 		const attach = async () => {

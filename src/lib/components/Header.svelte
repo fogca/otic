@@ -31,19 +31,29 @@
 
 		let isScrolling = false;
 		let scrollAnchor = 0; // scrollY when scrolling resumed (reference for distance)
+		let lastScrollY = window.scrollY; // previous position, to detect direction
 		let scrollEndTimer: ReturnType<typeof setTimeout> | null = null;
 
 		function onScroll() {
+			const currentY = window.scrollY;
+			const scrollingUp = currentY < lastScrollY;
+			lastScrollY = currentY;
+
 			// Scroll resume (idle → scrolling): re-anchor and show
 			if (!isScrolling) {
 				isScrolling = true;
 				headerShown = true;
-				scrollAnchor = window.scrollY;
+				scrollAnchor = currentY;
 			}
-			// Hide once scrolled HIDE_DISTANCE from anchor
-			if (Math.abs(window.scrollY - scrollAnchor) >= HIDE_DISTANCE) {
+
+			if (scrollingUp) {
+				// Scrolling back up: always show, regardless of distance —
+				// only continuous downward scroll past HIDE_DISTANCE hides it.
+				headerShown = true;
+			} else if (Math.abs(currentY - scrollAnchor) >= HIDE_DISTANCE) {
 				headerShown = false;
 			}
+
 			// Re-arm scroll-end detection
 			if (scrollEndTimer) clearTimeout(scrollEndTimer);
 			scrollEndTimer = setTimeout(() => {
@@ -212,11 +222,11 @@
 		}
 
 		.Header .link {
-			font-size: var(--fs-h5);
+			font-size: var(--fs-h6);
 		}
 
 		.lang-toggle {
-			font-size: var(--fs-h5);
+			font-size: var(--fs-h6);
 		}
 
 		/* PC: hide the top-right wordmark site-wide — the wordmark is pinned

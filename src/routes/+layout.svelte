@@ -7,6 +7,7 @@
 	import { CustomEase } from 'gsap/CustomEase';
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
+	import { footerNear } from '$lib/state/footerNear.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import LangSwitchOverlay from '$lib/components/LangSwitchOverlay.svelte';
@@ -102,6 +103,29 @@
 			if (rafId !== undefined) cancelAnimationFrame(rafId);
 			lenisInstance?.destroy();
 		};
+	});
+
+	// Flip footerNear.near once the Footer is about to scroll into view, so
+	// any position:fixed content (corner wordmark, slug's fixed lead, home's
+	// fixed ethos) can fade out before it — otherwise those sit on top of and
+	// visually crash into the Footer as it scrolls up underneath them. The
+	// Footer itself lives outside {@render children()}, so it's created once
+	// and persists across client-side navigation — one observer for the
+	// whole session is enough.
+	onMount(() => {
+		if (!browser) return;
+		const footerEl = document.querySelector('.Footer');
+		if (!footerEl) return;
+		const io = new IntersectionObserver(
+			([entry]) => {
+				footerNear.near = entry.isIntersecting;
+			},
+			// Expand the bottom of the effective viewport by 300px so this
+			// fires slightly BEFORE the Footer is actually on screen.
+			{ rootMargin: '0px 0px 300px 0px' }
+		);
+		io.observe(footerEl);
+		return () => io.disconnect();
 	});
 
 	// ── Outgoing: shrink + darken (overlay) + white panel up ──
@@ -262,7 +286,7 @@
      transform would otherwise make it a containing block). -->
 <a
 	class="corner-logo"
-	class:is-revealed={intro.completed}
+	class:is-revealed={intro.completed && !footerNear.near}
 	class:is-suppressed={isOffice}
 	href="/"
 	aria-label="Home"
