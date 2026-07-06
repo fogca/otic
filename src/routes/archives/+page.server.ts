@@ -20,27 +20,44 @@ type GalleryImage = {
 	workId: string;
 	workTitle: string;
 	isThumbnail: boolean;
+	/** 0 = thumbnail, 1/2 = the first couple of extra images per work,
+	    undefined = everything else. Drives the upward bias in
+	    patternShuffle — thumbnails lean up the most, the next couple of
+	    images per work lean up a bit too (tapering), everything else is
+	    unbiased. */
+	priorityTier?: number;
 	/** Cloudflare-hosted video row (pj_videos). Dimensions are 0 — the client
 	    reads them from the <video> metadata to size the masonry cell. */
 	isVideo?: boolean;
 };
 
-// Fixed-seed shuffle that biases thumbnails toward the upper half so they
-// dominate the top of the masonry while remaining sprinkled below. Same
-// order on every load (deterministic) — this is the current default.
+// Bias strength per tier — [bonus when ratio<0.5, bonus when ratio>=0.5].
+// Thumbnails lean up the most; the first couple of extra images per work
+// lean up a bit too, tapering off; anything beyond tier 2 is unbiased.
+const PRIORITY_BIAS: Record<number, [number, number]> = {
+	0: [2_000_000, 500_000],
+	1: [1_000_000, 250_000],
+	2: [500_000, 125_000]
+};
+
+// Fixed-seed shuffle that biases thumbnails (and the first couple of extra
+// images per work) toward the upper half so they dominate the top of the
+// masonry while remaining sprinkled below. Same order on every load
+// (deterministic) — this is the current default.
 function patternShuffle(items: GalleryImage[], seed: number): GalleryImage[] {
 	return [...items].sort((a, b) => {
 		const hashA = (hashString(a.url + a.workId) + seed) % 1_000_000;
 		const hashB = (hashString(b.url + b.workId) + seed) % 1_000_000;
 
-		const priority = (hash: number, isThumb: boolean): number => {
-			if (!isThumb) return 0;
+		const priority = (hash: number, tier?: number): number => {
+			const bias = tier !== undefined ? PRIORITY_BIAS[tier] : undefined;
+			if (!bias) return 0;
 			const ratio = (hash % 100) / 100;
-			return ratio < 0.5 ? (0.5 - ratio) * 2_000_000 : (1.0 - ratio) * 500_000;
+			return ratio < 0.5 ? (0.5 - ratio) * bias[0] : (1.0 - ratio) * bias[1];
 		};
 
-		const scoreA = priority(hashA, a.isThumbnail) + hashA;
-		const scoreB = priority(hashB, b.isThumbnail) + hashB;
+		const scoreA = priority(hashA, a.priorityTier) + hashA;
+		const scoreB = priority(hashB, b.priorityTier) + hashB;
 		return scoreB - scoreA;
 	});
 }
@@ -120,9 +137,19 @@ export const load: PageServerLoad = async () => {
 					workId: work.id,
 					workTitle: work.title,
 					isThumbnail: true,
+					priorityTier: 0,
 					isVideo: mv.isVideo
 				});
 			}
+
+			// Tags the first couple of extra (non-thumbnail) images per work
+			// with a tapering priority tier — see PRIORITY_BIAS above.
+			let extraCount = 0;
+			const nextExtraTier = (): number | undefined => {
+				const tier = extraCount < 2 ? extraCount + 1 : undefined;
+				extraCount++;
+				return tier;
+			};
 
 			if (work.repeat) {
 				for (const row of work.repeat) {
@@ -136,6 +163,7 @@ export const load: PageServerLoad = async () => {
 							workId: work.id,
 							workTitle: work.title,
 							isThumbnail: false,
+							priorityTier: nextExtraTier(),
 							isVideo: true
 						});
 					} else if (row.pj_images?.url) {
@@ -145,7 +173,8 @@ export const load: PageServerLoad = async () => {
 							height: row.pj_images.height,
 							workId: work.id,
 							workTitle: work.title,
-							isThumbnail: false
+							isThumbnail: false,
+							priorityTier: nextExtraTier()
 						});
 					}
 				}
@@ -163,7 +192,8 @@ export const load: PageServerLoad = async () => {
 							height: row.images.height ?? 0,
 							workId: work.id,
 							workTitle: work.title,
-							isThumbnail: false
+							isThumbnail: false,
+							priorityTier: nextExtraTier()
 						});
 					}
 				}
