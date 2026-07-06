@@ -732,8 +732,11 @@
 		}
 		.services-row {
 			/* Trailing space so the last card isn't flush against the
-			   viewport edge once the horizontal scroll completes. */
-			padding-right: calc(var(--padding) * 1.5);
+			   viewport edge once the horizontal scroll completes — also
+			   feeds directly into the scroll distance() calc in onMount,
+			   so more of it also paces out the last stretch of the
+			   horizontal reveal (was ending too abruptly at *1.5). */
+			padding-right: calc(var(--padding) * 3);
 		}
 
 		.service-card {
@@ -784,7 +787,9 @@
 			gap: calc(var(--padding) * 1.5);
 		}
 		.panel--company {
-			flex: 0 1 320px;
+			flex: none;
+			width: 30vw;
+			max-width: 440px;
 		}
 		.panel--company .panel-inner {
 			/* Inner-facing edge — .panel-pair's own gap provides the
