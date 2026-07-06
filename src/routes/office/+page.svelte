@@ -58,7 +58,7 @@
 			bodyEn:
 				'Our in-house engineering studio, Post Script, designs and builds digital products — brand sites, e-commerce, reservation systems, and web apps — and digital infrastructure, including AI / DX integration. With a modern stack and considered architecture, we refine experience and usability to give form to a brand in the digital world.',
 			body: '弊社主宰のエンジニアリングスタジオ——Post Scriptでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
-			link: 'www.joulejoule.com',
+			link: 'postscript.pages.dev',
 			image: '/images/services_production.png',
 			imageAlt: 'Digital Infrastructure'
 		}
@@ -690,7 +690,7 @@
 		line-height: 1.45;
 	}
 	.ethos-ja {
-		margin: 12px 0 0;
+		margin: 0;
 	}
 
 	/* ── Director ── */
@@ -720,7 +720,7 @@
 
 		.panel:not(.panel--intro) .panel-inner {
 			padding: 100px calc(var(--padding) * 1.5) 56px;
-			gap: 44px;
+			gap: 20px;
 		}
 		.panel-content {
 			flex-direction: row;
@@ -816,9 +816,15 @@
 		/* Director only: no gap between its header and body — same
 		   specificity trick as above (compounding onto the same 3
 		   class-equivalents as the shared rule, plus .panel--director,
-		   beats it regardless of source order). */
+		   beats it regardless of source order). Also drop its top padding:
+		   Company/Director spacing comes from .panel-pair__left's own gap
+		   below instead, not from each section's own padding stacking up. */
 		.panel--director.panel:not(.panel--intro) .panel-inner {
 			gap: 0;
+			padding-top: 0;
+		}
+		.panel--company.panel:not(.panel--intro) .panel-inner {
+			padding-bottom: 0;
 		}
 		.panel-pair__left {
 			display: flex;
@@ -826,6 +832,7 @@
 			flex: none;
 			width: 30vw;
 			max-width: 440px;
+			gap: 32px;
 		}
 		.panel--company {
 			width: auto;
