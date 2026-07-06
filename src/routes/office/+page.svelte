@@ -698,7 +698,7 @@
 		width: 100%;
 	}
 	.director-text p + p {
-		margin-top: 24px;
+		margin-top: 0;
 	}
 
 	/* SP: narrow the studio text a bit further than the page's standard
