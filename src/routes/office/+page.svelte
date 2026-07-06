@@ -268,6 +268,17 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Reserves the reveal image's own footprint in the document flow.
+		     .intro-reveal is absolutely positioned (see the comment above) so
+		     .intro-inner stays exactly one viewport tall at rest — but that
+		     means nothing below ever accounts for the reveal's space once the
+		     scroll sequence makes it visible, and the next panel (Services)
+		     starts immediately after .intro-inner and overlaps it. Mirrors
+		     .intro-reveal's own box model exactly (same width/max-width/
+		     margin-top/aspect-ratio) so the reserved space always matches its
+		     real rendered size, at any viewport width. -->
+		<div class="intro-reveal-spacer" aria-hidden="true"></div>
 	</section>
 
 			<!-- ─── Panel 2: Services ─── -->
@@ -510,6 +521,17 @@
 		height: 100%;
 		object-fit: cover;
 		display: block;
+	}
+
+	/* Mirrors .intro-reveal's box model exactly (see the spacer's own
+	   comment in the template) so it always reserves the same footprint,
+	   at any viewport width. */
+	.intro-reveal-spacer {
+		width: 100%;
+		max-width: 720px;
+		margin-inline: auto;
+		margin-top: 24px;
+		aspect-ratio: 4 / 3;
 	}
 
 	/* ── Content panels (Services / Company / Ethos / Director) ──
