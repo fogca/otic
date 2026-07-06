@@ -28,7 +28,10 @@
 			subtitle: '工業デザインと家具デザイン',
 			bodyEn:
 				'We develop products that bring use and quiet joy to daily life, returning to the materiality that meets the body and pursuing the forms that must inevitably arise from material, structure, and presence. Amid this transformation of the age, a more fundamental interaction — embodiment and emotion — has become our central concern. We continue this practice day by day, returning to the body and heart that are our origin.',
-			body: '身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる、必然のかたちを追い求めながら、日々の所作に添う用と喜びのあるプロダクトの企画・開発を行っています。わたしたちが直面しているこの大きな時代の変革において、より根源的で確かな相互作用——「身体性」と「情緒」が、私たちの大きな関心へとなりつつあります。私たちのオリジンである身体と心へと立ち返ることを大切に、日々学びながらその実践を続けてまいります。'
+			body: '身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる、必然のかたちを追い求めながら、日々の所作に添う用と喜びのあるプロダクトの企画・開発を行っています。わたしたちが直面しているこの大きな時代の変革において、より根源的で確かな相互作用——「身体性」と「情緒」が、私たちの大きな関心へとなりつつあります。私たちのオリジンである身体と心へと立ち返ることを大切に、日々学びながらその実践を続けてまいります。',
+			// Placeholder — swap for the real Product & Furniture Design asset.
+			image: '/images/services_typefoundry.png',
+			imageAlt: 'Product & Furniture Design'
 		},
 		{
 			title: 'V.I. & Typography',
@@ -301,44 +304,50 @@
 				</div>
 			</section>
 
-			<!-- ─── Panel 3: Company ─── -->
-			<section class="panel panel--company">
-				<div class="panel-inner">
-					<header class="panel-hd">
-						<span class="pn" lang="en">03</span>
-						<h2 class="pt" lang="en">Company</h2>
-					</header>
-					<div class="panel-content company-row">
-						<dl class="cfacts" lang="en">
-							<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
-							<div class="cfact">
-								<dt>Address</dt>
-								<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
-							</div>
-							<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
-							<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
-						</dl>
-						<dl class="cfacts" lang="ja">
-							<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
-							<div class="cfact">
-								<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
-							</div>
-							<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
-							<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
-						</dl>
+			<!-- ─── Panels 3 + 4: Company + Ethos ───
+			     PC: share a start Y (side-by-side columns) — see .panel-pair
+			     below. SP: .panel-pair is display:contents, so these two
+			     sections behave exactly as before (independent stacked
+			     blocks). -->
+			<div class="panel-pair">
+				<!-- ─── Panel 3: Company ─── -->
+				<section class="panel panel--company">
+					<div class="panel-inner">
+						<header class="panel-hd">
+							<span class="pn" lang="en">03</span>
+							<h2 class="pt" lang="en">Company</h2>
+						</header>
+						<div class="panel-content company-row">
+							<dl class="cfacts" lang="en">
+								<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
+								<div class="cfact">
+									<dt>Address</dt>
+									<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
+								</div>
+								<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
+								<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
+							</dl>
+							<dl class="cfacts" lang="ja">
+								<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
+								<div class="cfact">
+									<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
+								</div>
+								<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
+								<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
+							</dl>
+						</div>
 					</div>
-				</div>
-			</section>
+				</section>
 
-			<!-- ─── Panel 4: Ethos ─── -->
-			<section class="panel panel--ethos">
-				<div class="panel-inner">
-					<header class="panel-hd">
-						<span class="pn" lang="en">04</span>
-						<h2 class="pt" lang="en">Ethos</h2>
-					</header>
-					<div class="panel-content ethos-row">
-						<div class="ethos-block ethos-block--intro">
+				<!-- ─── Panel 4: Ethos ─── -->
+				<section class="panel panel--ethos">
+					<div class="panel-inner">
+						<header class="panel-hd">
+							<span class="pn" lang="en">04</span>
+							<h2 class="pt" lang="en">Ethos</h2>
+						</header>
+						<div class="panel-content ethos-row">
+							<div class="ethos-block ethos-block--intro">
 							<p class="ethos-en" lang="en">{ethosIntro.en}</p>
 							<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
 						</div>
@@ -355,6 +364,7 @@
 					</div>
 				</div>
 			</section>
+			</div>
 
 			<!-- ─── Panel 5: Director ─── -->
 			<section class="panel panel--director">
@@ -529,6 +539,14 @@
 		font-weight: var(--fw-lead);
 		font-variation-settings: 'wght' var(--fw-lead);
 		line-height: 1.15;
+	}
+
+	/* Company + Ethos share a wrapper so PC can lay them out as side-by-side
+	   columns starting at the same Y (see the min-width:1024px block below).
+	   SP: display:contents makes the wrapper invisible to layout — the two
+	   sections behave exactly as independent stacked blocks, unaffected. */
+	.panel-pair {
+		display: contents;
 	}
 
 	/* Content area — mobile-first: stacked column. PC becomes a horizontal
@@ -732,6 +750,52 @@
 			flex: none;
 			width: 44vw;
 			max-width: 640px;
+		}
+
+		/* Company (03) + Ethos (04) share a start Y — side-by-side columns
+		   instead of fully separate stacked sections. Ethos's own blocks
+		   (which the generic .panel-content rule above turns into a row)
+		   stack vertically within its column instead. */
+		.panel-pair {
+			display: flex;
+			align-items: flex-start;
+			gap: calc(var(--padding) * 1.5);
+		}
+		.panel--company {
+			flex: 0 1 320px;
+		}
+		.panel--company .panel-inner {
+			/* Inner-facing edge — .panel-pair's own gap provides the
+			   separation from Ethos, no need to double up. */
+			padding-right: 0;
+		}
+		.panel--ethos {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+		.panel--ethos .panel-inner {
+			padding-left: 0;
+		}
+		/* Company's own EN/JA fact lists stack (was side-by-side) — the
+		   halved column width from pairing with Ethos no longer fits two
+		   30vw-wide lists next to each other. */
+		.company-row {
+			flex-direction: column;
+			gap: 32px;
+		}
+		.cfacts {
+			width: 100%;
+			max-width: none;
+		}
+		/* Ethos's blocks stack vertically in their (now narrower) shared
+		   column instead of sitting side-by-side across the full page. */
+		.ethos-row {
+			flex-direction: column;
+		}
+		.ethos-block,
+		.ethos-block--intro {
+			width: 100%;
+			max-width: none;
 		}
 	}
 </style>
