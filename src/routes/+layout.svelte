@@ -275,11 +275,22 @@
 
 <div class="transition-bg">
 	<div class="page-wrapper">
-		<Header />
 		{@render children()}
 		<Footer />
 	</div>
 </div>
+
+<!-- Header lives OUTSIDE .page-wrapper — the wrapper's `will-change:transform`
+     makes it a containing block for ANY position:fixed descendant even at
+     rest (transform:none), which was silently breaking Header's fixed
+     positioning site-wide (it tracked page-wrapper's scroll position instead
+     of staying pinned to the true viewport). Only became visually obvious on
+     the Office page once its ScrollTrigger pin made the page much taller,
+     but the same drift is present on every page once scrolled far enough.
+     Header already hides itself during page transitions via its own
+     opacity/transform (intro.completed), so it doesn't need to be inside
+     .page-wrapper to participate in the scale-down transition visual. -->
+<Header />
 
 <!-- Global wordmark, pinned bottom-left on PC. Lives OUTSIDE .page-wrapper so
      its position:fixed resolves to the viewport (the wrapper's will-change

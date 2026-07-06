@@ -139,6 +139,12 @@
 					start: 'top top',
 					end: '+=1200',
 					pin: true,
+					// `.page-wrapper`'s `will-change: transform` makes it a containing
+					// block for any `position:fixed` descendant (same issue Header had
+					// — see +layout.svelte) — ScrollTrigger's default pin mechanism
+					// uses `position:fixed`, which broke the same way. Pinning via
+					// transform instead sidesteps that entirely.
+					pinType: 'transform',
 					scrub: 1,
 					invalidateOnRefresh: true
 				}
