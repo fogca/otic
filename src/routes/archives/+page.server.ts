@@ -20,26 +20,37 @@ type GalleryImage = {
 	workId: string;
 	workTitle: string;
 	isThumbnail: boolean;
-	/** 0 = thumbnail, 1/2 = the first couple of extra images per work,
-	    undefined = everything else. Drives the upward bias in
-	    patternShuffle — thumbnails lean up the most, the next couple of
-	    images per work lean up a bit too (tapering), everything else is
-	    unbiased. */
+	/** -1 = boosted thumbnail (see BOOSTED_THUMBNAIL_IDS), 0 = thumbnail,
+	    1/2 = the first couple of extra images per work, undefined =
+	    everything else. Drives the upward bias in patternShuffle —
+	    thumbnails lean up the most (boosted ones even more so), the next
+	    couple of images per work lean up a bit too (tapering), everything
+	    else is unbiased. */
 	priorityTier?: number;
 	/** Cloudflare-hosted video row (pj_videos). Dimensions are 0 — the client
 	    reads them from the <video> metadata to size the masonry cell. */
 	isVideo?: boolean;
 };
 
-// Bias strength per tier — [bonus when ratio<0.5, bonus when ratio>=0.5].
-// Thumbnails lean up the most (a clear step above tier 1/2, not just double)
-// so they dominate the top over the first couple of extra images per work,
-// which lean up a bit themselves, tapering off; anything beyond tier 2 is
-// unbiased.
-const PRIORITY_BIAS: Record<number, [number, number]> = {
-	0: [4_000_000, 1_000_000],
-	1: [1_000_000, 250_000],
-	2: [500_000, 125_000]
+// Flagship work(s) whose thumbnail should lead the grid even more reliably
+// than other thumbnails — gets its own tier (-1) above the regular tier 0.
+const BOOSTED_THUMBNAIL_IDS = new Set(['steiner']);
+
+// Bias strength per tier — [floor, high, low]. `floor` is a guaranteed
+// minimum bonus that alone already outscores every lower tier's best case
+// (hash maxes out at 999_999, and no lower tier's own floor+ratio bonus
+// reaches into the next tier's floor) — without one, a tier's bonus can
+// collapse toward 0 on an unlucky hash (ratio near 1), so "higher tier"
+// only ever meant "usually higher", not reliably so. `high`/`low` are the
+// existing ratio-scaled top-up layered on top of the floor, which is what
+// keeps things feeling sprinkled/random rather than rigidly ordered.
+// Regular tiers (0/1/2) keep floor:0 — same probabilistic feel as before.
+// Boosted (-1) gets a real floor so it reliably leads regardless of hash.
+const PRIORITY_BIAS: Record<number, [number, number, number]> = {
+	'-1': [4_500_000, 1_000_000, 250_000],
+	0: [0, 5_000_000, 1_200_000],
+	1: [0, 1_000_000, 250_000],
+	2: [0, 500_000, 125_000]
 };
 
 // Fixed-seed shuffle that biases thumbnails (and the first couple of extra
@@ -54,8 +65,9 @@ function patternShuffle(items: GalleryImage[], seed: number): GalleryImage[] {
 		const priority = (hash: number, tier?: number): number => {
 			const bias = tier !== undefined ? PRIORITY_BIAS[tier] : undefined;
 			if (!bias) return 0;
+			const [floor, high, low] = bias;
 			const ratio = (hash % 100) / 100;
-			return ratio < 0.5 ? (0.5 - ratio) * bias[0] : (1.0 - ratio) * bias[1];
+			return floor + (ratio < 0.5 ? (0.5 - ratio) * high : (1.0 - ratio) * low);
 		};
 
 		const scoreA = priority(hashA, a.priorityTier) + hashA;
@@ -139,7 +151,7 @@ export const load: PageServerLoad = async () => {
 					workId: work.id,
 					workTitle: work.title,
 					isThumbnail: true,
-					priorityTier: 0,
+					priorityTier: BOOSTED_THUMBNAIL_IDS.has(work.id) ? -1 : 0,
 					isVideo: mv.isVideo
 				});
 			}
