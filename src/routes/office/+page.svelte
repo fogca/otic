@@ -560,7 +560,7 @@
 		opacity: 0.4;
 	}
 	.pt {
-		font-size: var(--fs-h2);
+		font-size: var(--fs-h3);
 		font-weight: var(--fw-lead);
 		font-variation-settings: 'wght' var(--fw-lead);
 		line-height: 1.15;
@@ -605,7 +605,7 @@
 		display: block;
 	}
 	.service-title {
-		font-size: var(--fs-h3);
+		font-size: var(--fs-h4);
 		margin: 0;
 	}
 	.service-sub {
