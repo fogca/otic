@@ -707,6 +707,23 @@
 		.intro-text {
 			max-width: 78%;
 		}
+
+		/* SP: Director (04) and Ethos (05) stack as plain independent panels
+		   (see .panel-pair's display:contents) — tighten the gap between
+		   them to a flat 20px instead of Director's own bottom padding +
+		   Ethos's own top padding stacking up (~110px). Compounds onto the
+		   same specificity as the shared .panel:not(.panel--intro)
+		   .panel-inner rule so it reliably overrides regardless of source
+		   order (same technique as the PC-only overrides further down). */
+		.panel--director.panel:not(.panel--intro) .panel-inner {
+			padding-bottom: 0;
+		}
+		.panel--ethos.panel:not(.panel--intro) .panel-inner {
+			padding-top: 0;
+		}
+		.panel--ethos {
+			margin-top: 20px;
+		}
 	}
 
 	/* ── Desktop: side-by-side columns within each panel (the panels
