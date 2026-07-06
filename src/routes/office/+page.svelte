@@ -9,6 +9,8 @@
 	let wordmarkEl: HTMLElement | undefined = $state();
 	let introTextEl: HTMLElement | undefined = $state();
 	let revealEl: HTMLElement | undefined = $state();
+	let servicesInnerEl: HTMLElement | undefined = $state();
+	let servicesRowEl: HTMLElement | undefined = $state();
 
 	type Service = {
 		title: string;
@@ -113,6 +115,8 @@
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let tl: any;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let mm: any;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let lenis: any;
 		let onLenisScroll: (() => void) | undefined;
 
@@ -162,6 +166,54 @@
 				{ scale: 0.4, opacity: 0 },
 				{ scale: 1, opacity: 1, duration: 1, ease: 'none' }
 			);
+
+			// Services: pin the panel while its 4 cards translate horizontally
+			// (PC only — on SP the cards stay in normal stacked flow). Scoped
+			// via matchMedia so entering/leaving the breakpoint (e.g. resize)
+			// can't leave stale pinned/translated state behind.
+			if (servicesInnerEl && servicesRowEl) {
+				const servicesInner = servicesInnerEl;
+				const servicesRow = servicesRowEl;
+				mm = ScrollTrigger.matchMedia({
+					'(min-width: 1024px)': () => {
+						// scrollWidth - innerWidth alone under-measures the horizontal
+						// travel needed: it ignores the row's own resting offset from
+						// the viewport's left edge (page + panel padding), and -- since
+						// .services-row is a flex container with default overflow:visible,
+						// scrollWidth doesn't include the row's own padding-right. Measuring
+						// the resting left position via getBoundingClientRect() (read during
+						// ScrollTrigger's refresh, before this tween's transform is
+						// (re)applied, so it reflects the untransformed layout) and adding
+						// padding-right explicitly gives the true distance to the panel's
+						// trailing edge.
+						const distance = () => {
+							const paddingRight =
+								parseFloat(getComputedStyle(servicesRow).paddingRight) || 0;
+							return (
+								servicesRow.getBoundingClientRect().left +
+								servicesRow.scrollWidth +
+								paddingRight -
+								window.innerWidth
+							);
+						};
+						gsap.to(servicesRow, {
+							x: () => -distance(),
+							ease: 'none',
+							scrollTrigger: {
+								trigger: servicesInner,
+								start: 'top top',
+								end: () => '+=' + distance(),
+								pin: true,
+								// Same will-change containing-block issue as the intro
+								// pin above — see that comment.
+								pinType: 'transform',
+								scrub: 1,
+								invalidateOnRefresh: true
+							}
+						});
+					}
+				});
+			}
 		});
 
 		return () => {
@@ -169,6 +221,7 @@
 			if (onLenisScroll) lenis?.off('scroll', onLenisScroll);
 			tl?.scrollTrigger?.kill();
 			tl?.kill();
+			mm?.revert();
 		};
 	});
 </script>
@@ -216,12 +269,12 @@
 
 			<!-- ─── Panel 2: Services ─── -->
 			<section class="panel panel--services">
-				<div class="panel-inner">
+				<div class="panel-inner" bind:this={servicesInnerEl}>
 					<header class="panel-hd">
 						<span class="pn" lang="en">02</span>
 						<h2 class="pt" lang="en">Services &amp; Partners</h2>
 					</header>
-					<div class="panel-content services-row">
+					<div class="panel-content services-row" bind:this={servicesRowEl}>
 						{#each services as s}
 							<article class="service-card">
 								{#if s.image}
@@ -626,6 +679,21 @@
 		}
 		.panel-content {
 			flex-direction: row;
+		}
+
+		/* Services panel is pinned + scrolled horizontally on PC (see the
+		   matchMedia ScrollTrigger in onMount) — clip so the row's overflow
+		   before/during scroll can't create a page-wide horizontal scrollbar.
+		   `clip` not `hidden`: this codebase avoids overflow:hidden for
+		   horizontal clipping since it previously broke position:sticky
+		   elsewhere. */
+		.panel--services {
+			overflow-x: clip;
+		}
+		.services-row {
+			/* Trailing space so the last card isn't flush against the
+			   viewport edge once the horizontal scroll completes. */
+			padding-right: calc(var(--padding) * 1.5);
 		}
 
 		.service-card {
