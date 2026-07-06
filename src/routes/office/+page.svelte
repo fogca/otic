@@ -586,6 +586,9 @@
 	}
 
 	/* ── Services ── */
+	.services-row {
+		gap: 60px;
+	}
 	.service-card {
 		width: 100%;
 		display: flex;
