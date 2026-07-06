@@ -588,10 +588,10 @@
 	}
 	.service-image {
 		width: 100%;
-		aspect-ratio: 4 / 3;
+		aspect-ratio: 16 / 10;
 		overflow: hidden;
 		background: var(--color-bg-gray);
-		margin-bottom: 20px;
+		margin-bottom: 25px;
 	}
 	.service-image img {
 		width: 100%;
@@ -744,9 +744,8 @@
 			width: 30vw;
 			max-width: 440px;
 		}
-		/* Reserve 2 lines so subtitle + body start at the same Y across cards */
 		.service-title {
-			min-height: 2.66em;
+			min-height: auto;
 		}
 		.service-link {
 			margin-top: auto;
