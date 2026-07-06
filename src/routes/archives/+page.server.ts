@@ -32,10 +32,12 @@ type GalleryImage = {
 };
 
 // Bias strength per tier — [bonus when ratio<0.5, bonus when ratio>=0.5].
-// Thumbnails lean up the most; the first couple of extra images per work
-// lean up a bit too, tapering off; anything beyond tier 2 is unbiased.
+// Thumbnails lean up the most (a clear step above tier 1/2, not just double)
+// so they dominate the top over the first couple of extra images per work,
+// which lean up a bit themselves, tapering off; anything beyond tier 2 is
+// unbiased.
 const PRIORITY_BIAS: Record<number, [number, number]> = {
-	0: [2_000_000, 500_000],
+	0: [4_000_000, 1_000_000],
 	1: [1_000_000, 250_000],
 	2: [500_000, 125_000]
 };
