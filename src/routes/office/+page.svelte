@@ -315,94 +315,97 @@
 				</div>
 			</section>
 
-			<!-- ─── Panels 3 + 4: Company + Ethos ───
-			     PC: share a start Y (side-by-side columns) — see .panel-pair
-			     below. SP: .panel-pair is display:contents, so these two
-			     sections behave exactly as before (independent stacked
-			     blocks). -->
+			<!-- ─── Panels 3 + 4 + 5: Company / Director / Ethos ───
+			     PC: 3-section layout — Company (top-left) + Director
+			     (bottom-left) stacked in .panel-pair__left, with Ethos as
+			     one tall column on the right (see .panel-pair below). SP:
+			     .panel-pair is display:contents, so all three sections
+			     behave exactly as independent stacked blocks. -->
 			<div class="panel-pair">
-				<!-- ─── Panel 3: Company ─── -->
-				<section class="panel panel--company">
-					<div class="panel-inner">
-						<header class="panel-hd">
-							<span class="pn" lang="en">03</span>
-							<h2 class="pt" lang="en">Company</h2>
-						</header>
-						<div class="panel-content company-row">
-							<dl class="cfacts" lang="en">
-								<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
-								<div class="cfact">
-									<dt>Address</dt>
-									<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
-								</div>
-								<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
-								<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
-							</dl>
-							<dl class="cfacts" lang="ja">
-								<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
-								<div class="cfact">
-									<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
-								</div>
-								<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
-								<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
-							</dl>
+				<div class="panel-pair__left">
+					<!-- ─── Panel 3: Company ─── -->
+					<section class="panel panel--company">
+						<div class="panel-inner">
+							<header class="panel-hd">
+								<span class="pn" lang="en">03</span>
+								<h2 class="pt" lang="en">Company</h2>
+							</header>
+							<div class="panel-content company-row">
+								<dl class="cfacts" lang="en">
+									<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
+									<div class="cfact">
+										<dt>Address</dt>
+										<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
+									</div>
+									<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
+									<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
+								</dl>
+								<dl class="cfacts" lang="ja">
+									<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
+									<div class="cfact">
+										<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
+									</div>
+									<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
+									<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
+								</dl>
+							</div>
 						</div>
-					</div>
-				</section>
+					</section>
 
-				<!-- ─── Panel 4: Ethos ─── -->
+					<!-- ─── Panel 4: Director (moved up from panel 5) ─── -->
+					<section class="panel panel--director">
+						<div class="panel-inner">
+							<header class="panel-hd">
+								<span class="pn" lang="en">04</span>
+								<h2 class="pt" lang="en">Director</h2>
+							</header>
+							<div class="panel-content director-row">
+								<div class="director-text">
+									<p lang="en">
+										Born in Japan in 2001.<br />
+										While attending the University of Westminster in the UK, exposed to a wide
+										range of cultures and arts, I developed a strong interest in visual
+										expression and entered the creative industry. After working at several
+										design studios in Tokyo, I established my own practice. Today, as creative
+										director, I run a design office at the core of my work, alongside a type
+										foundry, an image-making studio, and a wine community.
+									</p>
+									<p lang="ja">
+										2001年日本生まれ。<br />
+										英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
+									</p>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+
+				<!-- ─── Panel 5: Ethos (renumbered from panel 4) ─── -->
 				<section class="panel panel--ethos">
 					<div class="panel-inner">
 						<header class="panel-hd">
-							<span class="pn" lang="en">04</span>
+							<span class="pn" lang="en">05</span>
 							<h2 class="pt" lang="en">Ethos</h2>
 						</header>
 						<div class="panel-content ethos-row">
 							<div class="ethos-block ethos-block--intro">
-							<p class="ethos-en" lang="en">{ethosIntro.en}</p>
-							<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
-						</div>
-						{#each ethosParts as p}
-							<div class="ethos-block">
-								<h3 class="ethos-part">
-									<span class="ethos-part-en" lang="en">{p.en}</span>
-									<span class="ethos-part-ja" lang="ja">{p.ja}</span>
-								</h3>
-								<p class="ethos-en" lang="en">{p.enBody}</p>
-								<p class="ethos-ja" lang="ja">{p.jaBody}</p>
+								<p class="ethos-en" lang="en">{ethosIntro.en}</p>
+								<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
 							</div>
-						{/each}
-					</div>
-				</div>
-			</section>
-			</div>
-
-			<!-- ─── Panel 5: Director ─── -->
-			<section class="panel panel--director">
-				<div class="panel-inner">
-					<header class="panel-hd">
-						<span class="pn" lang="en">05</span>
-						<h2 class="pt" lang="en">Director</h2>
-					</header>
-					<div class="panel-content director-row">
-						<div class="director-text">
-							<p lang="en">
-								Born in Japan in 2001.<br />
-								While attending the University of Westminster in the UK, exposed to a wide
-								range of cultures and arts, I developed a strong interest in visual
-								expression and entered the creative industry. After working at several
-								design studios in Tokyo, I established my own practice. Today, as creative
-								director, I run a design office at the core of my work, alongside a type
-								foundry, an image-making studio, and a wine community.
-							</p>
-							<p lang="ja">
-								2001年日本生まれ。<br />
-								英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
-							</p>
+							{#each ethosParts as p}
+								<div class="ethos-block">
+									<h3 class="ethos-part">
+										<span class="ethos-part-en" lang="en">{p.en}</span>
+										<span class="ethos-part-ja" lang="ja">{p.ja}</span>
+									</h3>
+									<p class="ethos-en" lang="en">{p.enBody}</p>
+									<p class="ethos-ja" lang="ja">{p.jaBody}</p>
+								</div>
+							{/each}
 						</div>
 					</div>
-				</div>
-			</section>
+				</section>
+			</div>
 
 </main>
 
@@ -563,11 +566,13 @@
 		line-height: 1.15;
 	}
 
-	/* Company + Ethos share a wrapper so PC can lay them out as side-by-side
-	   columns starting at the same Y (see the min-width:1024px block below).
-	   SP: display:contents makes the wrapper invisible to layout — the two
+	/* Company / Director / Ethos share a wrapper so PC can lay them out as a
+	   3-section layout (Company + Director stacked on the left, Ethos as one
+	   tall column on the right — see the min-width:1024px block below). SP:
+	   display:contents makes both wrappers invisible to layout — all three
 	   sections behave exactly as independent stacked blocks, unaffected. */
-	.panel-pair {
+	.panel-pair,
+	.panel-pair__left {
 		display: contents;
 	}
 
@@ -770,41 +775,68 @@
 			max-width: 420px;
 		}
 
+		/* Director now always sits in the narrower left column (see
+		   .panel-pair__left below), not as a standalone full-width panel —
+		   fills that column instead of the old 44vw/640px half-page size. */
 		.director-text {
 			flex: none;
-			width: 44vw;
-			max-width: 640px;
+			width: 100%;
+			max-width: none;
 		}
 
-		/* Company (03) + Ethos (04) share a start Y — side-by-side columns
-		   instead of fully separate stacked sections. Ethos's own blocks
-		   (which the generic .panel-content rule above turns into a row)
-		   stack vertically within its column instead. */
+		/* Company (03) + Director (04) + Ethos (05): a 3-section layout —
+		   Company/Director stacked on the left, Ethos as one tall column on
+		   the right, all sharing a start Y. Padding is set once on the
+		   .panel-pair wrapper itself (not on each section's own panel-inner)
+		   so the left/right page edges are managed in one place instead of
+		   patched per-section. */
 		.panel-pair {
 			display: flex;
 			align-items: flex-start;
+			padding-inline: calc(var(--padding) * 1.5);
 			gap: calc(var(--padding) * 1.5);
 		}
-		.panel--company {
+		/* base.css's global `section { padding-inline: var(--padding) }`
+		   still applies to every .panel here too — a class selector already
+		   beats that bare element selector regardless of source order, so
+		   this is enough to zero it out (the wrapper above is now the only
+		   source of left/right edge padding for this trio). */
+		.panel-pair .panel {
+			padding-inline: 0;
+		}
+		/* Matches .panel:not(.panel--intro) .panel-inner's own specificity
+		   (3 classes-worth, via :not()'s argument) plus .panel-pair, so this
+		   reliably wins regardless of source order — a lower-specificity
+		   `.panel-pair .panel-inner` selector silently loses to that shared
+		   rule's padding, same gotcha as elsewhere in this codebase. */
+		.panel-pair .panel:not(.panel--intro) .panel-inner {
+			padding-left: 0;
+			padding-right: 0;
+		}
+		.panel-pair__left {
+			display: flex;
+			flex-direction: column;
 			flex: none;
 			width: 30vw;
 			max-width: 440px;
 		}
-		.panel--company .panel-inner {
-			/* Inner-facing edge — .panel-pair's own gap provides the
-			   separation from Ethos, no need to double up. */
-			padding-right: 0;
+		.panel--company {
+			/* Sized narrower than the column instead of stretching to fill
+			   it — Director below it still fills the column width via
+			   .director-text above. Not max-content: the address line's
+			   natural no-wrap width is wider than the column itself, so
+			   max-content doesn't actually shrink anything here — a fixed
+			   cap that lets the address wrap onto 2 lines is what achieves
+			   an actually-compact fact list. */
+			width: auto;
+			max-width: 280px;
 		}
 		.panel--ethos {
 			flex: 1 1 auto;
 			min-width: 0;
 		}
-		.panel--ethos .panel-inner {
-			padding-left: 0;
-		}
 		/* Company's own EN/JA fact lists stack (was side-by-side) — the
-		   halved column width from pairing with Ethos no longer fits two
-		   30vw-wide lists next to each other. */
+		   narrower column no longer fits two 30vw-wide lists side by side. */
 		.company-row {
 			flex-direction: column;
 			gap: 32px;
