@@ -794,7 +794,7 @@
 			display: flex;
 			align-items: flex-start;
 			padding-inline: calc(var(--padding) * 1.5);
-			gap: calc(var(--padding) * 1.5);
+			gap: calc(var(--padding) * 3);
 		}
 		/* base.css's global `section { padding-inline: var(--padding) }`
 		   still applies to every .panel here too — a class selector already
@@ -813,6 +813,13 @@
 			padding-left: 0;
 			padding-right: 0;
 		}
+		/* Director only: no gap between its header and body — same
+		   specificity trick as above (compounding onto the same 3
+		   class-equivalents as the shared rule, plus .panel--director,
+		   beats it regardless of source order). */
+		.panel--director.panel:not(.panel--intro) .panel-inner {
+			gap: 0;
+		}
 		.panel-pair__left {
 			display: flex;
 			flex-direction: column;
@@ -821,15 +828,7 @@
 			max-width: 440px;
 		}
 		.panel--company {
-			/* Sized narrower than the column instead of stretching to fill
-			   it — Director below it still fills the column width via
-			   .director-text above. Not max-content: the address line's
-			   natural no-wrap width is wider than the column itself, so
-			   max-content doesn't actually shrink anything here — a fixed
-			   cap that lets the address wrap onto 2 lines is what achieves
-			   an actually-compact fact list. */
 			width: auto;
-			max-width: 280px;
 		}
 		.panel--ethos {
 			flex: 1 1 auto;
