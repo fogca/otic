@@ -1,21 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import { lazyGridVideo } from '$lib/actions/lazyGridVideo';
+	import { imgOpt, imgSrcset } from '$lib/js/img';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	// Optimise microCMS image URLs via Imgix-style query params.
+	// Grid cell is ~18vw on PC (5 cols), ~48vw on SP (2 cols).
+	const GRID_SIZES = '(min-width: 1024px) 18vw, 48vw';
+	const GRID_WIDTHS = [180, 320, 480, 700, 940];
+
 	const images = $derived(
 		data.images.map((img) => {
-			const optimised = img.url.includes('microcms-assets.io')
-				? `${img.url}?fm=webp&q=60&w=700&fit=max&auto=compress`
-				: img.url;
+			const isMicrocms = img.url.includes('microcms-assets.io');
 			return {
 				...img,
-				url: optimised,
+				isMicrocms,
+				// Optimised src + responsive srcset (microCMS/Imgix params). Non-CMS
+				// images (rare) and videos keep the raw url. imgOpt uses auto=format
+				// so supporting browsers still get WebP.
+				src: isMicrocms ? imgOpt(img.url, 700, 60) : img.url,
+				srcset: isMicrocms ? imgSrcset(img.url, GRID_WIDTHS, 60) : undefined,
 				// Videos have no CMS dimensions and their `src` is deferred (loaded
 				// only near the viewport — see lazyGridVideo) — start at a neutral
 				// 1:1 guess so the FIRST layout pass never waits on video network;
@@ -75,9 +81,6 @@
 		container.style.height = `${Math.max(...columnHeights)}px`;
 	}
 
-	function navigateToWork(workId: string) {
-		goto(`/archives/${workId}`);
-	}
 
 	let resizeTimer: number;
 	let metaTimer: number;
@@ -155,13 +158,11 @@
 
 	<section class="Gallery" class:loading={isLoading} id="grid-gallery">
 		{#each images as image, i (i + image.workId + image.url)}
-			<div
+			<a
 				class="grid_gallery_item"
-				role="button"
-				tabindex="0"
-				onclick={() => navigateToWork(image.workId)}
-				onkeydown={(e) => e.key === 'Enter' && navigateToWork(image.workId)}
+				href={`/archives/${image.workId}`}
 				aria-label={image.workTitle}
+				draggable="false"
 			>
 				<div class="image-wrapper" style:aspect-ratio={image.aspectRatio}>
 					{#if image.isVideo}
@@ -175,16 +176,19 @@
 						></video>
 					{:else}
 						<img
-							src={image.url}
+							src={image.src}
+							srcset={image.srcset}
+							sizes={image.srcset ? GRID_SIZES : undefined}
 							alt={image.workTitle}
 							loading="lazy"
+							decoding="async"
 							width={image.width}
 							height={image.height}
 							draggable="false"
 						/>
 					{/if}
 				</div>
-			</div>
+			</a>
 		{/each}
 	</section>
 </main>
@@ -240,7 +244,7 @@
 	}
 
 	.Archives .ViewSwitch .link.is-mute {
-		opacity: 0.3;
+		opacity: 0.55;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 
@@ -264,7 +268,10 @@
 
 	.Archives .grid_gallery_item {
 		position: absolute;
+		display: block;
 		cursor: pointer;
+		color: inherit;
+		text-decoration: none;
 	}
 
 	.Archives .image-wrapper {

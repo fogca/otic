@@ -60,7 +60,7 @@
 	}
 
 	.Archives .ViewSwitch .link.is-mute {
-		opacity: 0.3;
+		opacity: 0.55;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 
