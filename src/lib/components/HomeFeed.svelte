@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import { getLenis } from '$lib/state/lenis';
 	import { footerNear } from '$lib/state/footerNear.svelte';
+	import { lazyVideo } from '$lib/actions/lazyVideo';
 
 	export type Tile = {
 		src: string;
@@ -180,10 +181,14 @@
 					style:aspect-ratio={tileRatios[i]}
 				>
 					{#if t.isVideo}
+						<!-- No autoplay: lazyVideo starts playback (and full buffering)
+						     only when the tile nears the viewport, so all feed videos
+						     don't fight for bandwidth at once. preload=metadata stays so
+						     videoMeta can read the real aspect-ratio up front. -->
 						<video
 							use:videoMeta={i}
+							use:lazyVideo={{ rootMargin: '400px' }}
 							src={t.src}
-							autoplay
 							loop
 							muted
 							playsinline

@@ -155,12 +155,17 @@
 				<a class="card card-01" href="/archives/{firstWork.id}">
 					<div class="image">
 						{#if fwImg}
+							<!-- SP-only hero (this branch never renders ≥1024px), card is a
+							     fixed 257px (320px @768) — size the srcset to that, not 100vw,
+							     and prioritise it as the mobile LCP. -->
 							<img
-								src={imgOpt(fwImg.url, 1600)}
-								srcset={imgSrcset(fwImg.url, [800, 1200, 1600, 2400])}
-								sizes="(min-width: 1024px) 60vw, 100vw"
+								src={imgOpt(fwImg.url, 640)}
+								srcset={imgSrcset(fwImg.url, [400, 640, 800, 1200])}
+								sizes="(min-width: 768px) 320px, 257px"
 								alt={firstWork.title}
 								loading="eager"
+								fetchpriority="high"
+								decoding="async"
 							/>
 						{/if}
 					</div>
@@ -330,8 +335,10 @@
 		width: 257px;
 		max-width: 100%;
 		margin-inline: auto;
-		padding-top: calc((100vh - 385px) / 2);
-		margin-bottom: calc((100vh - 385px) / 2 - 103px);
+		/* dvh (not vh) so the iOS Safari toolbar doesn't push this centred hero
+		   below the fold when it's showing. */
+		padding-top: calc((100dvh - 385px) / 2);
+		margin-bottom: calc((100dvh - 385px) / 2 - 103px);
 	}
 
 	.Home .Archives .card-01 .image {
@@ -432,8 +439,8 @@
 	@media (min-width: 768px) {
 		.Home .Archives .card-01 {
 			width: 320px;
-			padding-top: calc((100vh - 480px) / 2);
-			margin-bottom: calc((100vh - 480px) / 2);
+			padding-top: calc((100dvh - 480px) / 2);
+			margin-bottom: calc((100dvh - 480px) / 2);
 		}
 	}
 
@@ -475,8 +482,8 @@
 		/* 01 — hero, centered on first viewport */
 		.Home .Archives .card-01 {
 			width: 380px;
-			padding-top: calc((100vh - 570px) / 2);
-			margin-bottom: calc((100vh - 570px) / 2);
+			padding-top: calc((100dvh - 570px) / 2);
+			margin-bottom: calc((100dvh - 570px) / 2);
 		}
 
 		/* 02 — right-shifted medium */

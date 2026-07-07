@@ -216,14 +216,18 @@
 
 	<div class="frame-stack">
 		{#each frames as frame, i (frame.id)}
+			<!-- Frame box is a fixed 257/320/380px (see .frame-stack), never 100vw —
+			     size the srcset to that. First frame is the LCP, so prioritise it. -->
 			<img
 				class="frame"
 				bind:this={frameEls[i]}
 				src={frame.src}
 				srcset={frame.srcset}
-				sizes="100vw"
+				sizes="(min-width: 1024px) 380px, (min-width: 768px) 320px, 257px"
 				alt={frame.alt}
 				loading="eager"
+				fetchpriority={i === 0 ? 'high' : undefined}
+				decoding="async"
 			/>
 		{/each}
 	</div>
