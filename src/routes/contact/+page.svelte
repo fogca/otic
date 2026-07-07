@@ -1,22 +1,31 @@
 <script lang="ts">
 	// Contact page — black background, accepts inquiries for new projects.
+	// Submits to the form action in +page.server.ts (validation + Resend email).
+	// Progressive enhancement: works as a native POST with JS off; use:enhance
+	// upgrades it to an in-place submit with loading/error/success states.
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
+
 	const INQUIRY_TYPES = ['Project', 'Hiring', 'Press', 'Other'] as const;
 
-	let formData = $state({
-		name: '',
-		email: '',
-		type: 'Project' as (typeof INQUIRY_TYPES)[number],
-		message: ''
+	let { form }: { form: ActionData } = $props();
+
+	let submitting = $state(false);
+	let thanksEl: HTMLElement | undefined = $state();
+
+	// Move focus to the confirmation once a submit succeeds, so screen-reader
+	// and keyboard users aren't left on a now-removed submit button.
+	$effect(() => {
+		if (form?.success && thanksEl) thanksEl.focus();
 	});
 
-	let submitted = $state(false);
-
-	function handleSubmit(e: SubmitEvent) {
-		e.preventDefault();
-		// TODO: wire up Resend or similar email service
-		console.log('Contact form submission:', formData);
-		submitted = true;
-	}
+	const submit = () => {
+		submitting = true;
+		return async ({ update }: { update: () => Promise<void> }) => {
+			await update();
+			submitting = false;
+		};
+	};
 </script>
 
 <svelte:head>
@@ -53,50 +62,98 @@
 						</p>
 					</div>
 
-					{#if submitted}
-						<p class="thanks" lang="en">Thank you. We'll be in touch shortly.</p>
+					{#if form?.success}
+						<p class="thanks" lang="en" role="status" tabindex="-1" bind:this={thanksEl}>
+							Thank you. We'll be in touch shortly.
+						</p>
 					{:else}
-						<form onsubmit={handleSubmit} class="form">
-							<label class="field">
-								<span class="label" lang="en">Name</span>
-								<input
-									type="text"
-									name="name"
-									placeholder="Yamada Taro"
-									bind:value={formData.name}
-									required
-								/>
-							</label>
-							<label class="field">
-								<span class="label" lang="en">Email</span>
-								<input
-									type="email"
-									name="email"
-									placeholder="hi@example.com"
-									bind:value={formData.email}
-									required
-								/>
-							</label>
-							<label class="field">
-								<span class="label" lang="en">Type</span>
-								<select name="type" bind:value={formData.type} required>
-									{#each INQUIRY_TYPES as t (t)}
-										<option value={t}>{t}</option>
-									{/each}
-								</select>
-							</label>
+						<form method="POST" use:enhance={submit} class="form" novalidate>
+							{#if form?.formError}
+								<p class="form-error" role="alert">{form.formError}</p>
+							{/if}
+
+							<!-- Honeypot: hidden from users, catches naive bots. -->
+							<div class="hp" aria-hidden="true">
+								<label>
+									Company
+									<input type="text" name="company" tabindex="-1" autocomplete="off" />
+								</label>
+							</div>
+
+							<div class="field-group">
+								<label class="field">
+									<span class="label" lang="en">Name</span>
+									<input
+										id="name"
+										type="text"
+										name="name"
+										placeholder="Yamada Taro"
+										value={form?.values?.name ?? ''}
+										required
+										aria-invalid={form?.errors?.name ? 'true' : undefined}
+										aria-describedby={form?.errors?.name ? 'name-error' : undefined}
+									/>
+								</label>
+								{#if form?.errors?.name}
+									<span class="field-error" id="name-error">{form.errors.name}</span>
+								{/if}
+							</div>
+							<div class="field-group">
+								<label class="field">
+									<span class="label" lang="en">Email</span>
+									<input
+										id="email"
+										type="email"
+										name="email"
+										placeholder="hi@example.com"
+										value={form?.values?.email ?? ''}
+										required
+										aria-invalid={form?.errors?.email ? 'true' : undefined}
+										aria-describedby={form?.errors?.email ? 'email-error' : undefined}
+									/>
+								</label>
+								{#if form?.errors?.email}
+									<span class="field-error" id="email-error">{form.errors.email}</span>
+								{/if}
+							</div>
+							<div class="field-group">
+								<label class="field">
+									<span class="label" lang="en">Type</span>
+									<select
+										name="type"
+										required
+										aria-invalid={form?.errors?.type ? 'true' : undefined}
+										aria-describedby={form?.errors?.type ? 'type-error' : undefined}
+									>
+										{#each INQUIRY_TYPES as t (t)}
+											<option value={t} selected={(form?.values?.type ?? 'Project') === t}>{t}</option>
+										{/each}
+									</select>
+								</label>
+								{#if form?.errors?.type}
+									<span class="field-error" id="type-error">{form.errors.type}</span>
+								{/if}
+							</div>
 							<label class="field field--textarea">
 								<span class="label" lang="en">Message</span>
 								<textarea
+									id="message"
 									name="message"
 									rows="8"
 									placeholder="Tell us about the project — background, scope, timeline, references..."
-									bind:value={formData.message}
 									required
-								></textarea>
+									aria-invalid={form?.errors?.message ? 'true' : undefined}
+									aria-describedby={form?.errors?.message ? 'message-error' : undefined}
+									>{form?.values?.message ?? ''}</textarea
+								>
+								{#if form?.errors?.message}
+									<span class="field-error" id="message-error">{form.errors.message}</span>
+								{/if}
 							</label>
 
-							<button type="submit" class="submit" lang="en">Send →</button>
+							<button type="submit" class="submit" lang="en" disabled={submitting}>
+								{submitting ? 'Sending…' : 'Send →'}
+							</button>
 						</form>
 					{/if}
 				</div>
@@ -123,6 +180,7 @@
 		padding-top: 100px;
 		padding-bottom: 120px;
 		min-height: 100vh;
+		min-height: 100dvh;
 		/* Absorb Footer's margin-top so Contact (black) flows seamlessly into Footer (black) */
 		margin-bottom: -120px;
 		/* Hairline divider between Contact and Footer (matches Footer__bottom top border) */
@@ -184,15 +242,27 @@
 		line-height: 1.7;
 	}
 
-	.Contact .body p + p {
-		margin-top: 16px;
-	}
-
 	.Contact .form {
 		margin-top: 56px;
 		display: flex;
 		flex-direction: column;
 		gap: 28px;
+	}
+
+	/* Visually-hidden honeypot — off-screen (not display:none, which some bots
+	   skip) and out of the tab order. */
+	.Contact .hp {
+		position: absolute;
+		left: -9999px;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+	}
+
+	.Contact .form-error {
+		margin: 0;
+		font-size: 13px;
+		color: #ff9a9a;
 	}
 
 	.Contact .field {
@@ -208,6 +278,15 @@
 		opacity: 0.6;
 		padding: 10px 0;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+	}
+
+	/* Groups a field row with its inline error below it — keeps the label +
+	   control underline on one continuous baseline (the error sits under the
+	   whole row, so it never shifts the label's own underline). */
+	.Contact .field-group {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
 	}
 
 	.Contact .field input,
@@ -251,6 +330,17 @@
 	.Contact .field select option {
 		background: #000;
 		color: #fff;
+	}
+
+	.Contact .field-error {
+		font-size: 12px;
+		color: #ff9a9a;
+	}
+
+	.Contact .field input[aria-invalid='true'],
+	.Contact .field textarea[aria-invalid='true'],
+	.Contact .field select[aria-invalid='true'] {
+		border-bottom-color: #ff9a9a;
 	}
 
 	/* Message field: stack label above full-width textarea */
@@ -300,9 +390,21 @@
 		border-color: #fff;
 	}
 
+	.Contact .submit:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+	.Contact .submit:disabled:hover {
+		background: transparent;
+		color: inherit;
+		border-color: rgba(255, 255, 255, 0.6);
+	}
+
 	.Contact .thanks {
 		font-size: 16px;
 		padding-block: 80px;
+		outline: none;
 	}
 
 	@media (min-width: 1024px) {
