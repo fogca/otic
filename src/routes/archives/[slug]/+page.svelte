@@ -148,6 +148,8 @@
 						srcset={imgSrcset(archive.hero.src, [900, 1400, 2000])}
 						sizes="(min-width: 1024px) 60vw, 100vw"
 						alt={archive.title}
+						fetchpriority="high"
+						decoding="async"
 					/>
 				</picture>
 			</div>
@@ -172,6 +174,7 @@
 						sizes="(min-width: 1024px) 50vw, 100vw"
 						alt={`${archive.title} ${i + 1}`}
 						loading="lazy"
+						decoding="async"
 					/>
 				{/if}
 			</div>
@@ -181,7 +184,7 @@
 	{#if hasColophon}
 		<section class="Colophon">
 			<div class="wrapper">
-				<h4 class="title" lang="en">Colophon</h4>
+				<h2 class="title" lang="en">Colophon</h2>
 				<div class="line" aria-hidden="true"></div>
 				<dl class="rows">
 					<div class="row">

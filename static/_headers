@@ -1,0 +1,14 @@
+# Cloudflare Pages security response headers (adapter-cloudflare copies this
+# from static/ into the deploy output).
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+
+# Content-Security-Policy — NOT enabled yet: it needs testing against the live
+# FontPlus loader (webfont.fontplus.jp injects font CSS/files from its own
+# subdomains) and SvelteKit's inline hydration before it can be enforced
+# without breaking the site. A CSP is best added via kit.csp (nonce/hash) in
+# svelte.config.js rather than here. Starting allowlist to verify against:
+#   Content-Security-Policy: default-src 'self'; img-src 'self' data: https://images.microcms-assets.io; media-src 'self' https://cdn.takumiisobe.com; script-src 'self' 'unsafe-inline' https://webfont.fontplus.jp; style-src 'self' 'unsafe-inline' https://webfont.fontplus.jp; font-src 'self' https://webfont.fontplus.jp https://*.fontplus.jp; connect-src 'self' https://api.resend.com; frame-ancestors 'none'

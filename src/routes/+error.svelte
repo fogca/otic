@@ -43,6 +43,7 @@
 <style>
 	.ErrorPage {
 		min-height: 100vh;
+		min-height: 100dvh;
 		padding: 100px var(--padding) 80px;
 		display: flex;
 		align-items: center;

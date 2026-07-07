@@ -206,7 +206,6 @@
 		gap: 5px;
 	}
 
-	.Legal .body h2,
 	.Legal .body h3 {
 		font-size: var(--fs-h4);
 		font-weight: var(--fw-medium);
@@ -214,7 +213,6 @@
 		margin: 0;
 	}
 
-	.Legal .body.body-ja h2,
 	.Legal .body.body-ja h3 {
 		font-size: var(--fs-h5);
 	}

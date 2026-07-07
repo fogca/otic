@@ -264,7 +264,9 @@
 				     scroll sequence continues. Placeholder asset: swap {src} for the
 				     real image. -->
 				<div class="intro-reveal" bind:this={revealEl}>
-					<img src="/images/services_visualisation.png" alt="" />
+					<!-- Below the fold (revealed on scroll) — lazy so it doesn't
+					     compete with the first view's assets. -->
+					<img src="/images/services_visualisation.png" alt="" loading="lazy" decoding="async" />
 				</div>
 			</div>
 		</div>

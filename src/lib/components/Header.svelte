@@ -105,6 +105,11 @@
 		>
 			{lang.current === 'en' ? 'EN' : 'JP'}
 		</button>
+		<!-- Announces the language change to screen readers (the EN/JP label
+		     alone doesn't say what happened). -->
+		<span class="sr-only" aria-live="polite">
+			{lang.current === 'en' ? 'English' : '日本語'}
+		</span>
 	</nav>
 
 	<div class="head-end">
@@ -167,6 +172,11 @@
 		line-height: 1;
 		color: var(--color-text);
 		font-weight: var(--fw-base);
+		/* Grow the tap target to ~35px tall without moving the text — the
+		   negative margin cancels the padding's layout effect (baseline stays
+		   put), so this is a hit-area-only change. WCAG 2.5.8. */
+		padding: 12px 4px;
+		margin: -12px -4px;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 
@@ -192,7 +202,23 @@
 		color: var(--color-text);
 		font-weight: var(--fw-base);
 		opacity: 0.7;
+		/* Same hit-area-only enlargement as .link above (WCAG 2.5.8). */
+		padding: 12px 4px;
+		margin: -12px -4px;
 		transition: opacity var(--duration-fast) var(--ease-default);
+	}
+
+	/* Visually hidden, but announced by screen readers. */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 	.lang-toggle:hover {
 		opacity: 1;

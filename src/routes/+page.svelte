@@ -350,17 +350,11 @@
 		width: 90%;
 		margin-inline: auto;
 	}
-	.Home .Archives .card-02 .image {
-		/* aspect-ratio: 4 / 5; */
-	}
 
 	/* 03 — full bleed image, meta stays inside padding */
 	.Home .Archives .card-03 {
 		width: 100vw;
 		margin-left: calc(-1 * var(--padding));
-	}
-	.Home .Archives .card-03 .image {
-		/* aspect-ratio: 1 / 1; */
 	}
 	.Home .Archives .card-03 .meta {
 		padding-inline: var(--padding);
@@ -371,17 +365,11 @@
 		width: 62.5vw;
 		margin-inline: auto;
 	}
-	.Home .Archives .card-04 .image {
-		/* aspect-ratio: 4 / 5; */
-	}
 
 	/* 05 — full bleed image, meta stays inside padding */
 	.Home .Archives .card-05 {
 		width: 100vw;
 		margin-left: calc(-1 * var(--padding));
-	}
-	.Home .Archives .card-05 .image {
-		/* aspect-ratio: 16 / 9; */
 	}
 	.Home .Archives .card-05 .meta {
 		padding-inline: var(--padding);
@@ -392,17 +380,11 @@
 		width: 85%;
 		margin-inline: auto;
 	}
-	.Home .Archives .card-06 .image {
-		/* aspect-ratio: 4 / 5; */
-	}
 
 	/* 07 — 70% centered */
 	.Home .Archives .card-07 {
 		width: 70%;
 		margin-inline: auto;
-	}
-	.Home .Archives .card-07 .image {
-		/* aspect-ratio: 4 / 5; */
 	}
 
 	/* 08 — 80% centered */
@@ -410,17 +392,11 @@
 		width: 80%;
 		margin-inline: auto;
 	}
-	.Home .Archives .card-08 .image {
-		/* aspect-ratio: 4 / 5; */
-	}
 
 	/* 09 — full bleed image, meta stays inside padding */
 	.Home .Archives .card-09 {
 		width: 100vw;
 		margin-left: calc(-1 * var(--padding));
-	}
-	.Home .Archives .card-09 .image {
-		/* aspect-ratio: 16 / 9; */
 	}
 	.Home .Archives .card-09 .meta {
 		padding-inline: var(--padding);
@@ -430,9 +406,6 @@
 	.Home .Archives .card-10 {
 		width: 62.5vw;
 		margin-inline: auto;
-	}
-	.Home .Archives .card-10 .image {
-		/* aspect-ratio: 4 / 5; */
 	}
 
 	/* ----- Tablet+ ----- */

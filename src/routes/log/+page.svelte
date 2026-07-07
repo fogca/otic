@@ -1,6 +1,9 @@
 <svelte:head>
   <title>Log / TAKUMIISOBE</title>
-  <link rel="stylesheet" href="/css/base.css" />
+  <!-- base.css is already loaded globally (versioned) in app.html — no need to
+       re-link it here (an unversioned second load risked a stale copy). -->
+  <!-- Stub page — keep it out of the index until it carries real content. -->
+  <meta name="robots" content="noindex" />
 </svelte:head>
 
 <main class="log-page">
@@ -33,6 +36,7 @@
   .log-page {
     background-color: var(--color-bg-log);
     min-height: 100vh;
+    min-height: 100dvh;
     position: relative;
   }
 
