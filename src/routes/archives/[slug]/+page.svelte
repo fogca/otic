@@ -205,9 +205,9 @@
 						<dd lang="en">{archive.colophonBase.links}</dd>
 					</div>
 					{#if archive.colophonExtra}
-						{#each archive.colophonExtra as { key, value } (key)}
+						{#each archive.colophonExtra as { label, value } (label)}
 							<div class="row">
-								<dt lang="en">{key}</dt>
+								<dt lang="en">{label}</dt>
 								<dd lang="en">{value}</dd>
 							</div>
 						{/each}

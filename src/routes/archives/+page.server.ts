@@ -131,8 +131,8 @@ export const load: PageServerLoad = async () => {
 				if (row.pj_images?.url) {
 					workImages.push({
 						url: row.pj_images.url,
-						width: row.pj_images.width,
-						height: row.pj_images.height,
+						width: row.pj_images.width ?? 0,
+						height: row.pj_images.height ?? 0,
 						workId: work.id,
 						workTitle: work.title,
 						isThumbnail: false
@@ -183,8 +183,8 @@ export const load: PageServerLoad = async () => {
 					} else if (row.pj_images?.url) {
 						workImages.push({
 							url: row.pj_images.url,
-							width: row.pj_images.width,
-							height: row.pj_images.height,
+							width: row.pj_images.width ?? 0,
+							height: row.pj_images.height ?? 0,
 							workId: work.id,
 							workTitle: work.title,
 							isThumbnail: false,

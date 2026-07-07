@@ -4,8 +4,6 @@
 	import { page } from '$app/state';
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
-	// Reverted to the "Office / TAKUMIISOBE.com" wordmark (Wordmark.svelte
-	// stays available if we swap back later).
 	import Logo from '$lib/components/Logo.svelte';
 
 	// Underline only on the Archives index/list — not on individual project

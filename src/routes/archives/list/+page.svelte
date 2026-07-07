@@ -1,9 +1,8 @@
 <script lang="ts">
+	import { padNumber } from '$lib/js/format';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-
-	const padNumber = (n: number) => String(n + 1).padStart(2, '0');
 </script>
 
 <svelte:head>

@@ -5,6 +5,7 @@
 	import HomeFeed, { type Tile } from '$lib/components/HomeFeed.svelte';
 	import { intro } from '$lib/state/intro.svelte';
 	import { imgOpt, imgSrcset, mainVisual, mainVisualImage } from '$lib/js/img';
+	import { padNumber } from '$lib/js/format';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -13,8 +14,6 @@
 
 	// PC gets the Figma "Log" feed; SP keeps the existing vertical archives stream.
 	let isPC = $state(false);
-
-	const padNumber = (n: number) => String(n + 1).padStart(2, '0');
 
 	const works = $derived(data.works);
 	const firstWork = $derived(works[0]);
