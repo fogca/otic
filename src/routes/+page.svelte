@@ -2,9 +2,8 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import Loader from '$lib/components/Loader.svelte';
-	import HomeFeed, { type Tile } from '$lib/components/HomeFeed.svelte';
 	import { intro } from '$lib/state/intro.svelte';
-	import { imgOpt, imgSrcset, mainVisual, mainVisualImage } from '$lib/js/img';
+	import { imgOpt, imgSrcset, mainVisualImage } from '$lib/js/img';
 	import { padNumber } from '$lib/js/format';
 	import type { PageData } from './$types';
 
@@ -12,35 +11,13 @@
 
 	let introCompleted = $state(false);
 
-	// PC gets the Figma "Log" feed; SP keeps the existing vertical archives stream.
-	let isPC = $state(false);
-
 	const works = $derived(data.works);
 	const firstWork = $derived(works[0]);
 	const restWorks = $derived(works.slice(1, 10));
 
-	// Work tiles for the right-hand vertical feed (5 selected projects) — fixed
-	// width, each keeps its own natural aspect-ratio (no forced square crop).
-	// Uses main_visual (Cloudflare video or image), falling back to thumbnail.
-	const feedTiles = $derived.by<Tile[]>(() =>
-		works
-			.map((w) => ({ w, v: mainVisual(w) }))
-			.filter((x): x is { w: (typeof works)[number]; v: NonNullable<typeof x.v> } => x.v !== null)
-			.slice(0, 5)
-			.map(({ w, v }) =>
-				v.isVideo
-					? { src: v.src, srcset: '', isVideo: true, alt: w.title, href: `/archives/${w.id}` }
-					: {
-							src: imgOpt(v.src, 800),
-							srcset: imgSrcset(v.src, [400, 600, 800, 1200]),
-							isVideo: false,
-							alt: w.title,
-							href: `/archives/${w.id}`,
-							width: v.width,
-							height: v.height
-						}
-			)
-	);
+	// Meta's third column: first 2 scope tags, e.g. "Branding / Web" — matches
+	// the convention already used in archives/list/+page.svelte.
+	const workScope = (w: { scope?: string[] }) => (w.scope ?? []).slice(0, 2).join(' / ');
 
 	// 3 filler frames + firstWork = 4 frames revealed in the loader.
 	// The last frame matches Archives card-01 so the handoff is seamless.
@@ -66,11 +43,6 @@
 	onMount(() => {
 		if (!browser) return;
 
-		const pcMq = window.matchMedia('(min-width: 1024px)');
-		isPC = pcMq.matches;
-		const onPcChange = (e: MediaQueryListEvent) => (isPC = e.matches);
-		pcMq.addEventListener('change', onPcChange);
-
 		const prefersReducedMotion = window.matchMedia(
 			'(prefers-reduced-motion: reduce)'
 		).matches;
@@ -78,14 +50,13 @@
 		if (prefersReducedMotion) {
 			introCompleted = true;
 			intro.completed = true;
-			return () => pcMq.removeEventListener('change', onPcChange);
+			return;
 		}
 
 		// Hide Header until loader completes
 		intro.completed = false;
 
 		return () => {
-			pcMq.removeEventListener('change', onPcChange);
 			intro.completed = true;
 		};
 	});
@@ -111,53 +82,26 @@
 		frames={loaderFrames}
 		num={padNumber(0)}
 		title={firstWork?.title ?? ''}
-		brand={firstWork?.brand ?? ''}
+		brand={firstWork ? workScope(firstWork) : ''}
 		showLogo={false}
 		onTextReveal={handleTextReveal}
 		onComplete={handleLoaderComplete}
 	/>
 
-	{#if isPC}
-		<!-- PC: Figma "Log" — vertical work feed + ethos statement -->
-		<HomeFeed tiles={feedTiles} />
-
-		<!-- After the feed: a dark band, then a light band (placeholder content
-		     — Contact / studio info), then the global black Footer. -->
-		<section class="band band--dark">
-			<div class="band__inner">
-				<p class="band__eyebrow" lang="en">Contact</p>
-				<a class="band__lead" href="mailto:hi@takumiisobe.com" lang="en"
-					>hi@takumiisobe.com</a
-				>
-				<p class="band__note" lang="en">
-					For new projects across product, furniture, typeface, web and
-					branding — we'd love to hear from you.
-				</p>
-			</div>
-		</section>
-
-		<section class="band band--light">
-			<div class="band__inner">
-				<p class="band__eyebrow" lang="en">Office</p>
-				<p class="band__lead band__lead--text" lang="en">
-					Office / TAKUMI ISOBE — a multi-disciplinary design office working
-					across visual identity and design engineering.
-				</p>
-				<p class="band__note" lang="en">Tokyo, Japan</p>
-			</div>
-		</section>
-	{:else}
-		<!-- SP: Archives stream 01 → 10 (unchanged) -->
-		<section class="Archives">
+	<!-- Archives stream 01 → 10 — same layout on every viewport (PC previously
+	     swapped in a work-feed + contact/office bands; reverted to this simpler
+	     stream for now). The min-width:1024px block below still varies each
+	     card's width/position on desktop; only the SP/PC branch split and the
+	     bands were removed. -->
+	<section class="Archives">
 		<div class="wrapper">
 			{#if firstWork}
 				{@const fwImg = mainVisualImage(firstWork)}
 				<a class="card card-01" href="/archives/{firstWork.id}">
 					<div class="image">
 						{#if fwImg}
-							<!-- SP-only hero (this branch never renders ≥1024px), card is a
-							     fixed 257px (320px @768) — size the srcset to that, not 100vw,
-							     and prioritise it as the mobile LCP. -->
+							<!-- Fixed 257px (320px @768, 380px @1024) — size the srcset to
+							     that, not 100vw, and prioritise it as the LCP. -->
 							<img
 								src={imgOpt(fwImg.url, 640)}
 								srcset={imgSrcset(fwImg.url, [400, 640, 800, 1200])}
@@ -172,7 +116,7 @@
 					<div class="meta">
 						<span class="num" lang="en">{padNumber(0)}</span>
 						<span class="code" lang="en">{firstWork.title}</span>
-						<span class="brand" lang="en">{firstWork.brand ?? ''}</span>
+						<span class="scope" lang="en">{workScope(firstWork)}</span>
 					</div>
 				</a>
 			{/if}
@@ -204,65 +148,17 @@
 					<div class="meta">
 						<span class="num" lang="en">{padNumber(i + 1)}</span>
 						<span class="code" lang="en">{work.title}</span>
-						<span class="brand" lang="en">{work.brand ?? ''}</span>
+						<span class="scope" lang="en">{workScope(work)}</span>
 					</div>
 				</a>
 			{/each}
 		</div>
 	</section>
-	{/if}
 </main>
 
 <style>
 	.Home {
 		min-height: 100dvh;
-	}
-
-	/* ----- Bands after the feed (dark Contact / light Office) ----- */
-	.Home .band {
-		min-height: 88vh;
-		display: flex;
-		align-items: center;
-		padding: 120px var(--padding);
-	}
-	.Home .band--dark {
-		background: var(--color-bg-dark);
-	}
-	.Home .band--dark :global(*) {
-		color: #fff;
-	}
-	.Home .band--light {
-		background: var(--color-bg);
-	}
-	.Home .band__inner {
-		max-width: 760px;
-	}
-	.Home .band__eyebrow {
-		margin: 0 0 24px;
-		font-size: var(--fs-h6);
-		font-weight: var(--fw-medium);
-		opacity: 0.5;
-	}
-	.Home .band__lead {
-		display: block;
-		margin: 0;
-		font-size: var(--fs-h2);
-		line-height: 1.2;
-		text-decoration: none;
-		transition: opacity var(--duration-fast) var(--ease-default);
-	}
-	.Home a.band__lead:hover {
-		opacity: 0.6;
-	}
-	.Home .band__lead--text {
-		font-weight: var(--fw-lead);
-		font-variation-settings: 'wght' var(--fw-lead);
-	}
-	.Home .band__note {
-		margin: 24px 0 0;
-		font-size: var(--fs-p-en);
-		opacity: 0.6;
-		max-width: 48ch;
 	}
 
 	/* ----- Archives stream ----- */
@@ -315,7 +211,7 @@
 	/* base.css sets color directly on span — keep meta text black */
 	.Home .Archives .card .meta .num,
 	.Home .Archives .card .meta .code,
-	.Home .Archives .card .meta .brand {
+	.Home .Archives .card .meta .scope {
 		color: var(--color-text);
 	}
 
@@ -323,7 +219,7 @@
 		opacity: 0.6;
 	}
 
-	.Home .Archives .card .meta .brand {
+	.Home .Archives .card .meta .scope {
 		text-align: right;
 		opacity: 0.6;
 		font-weight: var(--fw-base);
