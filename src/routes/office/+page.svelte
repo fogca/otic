@@ -557,7 +557,7 @@
 	}
 	.pn {
 		font-size: var(--fs-h5);
-		opacity: 0.4;
+		opacity: 0.55;
 	}
 	.pt {
 		font-size: var(--fs-h3);
@@ -658,7 +658,7 @@
 		flex: none;
 		width: 30%;
 		margin-right: 24px;
-		opacity: 0.5;
+		opacity: 0.6;
 	}
 	.cfact dd {
 		flex: 1;
@@ -880,6 +880,32 @@
 		.ethos-block--intro {
 			width: 100%;
 			max-width: none;
+		}
+	}
+
+	/* ── Reduced-motion fallback ──
+	   The onMount that drives the scroll-scrubbed intro (logo shrink + image
+	   reveal) AND the Services horizontal pin early-returns under
+	   prefers-reduced-motion, so neither animation runs. Without this block
+	   that left two broken states: (1) the reveal image stuck at opacity:0
+	   over its reserved spacer (an empty gap), and (2) the Services cards
+	   clipped by overflow-x:clip while the translate that would reveal them
+	   never fires — cards 2-4 permanently off-screen and unreachable by
+	   keyboard. Here we drop the (now non-existent) logo-shrink animation
+	   entirely and present a static, fully reachable layout: the logo stays
+	   at its resting full width, the reveal image just shows, and the
+	   Services row un-clips and stacks vertically like SP. Placed after the
+	   min-width:1024px block so its equal-specificity rules win by order. */
+	@media (prefers-reduced-motion: reduce) {
+		.intro-reveal {
+			opacity: 1;
+			transform: none;
+		}
+		.panel--services {
+			overflow-x: visible;
+		}
+		.services-row {
+			flex-direction: column;
 		}
 	}
 </style>
