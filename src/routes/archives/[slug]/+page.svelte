@@ -285,28 +285,14 @@
 		display: block;
 	}
 
-	/* SP: hero full-width; gallery thumbnails keep their centred-narrow /
-	   full-bleed rhythm. */
+	/* SP: hero and gallery thumbnails all full-width. */
 	.media__hero {
 		width: 100%;
 		margin-inline: 0;
 	}
 	.media__item {
-		width: 90%;
-		margin-inline: auto;
-	}
-	.media__item.mp-1 {
-		width: 80%;
-	}
-	.media__item.mp-2 {
-		width: 100vw;
-	}
-	.media__item.mp-5 {
-		width: 100vw;
-		margin-inline: calc(-1 * var(--padding));
-	}
-	.media__item.mp-3 {
-		width: 70%;
+		width: 100%;
+		margin-inline: 0;
 	}
 
 	/* ── Colophon ── */
@@ -380,21 +366,8 @@
 		}
 		.media__hero,
 		.media__item {
-			width: 50vw;
-			margin-left: auto;
-			margin-right: 0;
-		}
-		/* Re-assert the uniform width against the SP mp-1/2/3/5 rules above —
-		   those use two classes (higher specificity) so they'd otherwise still
-		   win here even though this block comes later in the cascade. */
-		.media__item.mp-1,
-		.media__item.mp-2,
-		.media__item.mp-3,
-		.media__item.mp-4,
-		.media__item.mp-5,
-		.media__item.mp-6 {
-			width: 50vw;
-			margin-left: auto;
+			width: 100%;
+			margin-left: 0;
 			margin-right: 0;
 		}
 		.media__hero img,
