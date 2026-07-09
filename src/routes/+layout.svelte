@@ -114,16 +114,40 @@
 		if (!browser) return;
 		const footerEl = document.querySelector('.Footer');
 		if (!footerEl) return;
+
+		// On a short page (e.g. an archives/[slug] with few gallery images),
+		// the Footer already sits inside the 300px pre-emptive margin below at
+		// scrollY:0 — isIntersecting is true from the very first callback, with
+		// no scrolling at all, which faded out the title/lead/corner-logo
+		// immediately on load. Gate on genuine scroll progress too.
+		let isIntersecting = false;
+		const recompute = () => {
+			footerNear.near = isIntersecting && window.scrollY > 0;
+		};
+
 		const io = new IntersectionObserver(
 			([entry]) => {
-				footerNear.near = entry.isIntersecting;
+				isIntersecting = entry.isIntersecting;
+				recompute();
 			},
 			// Expand the bottom of the effective viewport by 300px so this
 			// fires slightly BEFORE the Footer is actually on screen.
 			{ rootMargin: '0px 0px 300px 0px' }
 		);
 		io.observe(footerEl);
-		return () => io.disconnect();
+
+		// IntersectionObserver only re-fires when isIntersecting itself
+		// flips — on a short page it can stay true through any amount of
+		// scrolling (the Footer never leaves the margin), so the callback
+		// above never fires again after the first one. Recompute on scroll
+		// too, so the "hasn't scrolled yet" suppression correctly lifts the
+		// moment the user actually scrolls.
+		window.addEventListener('scroll', recompute, { passive: true });
+
+		return () => {
+			io.disconnect();
+			window.removeEventListener('scroll', recompute);
+		};
 	});
 
 	// ── Outgoing: shrink + darken (overlay) + white panel up ──
