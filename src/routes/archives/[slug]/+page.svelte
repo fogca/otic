@@ -358,11 +358,12 @@
 
 		/* Media: uniform-width column, tight gap (was editorial-scatter
 		   varied widths/offsets + a large 12vh gap). Top padding matches the
-		   left/right var(--padding) rhythm instead of a one-off 25px. */
+		   12px item gap for a consistent vertical rhythm; right padding
+		   stays the page's standard var(--padding) edge. */
 		.media {
 			grid-area: media;
 			margin-top: 0;
-			padding: var(--padding) var(--padding) 0 0;
+			padding: 12px var(--padding) 0 0;
 			gap: 12px;
 		}
 		.media__hero,
