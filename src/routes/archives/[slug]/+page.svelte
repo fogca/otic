@@ -363,7 +363,7 @@
 			grid-area: media;
 			margin-top: 0;
 			padding: var(--padding) var(--padding) 0 0;
-			gap: 10px;
+			gap: 12px;
 		}
 		.media__hero,
 		.media__item {
