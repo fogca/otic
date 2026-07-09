@@ -357,11 +357,12 @@
 		}
 
 		/* Media: uniform-width column, tight gap (was editorial-scatter
-		   varied widths/offsets + a large 12vh gap). */
+		   varied widths/offsets + a large 12vh gap). Top padding matches the
+		   left/right var(--padding) rhythm instead of a one-off 25px. */
 		.media {
 			grid-area: media;
 			margin-top: 0;
-			padding: 25px var(--padding) 0 0;
+			padding: var(--padding) var(--padding) 0 0;
 			gap: 10px;
 		}
 		.media__hero,
@@ -377,17 +378,6 @@
 			max-height: 88vh;
 			object-fit: contain;
 			object-position: left top;
-		}
-
-		/* First view: hero fills exactly one viewport height with its image
-		   bottom-anchored, so only the hero is visible before any scroll.
-		   .media's own 25px top padding is subtracted so the hero's bottom
-		   edge lands exactly on the true viewport bottom, not 25px past it. */
-		.media__hero {
-			height: calc(100dvh - 25px);
-			display: flex;
-			align-items: flex-end;
-			justify-content: flex-end;
 		}
 
 		/* Colophon — tight info block, left-aligned under the lead */
