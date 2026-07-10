@@ -65,6 +65,11 @@ export type Work = {
 		value?: string;
 		url?: string;
 	}>;
+	/** Colophon as free-form rich text (richEditor — raw HTML) — an
+	    alternative to the structured `colophon` rows above, tried alongside
+	    it rather than replacing it. Not yet a live CMS field; optional
+	    until added. */
+	colophon_text?: string;
 };
 
 // Sort: works with `order` field come first (asc), others fall back to API's default order

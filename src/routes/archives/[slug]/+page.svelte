@@ -86,11 +86,13 @@
 		};
 	}
 
-	// Show Colophon section only if at least one row is filled in. Brand
-	// alone doesn't count (it's auto-populated from work meta, so it's
-	// present on nearly every work — showing the section for just that would
-	// be noise).
-	const hasColophon = $derived(archive.colophonBase.rows.length > 0);
+	// Show Colophon section if there's at least one structured row or any
+	// rich-text content. Brand alone doesn't count (it's auto-populated from
+	// work meta, so it's present on nearly every work — showing the section
+	// for just that would be noise).
+	const hasColophon = $derived(
+		archive.colophonBase.rows.length > 0 || !!archive.colophonBase.text
+	);
 </script>
 
 <svelte:head>
@@ -181,6 +183,9 @@
 			<div class="wrapper">
 				<h2 class="title" lang="en">Colophon</h2>
 				<div class="line" aria-hidden="true"></div>
+				{#if archive.colophonBase.text}
+					<div class="text" lang="en">{@html archive.colophonBase.text}</div>
+				{/if}
 				<dl class="rows">
 					{#if archive.colophonBase.brand}
 						<div class="row">
@@ -321,6 +326,29 @@
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 	.Colophon .row dd a:hover {
+		opacity: 0.6;
+	}
+
+	/* Alternative free-form rich text (richEditor HTML) — basic prose
+	   rhythm; only styles what a rich editor can actually produce. */
+	.Colophon .text {
+		font-size: var(--fs-h5);
+		line-height: 1.6;
+		font-weight: var(--fw-base);
+		margin-bottom: 20px;
+	}
+	.Colophon .text :global(p) {
+		margin: 0.6em 0;
+	}
+	.Colophon .text :global(p:first-child) {
+		margin-top: 0;
+	}
+	.Colophon .text :global(a) {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		transition: opacity var(--duration-fast) var(--ease-default);
+	}
+	.Colophon .text :global(a:hover) {
 		opacity: 0.6;
 	}
 

@@ -48,7 +48,10 @@ export const load: PageServerLoad = async ({ params }) => {
 					label: r.label ?? '',
 					value: r.value ?? '',
 					url: r.url?.trim() || undefined
-				}))
+				})),
+			// Alternative free-form rich text version, tried alongside the
+			// structured rows above rather than replacing them.
+			text: work.colophon_text ?? ''
 		}
 	};
 
