@@ -15,9 +15,9 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import { setLenis } from '$lib/state/lenis';
 
-	// Office's corner-logo starts full-bleed at the bottom of the viewport
-	// until the user scrolls at all (officeIntro.pastHero, set by
-	// office/+page.svelte), then immediately shrinks down to its normal
+	// Office's corner-logo starts oversized at the bottom (same left inset,
+	// just wider) until the user scrolls at all (officeIntro.pastHero, set
+	// by office/+page.svelte), then immediately shrinks down to its normal
 	// bottom-left size, same as every other page.
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
 	const officeHero = $derived(isOffice && !officeIntro.pastHero);
@@ -320,10 +320,10 @@
 <Header />
 
 <!-- Global wordmark, PC only, normally bottom-left/small. On Office it
-     starts full-bleed at the bottom (see .is-hero below) and shrinks to
-     that normal size the instant the user scrolls. Lives OUTSIDE
-     .page-wrapper so its position:fixed resolves to the viewport (the
-     wrapper's will-change transform would otherwise make it a containing
+     starts oversized at the same bottom-left anchor (see .is-hero below)
+     and shrinks to that normal size the instant the user scrolls. Lives
+     OUTSIDE .page-wrapper so its position:fixed resolves to the viewport
+     (the wrapper's will-change transform would otherwise make it a containing
      block). -->
 <a
 	class="corner-logo"
@@ -356,11 +356,11 @@
 	}
 
 	/* ── Global corner wordmark (PC), normally bottom-left/small. On Office
-	   it starts full-bleed at the bottom (officeHero, driven by
+	   it starts oversized at the bottom (officeHero, driven by
 	   officeIntro.pastHero — see office/+page.svelte) and shrinks back to
-	   this normal bottom-left size the instant the user scrolls. `bottom`
-	   stays constant across both states (never moves vertically/to top:0) —
-	   only left/width/max-width change. ── */
+	   this normal bottom-left size the instant the user scrolls. `left` and
+	   `bottom` stay constant across both states (the corner never moves) —
+	   only width/max-width change. ── */
 	.corner-logo {
 		position: fixed;
 		left: var(--padding);
@@ -376,7 +376,6 @@
 		z-index: var(--z-header);
 		transition:
 			opacity 600ms var(--ease-out),
-			left 700ms var(--ease-out),
 			width 700ms var(--ease-out),
 			max-width 700ms var(--ease-out);
 	}
@@ -393,11 +392,13 @@
 		.corner-logo {
 			display: block;
 		}
-		/* Hero state: full-bleed width, still anchored to the bottom (not
-		   top:0) — only the horizontal extent changes. */
+		/* Hero state: 100% of the page's own padded content width, not the
+		   raw 100vw — left stays at the same var(--padding) as the resting
+		   state, and width subtracts that same padding again on the right,
+		   so it reads as a balanced, symmetrically-inset "full width"
+		   rather than a literal edge-to-edge maximum. */
 		.corner-logo.is-hero {
-			left: 0;
-			width: 100%;
+			width: calc(100% - var(--padding) * 2);
 			max-width: none;
 		}
 	}

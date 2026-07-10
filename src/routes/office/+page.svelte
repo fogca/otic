@@ -3,11 +3,12 @@
 	import { browser } from '$app/environment';
 	import { officeIntro } from '$lib/state/officeIntro.svelte';
 
-	// The site-wide corner-logo starts oversized, full-bleed at the bottom of
-	// this page (see +layout.svelte's .is-hero state) — fires the instant
-	// the user scrolls at all (not waiting for any element to leave view),
-	// so the logo can shrink back to its normal size right away. Scrolling
-	// back to the very top restores the oversized state.
+	// The site-wide corner-logo starts oversized at the bottom of this page
+	// (same left inset, just wider — see +layout.svelte's .is-hero state) —
+	// fires the instant the user scrolls at all (not waiting for any
+	// element to leave view), so the logo can shrink back to its normal
+	// size right away. Scrolling back to the very top restores the
+	// oversized state.
 	onMount(() => {
 		if (!browser) return;
 
@@ -334,8 +335,8 @@
 	}
 	.pt {
 		font-size: var(--fs-h4);
-		font-weight: var(--fw-lead);
-		font-variation-settings: 'wght' var(--fw-lead);
+		font-weight: var(--fw-medium);
+		font-variation-settings: 'wght' var(--fw-medium);
 		line-height: 1.15;
 	}
 
