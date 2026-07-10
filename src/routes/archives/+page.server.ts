@@ -112,9 +112,7 @@ export const load: PageServerLoad = async () => {
 	// Per-PJ image selection override. Listed PJs skip thumbnail and use only
 	// the last N images from `repeat`. Useful for low-emphasis works that we
 	// still want represented in the grid via specific image picks.
-	const TAIL_REPEAT_ONLY: Record<string, number> = {
-		ondo: 2
-	};
+	const TAIL_REPEAT_ONLY: Record<string, number> = {};
 
 	const images: GalleryImage[] = [];
 
@@ -219,7 +217,7 @@ export const load: PageServerLoad = async () => {
 
 	// Trailing IDs: PJs that should always appear at the back of the grid,
 	// regardless of shuffle priority. Useful for archived / low-emphasis works.
-	const TRAILING_IDS = new Set(['ondo', 'thalassic']);
+	const TRAILING_IDS = new Set<string>();
 
 	const main = images.filter((img) => !TRAILING_IDS.has(img.workId));
 	const trailing = images.filter((img) => TRAILING_IDS.has(img.workId));
