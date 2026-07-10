@@ -39,14 +39,16 @@ export const load: PageServerLoad = async ({ params }) => {
 		gallery,
 		colophonBase: {
 			brand: work.brand ?? '',
-			// Free-form credit rows (Direction, Design, Photography, ...) — any
-			// row missing both label and value is dropped rather than shown blank.
-			credits: (work.colophon_credits ?? [])
-				.filter((c) => c.label?.trim() || c.value?.trim())
-				.map((c) => ({ label: c.label ?? '', value: c.value ?? '' })),
-			links: (work.colophon_links ?? [])
-				.filter((l) => l.label?.trim() || l.url?.trim())
-				.map((l) => ({ label: l.label ?? '', url: l.url ?? '' }))
+			// Free-form credit/link rows — plain "label: value" text, or a
+			// clickable link when `url` is set. Rows with nothing filled in
+			// are dropped rather than shown blank.
+			rows: (work.colophon ?? [])
+				.filter((r) => r.label?.trim() || r.value?.trim() || r.url?.trim())
+				.map((r) => ({
+					label: r.label ?? '',
+					value: r.value ?? '',
+					url: r.url?.trim() || undefined
+				}))
 		}
 	};
 

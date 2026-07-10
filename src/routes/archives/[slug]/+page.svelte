@@ -86,13 +86,11 @@
 		};
 	}
 
-	// Show Colophon section only if at least one credit or link is filled in.
-	// Brand alone doesn't count (it's auto-populated from work meta, so it's
+	// Show Colophon section only if at least one row is filled in. Brand
+	// alone doesn't count (it's auto-populated from work meta, so it's
 	// present on nearly every work — showing the section for just that would
 	// be noise).
-	const hasColophon = $derived(
-		archive.colophonBase.credits.length > 0 || archive.colophonBase.links.length > 0
-	);
+	const hasColophon = $derived(archive.colophonBase.rows.length > 0);
 </script>
 
 <svelte:head>
@@ -190,24 +188,20 @@
 							<dd lang="en">{archive.colophonBase.brand}</dd>
 						</div>
 					{/if}
-					{#each archive.colophonBase.credits as credit, i (i)}
+					{#each archive.colophonBase.rows as row, i (i)}
 						<div class="row">
-							<dt lang="en">{credit.label}</dt>
-							<dd lang="en">{credit.value}</dd>
-						</div>
-					{/each}
-					{#if archive.colophonBase.links.length > 0}
-						<div class="row">
-							<dt lang="en">Links</dt>
-							<dd lang="en" class="links">
-								{#each archive.colophonBase.links as link, i (i)}
-									<a href={link.url} target="_blank" rel="noopener noreferrer"
-										>{link.label || link.url}</a
+							<dt lang="en">{row.label}</dt>
+							<dd lang="en">
+								{#if row.url}
+									<a href={row.url} target="_blank" rel="noopener noreferrer"
+										>{row.value || row.url}</a
 									>
-								{/each}
+								{:else}
+									{row.value}
+								{/if}
 							</dd>
 						</div>
-					{/if}
+					{/each}
 				</dl>
 			</div>
 		</section>
@@ -321,17 +315,12 @@
 		line-height: 24px;
 		font-weight: var(--fw-base);
 	}
-	.Colophon .row dd.links {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-	}
-	.Colophon .row dd.links a {
+	.Colophon .row dd a {
 		text-decoration: underline;
 		text-underline-offset: 3px;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
-	.Colophon .row dd.links a:hover {
+	.Colophon .row dd a:hover {
 		opacity: 0.6;
 	}
 

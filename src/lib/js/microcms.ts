@@ -54,18 +54,15 @@ export type Work = {
 				images?: MicroCMSImage;
 		  }
 		| MicroCMSImage;
-	/** Colophon credits — free-form "label: value" rows (Direction, Design,
-	    Photography, etc). Not yet a live CMS field; optional until added. */
-	colophon_credits?: Array<{
+	/** Colophon rows — free-form "label: value" credit lines (Direction,
+	    Design, Photography, ...). Set `url` to make a row a clickable link
+	    instead (value becomes the link text, falling back to the URL itself
+	    when left blank). One field for both credits and links. Not yet a
+	    live CMS field; optional until added. */
+	colophon?: Array<{
 		fieldId: string;
 		label?: string;
 		value?: string;
-	}>;
-	/** Colophon links — free-form "label -> url" rows. Not yet a live CMS
-	    field; optional until added. */
-	colophon_links?: Array<{
-		fieldId: string;
-		label?: string;
 		url?: string;
 	}>;
 };
