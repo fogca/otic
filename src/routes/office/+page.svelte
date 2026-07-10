@@ -1,26 +1,43 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import Logo from '$lib/components/Logo.svelte';
 	import { officeIntro } from '$lib/state/officeIntro.svelte';
 
 	let introEl: HTMLElement | undefined = $state();
 
-	// The site-wide corner-logo (bottom-left, PC) is suppressed on this page
-	// since the wordmark above already fills that role at the top — but only
-	// while that wordmark is still in view. Once .panel--intro has scrolled
-	// fully out of view, flip officeIntro.pastHero so +layout.svelte's
-	// corner-logo can reappear at its normal size, same as every other page.
+	// The site-wide corner-logo starts as a full-bleed hero banner at top:0
+	// on this page (see +layout.svelte's .is-hero state) — once this intro
+	// panel has scrolled fully out of view, flip officeIntro.pastHero so the
+	// logo can smoothly resize/reposition down to its normal small
+	// bottom-left resting state, same as every other page.
 	onMount(() => {
 		if (!browser || !introEl) return;
+
+		// getBoundingClientRect-based recompute, called immediately (don't wait
+		// on the IntersectionObserver's first async callback — a page load
+		// that starts already scrolled past the intro, e.g. browser scroll
+		// restoration, would otherwise leave the corner-logo stuck in its hero
+		// state until the next scroll event) and again on every scroll, as a
+		// belt-and-suspenders fallback alongside the observer below (same
+		// defensive pairing footerNear uses in +layout.svelte).
+		const recompute = () => {
+			if (!introEl) return;
+			const r = introEl.getBoundingClientRect();
+			officeIntro.pastHero = r.bottom <= 0 || r.top >= window.innerHeight;
+		};
+		recompute();
+
 		const io = new IntersectionObserver(
 			([entry]) => {
 				officeIntro.pastHero = !entry.isIntersecting;
 			}
 		);
 		io.observe(introEl);
+		window.addEventListener('scroll', recompute, { passive: true });
+
 		return () => {
 			io.disconnect();
+			window.removeEventListener('scroll', recompute);
 			officeIntro.pastHero = false;
 		};
 	});
@@ -117,9 +134,11 @@
 
 <main class="OfficePage">
 
-	<!-- ─── Panel 1: Office — wordmark shown full-bleed, no scroll animation.
-	     Normal document flow: scrolling past it simply reaches Panel 2 at its
-	     own normal size/position, same as every other panel. ─── -->
+	<!-- ─── Panel 1: Office — the page's own logo now lives in the fixed
+	     corner-logo (see +layout.svelte), which starts full-bleed at top:0
+	     here and shrinks to its normal resting state once this panel scrolls
+	     out of view. This section only carries the 01/Office label + intro
+	     text. ─── -->
 	<section class="panel panel--intro" bind:this={introEl}>
 		<div class="panel-inner">
 			<header class="panel-hd">
@@ -136,9 +155,6 @@
 					better creation.
 				</p>
 			</div>
-		</div>
-		<div class="wordmark">
-			<Logo />
 		</div>
 	</section>
 
@@ -176,57 +192,57 @@
 		</div>
 	</section>
 
-	<!-- ─── Panel 3: Company ─── -->
-	<section class="panel panel--company">
-		<div class="panel-inner">
-			<header class="panel-hd">
-				<span class="pn" lang="en">03</span>
-				<h2 class="pt" lang="en">Company</h2>
-			</header>
-			<div class="panel-content company-row">
-				<dl class="cfacts" lang="en">
-					<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
-					<div class="cfact">
-						<dt>Address</dt>
-						<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
-					</div>
-					<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
-					<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
-				</dl>
-				<dl class="cfacts" lang="ja">
-					<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
-					<div class="cfact">
-						<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
-					</div>
-					<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
-					<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
-				</dl>
+	<!-- ─── Panel 3+4: Company / Director — two columns sharing one
+	     right-aligned panel-inner, side by side on desktop, stacked on
+	     mobile. ─── -->
+	<section class="panel panel--company-director">
+		<div class="panel-inner duo-inner">
+			<div class="duo-col">
+				<header class="panel-hd">
+					<span class="pn" lang="en">03</span>
+					<h2 class="pt" lang="en">Company</h2>
+				</header>
+				<div class="panel-content company-row">
+					<dl class="cfacts" lang="en">
+						<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
+						<div class="cfact">
+							<dt>Address</dt>
+							<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
+						</div>
+						<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
+						<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
+					</dl>
+					<dl class="cfacts" lang="ja">
+						<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
+						<div class="cfact">
+							<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
+						</div>
+						<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
+						<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
+					</dl>
+				</div>
 			</div>
-		</div>
-	</section>
-
-	<!-- ─── Panel 4: Director ─── -->
-	<section class="panel panel--director">
-		<div class="panel-inner">
-			<header class="panel-hd">
-				<span class="pn" lang="en">04</span>
-				<h2 class="pt" lang="en">Director</h2>
-			</header>
-			<div class="panel-content director-row">
-				<div class="director-text">
-					<p lang="en">
-						Born in Japan in 2001.<br />
-						While attending the University of Westminster in the UK, exposed to a wide
-						range of cultures and arts, I developed a strong interest in visual
-						expression and entered the creative industry. After working at several
-						design studios in Tokyo, I established my own practice. Today, as creative
-						director, I run a design office at the core of my work, alongside a type
-						foundry, an image-making studio, and a wine community.
-					</p>
-					<p lang="ja">
-						2001年日本生まれ。<br />
-						英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
-					</p>
+			<div class="duo-col">
+				<header class="panel-hd">
+					<span class="pn" lang="en">04</span>
+					<h2 class="pt" lang="en">Director</h2>
+				</header>
+				<div class="panel-content director-row">
+					<div class="director-text">
+						<p lang="en">
+							Born in Japan in 2001.<br />
+							While attending the University of Westminster in the UK, exposed to a wide
+							range of cultures and arts, I developed a strong interest in visual
+							expression and entered the creative industry. After working at several
+							design studios in Tokyo, I established my own practice. Today, as creative
+							director, I run a design office at the core of my work, alongside a type
+							foundry, an image-making studio, and a wine community.
+						</p>
+						<p lang="ja">
+							2001年日本生まれ。<br />
+							英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
+						</p>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -285,6 +301,10 @@
 		padding: 0;
 		margin: 0;
 		background: var(--color-bg);
+		/* Ligature support for the page's Latin/EN prose (Steiner) — standard +
+		   discretionary + contextual. No-op on the CJK body copy, which has no
+		   matching GSUB features. */
+		font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
 	}
 
 	/* Every panel is an independent, normal-flow block — simple vertical
@@ -292,8 +312,7 @@
 	   padding-inline:0 overrides base.css's global `section { padding-inline:
 	   var(--padding) }` (a class selector beats that bare element selector
 	   regardless of source order) — .panel-inner's own explicit padding is
-	   the single source of truth for content inset, so a full-bleed sibling
-	   like .wordmark can truly reach the true viewport edge. */
+	   the single source of truth for content inset. */
 	.panel {
 		position: relative;
 		padding-inline: 0;
@@ -339,19 +358,6 @@
 		font-size: var(--fs-h3);
 		max-width: 640px;
 		margin: 0;
-	}
-
-	/* Wordmark — full-bleed (outside .panel-inner's padding), static, no
-	   scroll-linked animation. */
-	.wordmark {
-		width: 100%;
-		margin-top: 64px;
-		line-height: 1;
-	}
-	.wordmark :global(svg) {
-		width: 100%;
-		height: auto;
-		display: block;
 	}
 
 	/* ── Services: 2x2 grid ── */
@@ -475,6 +481,19 @@
 		margin-top: 0;
 	}
 
+	/* ── Panel 3+4 (Company / Director): two columns sharing one
+	   right-aligned panel-inner. Mobile: stacked, with extra breathing room
+	   between them since they're no longer separate sections. Desktop: side
+	   by side (see min-width:1024px below). ── */
+	.duo-inner {
+		gap: 80px;
+	}
+	.duo-col {
+		display: flex;
+		flex-direction: column;
+		gap: 32px;
+	}
+
 	/* SP: narrow the studio text a bit further than the page's standard
 	   side padding already does. */
 	@media (max-width: 1023px) {
@@ -499,8 +518,12 @@
 		.intro-text {
 			font-size: var(--fs-h4);
 		}
-		.wordmark {
-			margin-top: 80px;
+		/* Extra clearance under the fixed hero logo (+layout.svelte's
+		   .corner-logo.is-hero), which is pinned at top:0 full-bleed while
+		   this panel is in view — the base 100px above isn't enough at wide
+		   viewports where the logo's own width-driven height grows past it. */
+		.panel--intro .panel-inner {
+			padding-top: 180px;
 		}
 
 		/* Services' 2x2 grid can use the panel's full right-aligned width. */
@@ -516,6 +539,16 @@
 		.cfacts {
 			flex: 1;
 			width: auto;
+		}
+
+		/* Company / Director side by side, sharing the duo-inner row. */
+		.duo-inner {
+			flex-direction: row;
+			gap: 64px;
+		}
+		.duo-col {
+			flex: 1;
+			min-width: 0;
 		}
 
 		.ethos-row {

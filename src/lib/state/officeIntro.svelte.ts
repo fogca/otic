@@ -1,10 +1,10 @@
 // Shared signal: true once the user has scrolled past the Office page's
-// full-bleed intro wordmark. The site-wide corner-logo is normally
-// suppressed on /office (the giant wordmark already serves as the page's
-// own logo treatment at the top) — this lets it reappear at its normal
-// header size once that big wordmark has scrolled out of view, instead of
-// staying suppressed for the whole page. Set from office/+page.svelte via
-// an IntersectionObserver on .panel--intro; reset on navigating away.
+// intro panel. The site-wide corner-logo starts as a full-bleed hero banner
+// pinned to top:0 on /office (see +layout.svelte's .is-hero state) — this
+// flips once that intro panel has scrolled out of view, so the logo can
+// smoothly resize/reposition down to its normal small bottom-left resting
+// state, same as every other page. Set from office/+page.svelte via an
+// IntersectionObserver on .panel--intro; reset on navigating away.
 class OfficeIntroState {
 	pastHero = $state(false);
 }

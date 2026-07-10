@@ -15,12 +15,13 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import { setLenis } from '$lib/state/lenis';
 
-	// Office has its own prominent wordmark at the top — skip the corner logo
-	// there UNTIL it's scrolled out of view (officeIntro.pastHero, set by
-	// office/+page.svelte), then let it reappear at its normal size like
-	// every other page.
+	// Office's corner-logo starts as a full-bleed hero banner pinned to
+	// top:0 (the page's own logo treatment) until the intro panel scrolls
+	// out of view (officeIntro.pastHero, set by office/+page.svelte), then
+	// smoothly resizes/repositions down into the normal small bottom-left
+	// corner-logo, same as every other page.
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
-	const suppressCornerLogo = $derived(isOffice && !officeIntro.pastHero);
+	const officeHero = $derived(isOffice && !officeIntro.pastHero);
 
 	// Sync the reactive lang.current from the session (app.html's inline script
 	// already set <html data-lang> pre-paint — this just reconciles the store so
@@ -319,13 +320,16 @@
      .page-wrapper to participate in the scale-down transition visual. -->
 <Header />
 
-<!-- Global wordmark, pinned bottom-left on PC. Lives OUTSIDE .page-wrapper so
-     its position:fixed resolves to the viewport (the wrapper's will-change
-     transform would otherwise make it a containing block). -->
+<!-- Global wordmark, PC only. Normally rests bottom-left, small; on Office
+     it starts as a full-bleed hero banner at top:0 and smoothly morphs down
+     to this same resting state as the user scrolls (see .is-hero below).
+     Lives OUTSIDE .page-wrapper so its position:fixed resolves to the
+     viewport (the wrapper's will-change transform would otherwise make it a
+     containing block). -->
 <a
 	class="corner-logo"
 	class:is-revealed={intro.completed && !footerNear.near}
-	class:is-suppressed={suppressCornerLogo}
+	class:is-hero={officeHero}
 	href="/"
 	aria-label="Home"
 >
@@ -352,7 +356,13 @@
 		min-height: 100dvh;
 	}
 
-	/* ── Global corner wordmark (PC, bottom-left) ── */
+	/* ── Global corner wordmark (PC). Normally rests bottom-left, small. On
+	   Office it starts as a full-bleed "hero" banner pinned to top:0 and
+	   smoothly resizes/repositions down to this same resting state once the
+	   user scrolls past the intro panel (officeHero, driven by
+	   officeIntro.pastHero — see office/+page.svelte). Position is expressed
+	   entirely via `bottom` (never `top`/`auto`) so both states interpolate
+	   as plain animatable values instead of snapping. ── */
 	.corner-logo {
 		position: fixed;
 		left: var(--padding);
@@ -366,7 +376,12 @@
 		pointer-events: none;
 		display: none; /* SP: hidden (Header keeps the top-right logo) */
 		z-index: var(--z-header);
-		transition: opacity 600ms var(--ease-out);
+		transition:
+			opacity 600ms var(--ease-out),
+			bottom 700ms var(--ease-out),
+			left 700ms var(--ease-out),
+			width 700ms var(--ease-out),
+			max-width 700ms var(--ease-out);
 	}
 	.corner-logo :global(svg) {
 		display: block;
@@ -381,8 +396,18 @@
 		.corner-logo {
 			display: block;
 		}
-		.corner-logo.is-suppressed {
-			display: none;
+		/* Hero state: full-bleed banner pinned to the true top:0. The logo
+		   SVG's own viewBox is 300:20 (15:1) — at width:100vw its rendered
+		   height is 100vw/15, so `bottom` (= 100vh minus that height) puts
+		   the top edge exactly at 0 without a hardcoded height. Sits one
+		   z-index below Header so the nav stays clickable/legible where the
+		   two overlap. */
+		.corner-logo.is-hero {
+			left: 0;
+			width: 100%;
+			max-width: none;
+			bottom: calc(100vh - (100vw / 15));
+			z-index: calc(var(--z-header) - 1);
 		}
 	}
 
