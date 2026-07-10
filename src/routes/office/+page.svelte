@@ -1,5 +1,29 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import Logo from '$lib/components/Logo.svelte';
+	import { officeIntro } from '$lib/state/officeIntro.svelte';
+
+	let introEl: HTMLElement | undefined = $state();
+
+	// The site-wide corner-logo (bottom-left, PC) is suppressed on this page
+	// since the wordmark above already fills that role at the top — but only
+	// while that wordmark is still in view. Once .panel--intro has scrolled
+	// fully out of view, flip officeIntro.pastHero so +layout.svelte's
+	// corner-logo can reappear at its normal size, same as every other page.
+	onMount(() => {
+		if (!browser || !introEl) return;
+		const io = new IntersectionObserver(
+			([entry]) => {
+				officeIntro.pastHero = !entry.isIntersecting;
+			}
+		);
+		io.observe(introEl);
+		return () => {
+			io.disconnect();
+			officeIntro.pastHero = false;
+		};
+	});
 
 	type Service = {
 		title: string;
@@ -18,6 +42,7 @@
 			bodyEn:
 				'We develop products that bring use and quiet joy to daily life, returning to the materiality that meets the body and pursuing the forms that must inevitably arise from material, structure, and presence. Amid this transformation of the age, a more fundamental interaction — embodiment and emotion — has become our central concern. We continue this practice day by day, returning to the body and heart that are our origin.',
 			body: '身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる、必然のかたちを追い求めながら、日々の所作に添う用と喜びのあるプロダクトの企画・開発を行っています。わたしたちが直面しているこの大きな時代の変革において、より根源的で確かな相互作用——「身体性」と「情緒」が、私たちの大きな関心へとなりつつあります。私たちのオリジンである身体と心へと立ち返ることを大切に、日々学びながらその実践を続けてまいります。',
+			link: 'www.YSOVE.com',
 			// Placeholder — swap for the real Product & Furniture Design asset.
 			image: '/images/services_typefoundry.png',
 			imageAlt: 'Product & Furniture Design'
@@ -28,7 +53,7 @@
 			bodyEn:
 				'From brand strategy and direction through to logo, graphic, and package design, we work across the full arc of creation. Our in-house type foundry, August Type Foundry, develops typefaces in pursuit of new forms that reinterpret history within a contemporary context. The precision honed in type design runs through all our branding, shaping a coherent formal language at the core of each brand.',
 			body: '私たちは、ブランディングを始めとするクリエイティブ戦略の策定・ディレクションから、ロゴ・グラフィックデザイン・パッケージデザインといったクリエイションまで手掛けています。また弊社主宰のタイプファウンダリ——August Type Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。',
-			link: 'www.august.tf',
+			link: 'www.AUGUST.tf',
 			image: '/images/services_typefoundry_02.png',
 			imageAlt: 'V.I. & Typography'
 		},
@@ -47,7 +72,7 @@
 			bodyEn:
 				'Our in-house engineering studio, Post Script, designs and builds digital products — brand sites, e-commerce, reservation systems, and web apps — and digital infrastructure, including AI / DX integration. With a modern stack and considered architecture, we refine experience and usability to give form to a brand in the digital world.',
 			body: '弊社主宰のエンジニアリングスタジオ——Post Scriptでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
-			link: 'postscript.pages.dev',
+			link: 'www.PostScript.jp',
 			image: '/images/services_production.png',
 			imageAlt: 'Digital Infrastructure'
 		}
@@ -95,7 +120,7 @@
 	<!-- ─── Panel 1: Office — wordmark shown full-bleed, no scroll animation.
 	     Normal document flow: scrolling past it simply reaches Panel 2 at its
 	     own normal size/position, same as every other panel. ─── -->
-	<section class="panel panel--intro">
+	<section class="panel panel--intro" bind:this={introEl}>
 		<div class="panel-inner">
 			<header class="panel-hd">
 				<span class="pn" lang="en">01</span>
@@ -458,23 +483,17 @@
 		}
 	}
 
-	/* ── Desktop: "label-left, content-right" grid for every panel,
-	   mirroring archives/[slug]'s lead/media split. ── */
+	/* ── Desktop: whole panel (number + title + content together) pushed to
+	   a right-aligned column, mirroring archives/[slug]'s right-weighted
+	   layout — unlike slug's own lead/media split, the number+title stay
+	   WITH the content on the right rather than sitting in a separate left
+	   column; the left ~38% of the page is simply open space. ── */
 	@media (min-width: 1024px) {
 		.panel-inner {
-			display: grid;
-			grid-template-columns: 38% 62%;
-			column-gap: 2vw;
-			padding: 100px calc(var(--padding) * 1.5) 56px;
-		}
-		.panel-hd {
-			grid-column: 1;
-		}
-		.panel-content {
-			grid-column: 2;
-			max-width: 720px;
+			width: 62%;
 			margin-left: auto;
 			margin-right: 0;
+			padding: 100px calc(var(--padding) * 1.5) 56px;
 		}
 
 		.intro-text {
@@ -484,12 +503,10 @@
 			margin-top: 80px;
 		}
 
-		/* Services' 2x2 grid needs more room than the shared 720px text cap —
-		   let it use the full right-hand column instead. */
+		/* Services' 2x2 grid can use the panel's full right-aligned width. */
 		.services-grid {
 			grid-template-columns: repeat(2, 1fr);
 			gap: 56px 40px;
-			max-width: none;
 		}
 
 		.company-row {

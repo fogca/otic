@@ -8,14 +8,19 @@
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
 	import { footerNear } from '$lib/state/footerNear.svelte';
+	import { officeIntro } from '$lib/state/officeIntro.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import LangSwitchOverlay from '$lib/components/LangSwitchOverlay.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import { setLenis } from '$lib/state/lenis';
 
-	// Office has its own prominent wordmark + dark reversal — skip the corner logo there.
+	// Office has its own prominent wordmark at the top — skip the corner logo
+	// there UNTIL it's scrolled out of view (officeIntro.pastHero, set by
+	// office/+page.svelte), then let it reappear at its normal size like
+	// every other page.
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
+	const suppressCornerLogo = $derived(isOffice && !officeIntro.pastHero);
 
 	// Sync the reactive lang.current from the session (app.html's inline script
 	// already set <html data-lang> pre-paint — this just reconciles the store so
@@ -320,7 +325,7 @@
 <a
 	class="corner-logo"
 	class:is-revealed={intro.completed && !footerNear.near}
-	class:is-suppressed={isOffice}
+	class:is-suppressed={suppressCornerLogo}
 	href="/"
 	aria-label="Home"
 >
