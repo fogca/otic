@@ -3,40 +3,21 @@
 	import { browser } from '$app/environment';
 	import { officeIntro } from '$lib/state/officeIntro.svelte';
 
-	let introEl: HTMLElement | undefined = $state();
-
-	// The site-wide corner-logo starts oversized on this page (same
-	// bottom-left position as everywhere else — see +layout.svelte's
-	// .is-hero state) — once this intro panel has scrolled fully out of
-	// view, flip officeIntro.pastHero so the logo can smoothly shrink down
-	// to its normal size, same as every other page.
+	// The site-wide corner-logo starts oversized, full-bleed at the bottom of
+	// this page (see +layout.svelte's .is-hero state) — fires the instant
+	// the user scrolls at all (not waiting for any element to leave view),
+	// so the logo can shrink back to its normal size right away. Scrolling
+	// back to the very top restores the oversized state.
 	onMount(() => {
-		if (!browser || !introEl) return;
+		if (!browser) return;
 
-		// getBoundingClientRect-based recompute, called immediately (don't wait
-		// on the IntersectionObserver's first async callback — a page load
-		// that starts already scrolled past the intro, e.g. browser scroll
-		// restoration, would otherwise leave the corner-logo stuck in its hero
-		// state until the next scroll event) and again on every scroll, as a
-		// belt-and-suspenders fallback alongside the observer below (same
-		// defensive pairing footerNear uses in +layout.svelte).
 		const recompute = () => {
-			if (!introEl) return;
-			const r = introEl.getBoundingClientRect();
-			officeIntro.pastHero = r.bottom <= 0 || r.top >= window.innerHeight;
+			officeIntro.pastHero = window.scrollY > 0;
 		};
 		recompute();
-
-		const io = new IntersectionObserver(
-			([entry]) => {
-				officeIntro.pastHero = !entry.isIntersecting;
-			}
-		);
-		io.observe(introEl);
 		window.addEventListener('scroll', recompute, { passive: true });
 
 		return () => {
-			io.disconnect();
 			window.removeEventListener('scroll', recompute);
 			officeIntro.pastHero = false;
 		};
@@ -135,10 +116,10 @@
 <main class="OfficePage">
 
 	<!-- ─── Panel 1: Office — the page's own logo now lives in the fixed
-	     corner-logo (see +layout.svelte), which starts oversized here and
-	     shrinks to its normal size once this panel scrolls out of view. This
-	     section only carries the 01/Office label + intro text. ─── -->
-	<section class="panel panel--intro" bind:this={introEl}>
+	     corner-logo (see +layout.svelte), which starts oversized and shrinks
+	     to its normal size the instant the user scrolls. This section only
+	     carries the 01/Office label + intro text. ─── -->
+	<section class="panel panel--intro">
 		<div class="panel-inner">
 			<header class="panel-hd">
 				<span class="pn" lang="en">01</span>

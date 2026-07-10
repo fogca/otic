@@ -1,10 +1,9 @@
-// Shared signal: true once the user has scrolled past the Office page's
-// intro panel. The site-wide corner-logo starts oversized on /office (same
-// bottom-left position as everywhere else — see +layout.svelte's .is-hero
-// state) — this flips once that intro panel has scrolled out of view, so
-// the logo can smoothly shrink down to its normal size, same as every
-// other page. Set from office/+page.svelte via an IntersectionObserver on
-// .panel--intro; reset on navigating away.
+// Shared signal: true once the user has scrolled at all on the Office page.
+// The site-wide corner-logo starts oversized, full-bleed at the bottom on
+// /office (see +layout.svelte's .is-hero state) — this flips the instant
+// scrolling starts, so the logo can shrink down to its normal size right
+// away, and flips back on returning to the very top. Set from
+// office/+page.svelte via a scroll listener; reset on navigating away.
 class OfficeIntroState {
 	pastHero = $state(false);
 }

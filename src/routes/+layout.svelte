@@ -15,10 +15,10 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import { setLenis } from '$lib/state/lenis';
 
-	// Office's corner-logo starts oversized (same bottom-left position as
-	// everywhere else) until the intro panel scrolls out of view
-	// (officeIntro.pastHero, set by office/+page.svelte), then smoothly
-	// shrinks down to its normal size, same as every other page.
+	// Office's corner-logo starts full-bleed at the bottom of the viewport
+	// until the user scrolls at all (officeIntro.pastHero, set by
+	// office/+page.svelte), then immediately shrinks down to its normal
+	// bottom-left size, same as every other page.
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
 	const officeHero = $derived(isOffice && !officeIntro.pastHero);
 
@@ -319,11 +319,12 @@
      .page-wrapper to participate in the scale-down transition visual. -->
 <Header />
 
-<!-- Global wordmark, PC only, always bottom-left. On Office it starts
-     oversized (see .is-hero below) and smoothly shrinks to this same
-     position's normal size as the user scrolls. Lives OUTSIDE .page-wrapper
-     so its position:fixed resolves to the viewport (the wrapper's
-     will-change transform would otherwise make it a containing block). -->
+<!-- Global wordmark, PC only, normally bottom-left/small. On Office it
+     starts full-bleed at the bottom (see .is-hero below) and shrinks to
+     that normal size the instant the user scrolls. Lives OUTSIDE
+     .page-wrapper so its position:fixed resolves to the viewport (the
+     wrapper's will-change transform would otherwise make it a containing
+     block). -->
 <a
 	class="corner-logo"
 	class:is-revealed={intro.completed && !footerNear.near}
@@ -354,12 +355,12 @@
 		min-height: 100dvh;
 	}
 
-	/* ── Global corner wordmark (PC), always bottom-left. On Office it
-	   starts oversized (officeHero, driven by officeIntro.pastHero — see
-	   office/+page.svelte) and smoothly shrinks to this same left/bottom
-	   position's normal size once the user scrolls past the intro panel —
-	   only width/max-width differ between the two states, so the position
-	   itself never moves. ── */
+	/* ── Global corner wordmark (PC), normally bottom-left/small. On Office
+	   it starts full-bleed at the bottom (officeHero, driven by
+	   officeIntro.pastHero — see office/+page.svelte) and shrinks back to
+	   this normal bottom-left size the instant the user scrolls. `bottom`
+	   stays constant across both states (never moves vertically/to top:0) —
+	   only left/width/max-width change. ── */
 	.corner-logo {
 		position: fixed;
 		left: var(--padding);
@@ -375,6 +376,7 @@
 		z-index: var(--z-header);
 		transition:
 			opacity 600ms var(--ease-out),
+			left 700ms var(--ease-out),
 			width 700ms var(--ease-out),
 			max-width 700ms var(--ease-out);
 	}
@@ -391,10 +393,12 @@
 		.corner-logo {
 			display: block;
 		}
-		/* Hero state: same bottom-left anchor, just bigger. */
+		/* Hero state: full-bleed width, still anchored to the bottom (not
+		   top:0) — only the horizontal extent changes. */
 		.corner-logo.is-hero {
-			width: 840px;
-			max-width: 64vw;
+			left: 0;
+			width: 100%;
+			max-width: none;
 		}
 	}
 
