@@ -113,6 +113,9 @@
 		{#if archive.descriptionJa}
 			<p class="lead__body lead__body--ja" lang="ja">{archive.descriptionJa}</p>
 		{/if}
+		{#if archive.stack}
+			<p class="lead__stack" lang="en">{archive.stack}</p>
+		{/if}
 	</div>
 
 	<!-- RIGHT: media — hero + gallery, editorial vertical flow -->
@@ -258,6 +261,13 @@
 	}
 	.lead__body--ja {
 		margin-top: 14px;
+	}
+	/* "Built with" line — a small technical footnote under the body copy,
+	   not a credits/colophon entry (that stays further down the page). */
+	.lead__stack {
+		font-size: var(--fs-h6);
+		margin: 20px 0 0;
+		opacity: 0.5;
 	}
 
 	/* ── Media (hero + gallery) ── */

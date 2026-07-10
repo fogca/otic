@@ -26,6 +26,11 @@ export type Work = {
 	body_jp: string;
 	body_en: string;
 	headline?: string;
+	/** Short "built with" line shown right under the body copy on the work
+	    detail page (e.g. "SvelteKit / Cloudflare / microCMS") — separate
+	    from the Colophon section further down. Not yet a live CMS field;
+	    optional until added. */
+	stack?: string;
 	category: string | null;
 	thumbnail?: MicroCMSImage;
 	/** Optional SP-specific thumbnail; falls back to `thumbnail` when absent. */

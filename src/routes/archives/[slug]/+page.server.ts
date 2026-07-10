@@ -36,6 +36,9 @@ export const load: PageServerLoad = async ({ params }) => {
 		descriptionJa: work.body_jp ?? work.description ?? '',
 		descriptionEn: work.body_en ?? '',
 		headline: work.headline ?? '',
+		// Short "built with" line, shown right under the body copy — separate
+		// from Colophon further down the page.
+		stack: work.stack ?? '',
 		gallery,
 		colophonBase: {
 			brand: work.brand ?? '',
