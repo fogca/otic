@@ -301,10 +301,23 @@
 		padding: 0;
 		margin: 0;
 		background: var(--color-bg);
-		/* Ligature support for the page's Latin/EN prose (Steiner) — standard +
-		   discretionary + contextual. No-op on the CJK body copy, which has no
-		   matching GSUB features. */
-		font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
+	}
+
+	/* base.css sets font-feature-settings:"palt" directly on p/h2/span/etc
+	   (a bare-type-selector rule, applied straight to the element, not
+	   inherited) — font-feature-settings on a directly-matched element
+	   always wins over an ancestor's font-variant-ligatures, so it silently
+	   suppresses even the browser's default ligatures on this page's
+	   Latin/EN prose. Override with the same low-level mechanism instead:
+	   keep "palt" (still needed for the JP body copy) and add "liga" — the
+	   only ligature feature Steiner actually has (ff/fi/fl/ffi/ffl; it has
+	   no dlig or calt table, so those would be no-ops). ".OfficePage *"
+	   (specificity 0,1,0) beats the bare type selectors (0,0,1) regardless
+	   of source order. */
+	.OfficePage * {
+		font-feature-settings:
+			'palt' 1,
+			'liga' 1;
 	}
 
 	/* Every panel is an independent, normal-flow block — simple vertical
