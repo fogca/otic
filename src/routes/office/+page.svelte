@@ -1,16 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
-	import gsap from 'gsap';
-	import { getLenis } from '$lib/state/lenis';
 	import Logo from '$lib/components/Logo.svelte';
-
-	let introInnerEl: HTMLElement | undefined = $state();
-	let wordmarkEl: HTMLElement | undefined = $state();
-	let introTextEl: HTMLElement | undefined = $state();
-	let revealEl: HTMLElement | undefined = $state();
-	let servicesInnerEl: HTMLElement | undefined = $state();
-	let servicesRowEl: HTMLElement | undefined = $state();
 
 	type Service = {
 		title: string;
@@ -95,138 +84,6 @@
 				'持続不可能なものを作り続けるという行為は、未来を作っているのではありません。それは、次の世代から選択肢を静かに奪っている——「脱未来化（defuturing）」と呼ばれる事態です (Fry, 1999)。デザイナーは、形而上のものを形而下へと具象化できる職能です。生活様式や物的価値、消費の様態といった、人間の営みの広い範囲に介入し得る。その責任の重さは、すでに半世紀前から指摘されてきました (Papanek, 1971)。そしてわたしたち自身が、日々、消費を加速させ、負荷を積み重ねている当事者でもあります。何がどのように世界に作用しているのか、そして何が世界を形作っているのか、驚くほどわたしたちは知りません。だからこそ、日々学びを重ね続けなければならないのだと思います。わたしたちがそれぞれのキャリアを終えるその時に、わずかでも次代に手渡せるものを残すために、日々思考を止めず、学びを続けてまいります。'
 		}
 	];
-
-	// Scroll-linked intro sequence: as the user scrolls past the first view,
-	// the wordmark shrinks from full-bleed down to the width of the studio
-	// text above it, then the reveal image scales up from underneath it.
-	// Pinned + scrubbed (tied directly to scroll position, not a one-shot
-	// trigger) via GSAP ScrollTrigger.
-	onMount(() => {
-		if (!browser) return;
-		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-		if (!introInnerEl || !wordmarkEl || !introTextEl || !revealEl) return;
-		// Capture as locals: TS can't carry the narrowing from the guard above
-		// across the async `.then()` boundary, and these are $state fields
-		// that could theoretically be reassigned (they won't be, but the
-		// non-null guarantee needs to live on something stable).
-		const introInner = introInnerEl;
-		const wordmark = wordmarkEl;
-		const introText = introTextEl;
-		const reveal = revealEl;
-
-		let cancelled = false;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let tl: any;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let mm: any;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let lenis: any;
-		let onLenisScroll: (() => void) | undefined;
-
-		import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
-			if (cancelled) return;
-			gsap.registerPlugin(ScrollTrigger);
-
-			// The global Lenis (site-wide smooth scroll, set up in +layout.svelte)
-			// virtualises scroll — ScrollTrigger needs to be nudged on every
-			// Lenis tick or its progress calculations lag behind what's on screen.
-			lenis = getLenis();
-			if (lenis) {
-				onLenisScroll = () => ScrollTrigger.update();
-				lenis.on('scroll', onLenisScroll);
-			}
-
-			const targetWidth = () => introText.getBoundingClientRect().width;
-
-			gsap.set(reveal, { scale: 0.4, opacity: 0, transformOrigin: '50% 0%' });
-
-			tl = gsap.timeline({
-				scrollTrigger: {
-					trigger: introInner,
-					start: 'top top',
-					end: '+=1200',
-					pin: true,
-					// `.page-wrapper`'s `will-change: transform` makes it a containing
-					// block for any `position:fixed` descendant (same issue Header had
-					// — see +layout.svelte) — ScrollTrigger's default pin mechanism
-					// uses `position:fixed`, which broke the same way. Pinning via
-					// transform instead sidesteps that entirely.
-					pinType: 'transform',
-					scrub: 1,
-					invalidateOnRefresh: true
-				}
-			});
-
-			// Phase 1: wordmark shrinks to match the text's rendered width.
-			tl.to(wordmark, {
-				width: targetWidth,
-				duration: 1,
-				ease: 'none'
-			});
-			// Phase 2: reveal image scales up from beneath the (now-shrunk) wordmark.
-			tl.fromTo(
-				reveal,
-				{ scale: 0.4, opacity: 0 },
-				{ scale: 1, opacity: 1, duration: 1, ease: 'none' }
-			);
-
-			// Services: pin the panel while its 4 cards translate horizontally
-			// (PC only — on SP the cards stay in normal stacked flow). Scoped
-			// via matchMedia so entering/leaving the breakpoint (e.g. resize)
-			// can't leave stale pinned/translated state behind.
-			if (servicesInnerEl && servicesRowEl) {
-				const servicesInner = servicesInnerEl;
-				const servicesRow = servicesRowEl;
-				mm = ScrollTrigger.matchMedia({
-					'(min-width: 1024px)': () => {
-						// scrollWidth - innerWidth alone under-measures the horizontal
-						// travel needed: it ignores the row's own resting offset from
-						// the viewport's left edge (page + panel padding), and -- since
-						// .services-row is a flex container with default overflow:visible,
-						// scrollWidth doesn't include the row's own padding-right. Measuring
-						// the resting left position via getBoundingClientRect() (read during
-						// ScrollTrigger's refresh, before this tween's transform is
-						// (re)applied, so it reflects the untransformed layout) and adding
-						// padding-right explicitly gives the true distance to the panel's
-						// trailing edge.
-						const distance = () => {
-							const paddingRight =
-								parseFloat(getComputedStyle(servicesRow).paddingRight) || 0;
-							return (
-								servicesRow.getBoundingClientRect().left +
-								servicesRow.scrollWidth +
-								paddingRight -
-								window.innerWidth
-							);
-						};
-						gsap.to(servicesRow, {
-							x: () => -distance(),
-							ease: 'none',
-							scrollTrigger: {
-								trigger: servicesInner,
-								start: 'top top',
-								end: () => '+=' + distance(),
-								pin: true,
-								// Same will-change containing-block issue as the intro
-								// pin above — see that comment.
-								pinType: 'transform',
-								scrub: 1,
-								invalidateOnRefresh: true
-							}
-						});
-					}
-				});
-			}
-		});
-
-		return () => {
-			cancelled = true;
-			if (onLenisScroll) lenis?.off('scroll', onLenisScroll);
-			tl?.scrollTrigger?.kill();
-			tl?.kill();
-			mm?.revert();
-		};
-	});
 </script>
 
 <svelte:head>
@@ -235,12 +92,17 @@
 
 <main class="OfficePage">
 
-	<!-- ─── Panel 1: First view ─── -->
+	<!-- ─── Panel 1: Office — wordmark shown full-bleed, no scroll animation.
+	     Normal document flow: scrolling past it simply reaches Panel 2 at its
+	     own normal size/position, same as every other panel. ─── -->
 	<section class="panel panel--intro">
-		<div class="intro-inner" bind:this={introInnerEl}>
-			<!-- Studio description — centred (X/Y) in the space above the logo -->
-			<div class="intro-content">
-				<p class="intro-text" bind:this={introTextEl} lang="en">
+		<div class="panel-inner">
+			<header class="panel-hd">
+				<span class="pn" lang="en">01</span>
+				<h2 class="pt" lang="en">Office</h2>
+			</header>
+			<div class="panel-content">
+				<p class="intro-text" lang="en">
 					Office / TAKUMI ISOBE is a creative office based in Tokyo working across
 					visual identity and design engineering — experience, brand, product, type,
 					furniture, and digital communication. By blending culture, philosophy, and
@@ -249,165 +111,127 @@
 					better creation.
 				</p>
 			</div>
+		</div>
+		<div class="wordmark">
+			<Logo />
+		</div>
+	</section>
 
-			<!-- Wordmark stays the true last/bottom-anchored element (as before) —
-			     the reveal image below is absolutely positioned so its (invisible
-			     at rest) box doesn't push the wordmark up out of the bottom spot. -->
-			<div class="wordmark-group">
-				<!-- Office logo — full-bleed at rest; scroll-scrubbed to shrink down
-				     to the studio text's width (see the onMount ScrollTrigger above). -->
-				<div class="wordmark" bind:this={wordmarkEl}>
-					<Logo />
-				</div>
+	<!-- ─── Panel 2: Services — 2x2 grid ─── -->
+	<section class="panel panel--services">
+		<div class="panel-inner">
+			<header class="panel-hd">
+				<span class="pn" lang="en">02</span>
+				<h2 class="pt" lang="en">Services &amp; Partners</h2>
+			</header>
+			<div class="panel-content services-grid">
+				{#each services as s}
+					<article class="service-card">
+						{#if s.image}
+							<div class="service-image">
+								<img src={s.image} alt={s.imageAlt ?? s.title} loading="lazy" />
+							</div>
+						{/if}
+						<h3 class="service-title" lang="en">{s.title}</h3>
+						<p class="service-sub" lang="ja">{s.subtitle}</p>
+						<p class="service-en" lang="en">{s.bodyEn}</p>
+						<p class="service-ja" lang="ja">{s.body}</p>
+						{#if s.link}
+							<a
+								class="service-link"
+								href={`https://${s.link}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								lang="en">{s.link} ↗</a
+							>
+						{/if}
+					</article>
+				{/each}
+			</div>
+		</div>
+	</section>
 
-				<!-- Reveal image — scales up from beneath the shrunk wordmark as the
-				     scroll sequence continues. Placeholder asset: swap {src} for the
-				     real image. -->
-				<div class="intro-reveal" bind:this={revealEl}>
-					<!-- Below the fold (revealed on scroll) — lazy so it doesn't
-					     compete with the first view's assets. -->
-					<img src="/images/services_visualisation.png" alt="" loading="lazy" decoding="async" />
+	<!-- ─── Panel 3: Company ─── -->
+	<section class="panel panel--company">
+		<div class="panel-inner">
+			<header class="panel-hd">
+				<span class="pn" lang="en">03</span>
+				<h2 class="pt" lang="en">Company</h2>
+			</header>
+			<div class="panel-content company-row">
+				<dl class="cfacts" lang="en">
+					<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
+					<div class="cfact">
+						<dt>Address</dt>
+						<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
+					</div>
+					<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
+					<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
+				</dl>
+				<dl class="cfacts" lang="ja">
+					<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
+					<div class="cfact">
+						<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
+					</div>
+					<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
+					<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
+				</dl>
+			</div>
+		</div>
+	</section>
+
+	<!-- ─── Panel 4: Director ─── -->
+	<section class="panel panel--director">
+		<div class="panel-inner">
+			<header class="panel-hd">
+				<span class="pn" lang="en">04</span>
+				<h2 class="pt" lang="en">Director</h2>
+			</header>
+			<div class="panel-content director-row">
+				<div class="director-text">
+					<p lang="en">
+						Born in Japan in 2001.<br />
+						While attending the University of Westminster in the UK, exposed to a wide
+						range of cultures and arts, I developed a strong interest in visual
+						expression and entered the creative industry. After working at several
+						design studios in Tokyo, I established my own practice. Today, as creative
+						director, I run a design office at the core of my work, alongside a type
+						foundry, an image-making studio, and a wine community.
+					</p>
+					<p lang="ja">
+						2001年日本生まれ。<br />
+						英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
+					</p>
 				</div>
 			</div>
 		</div>
-
-		<!-- Reserves the reveal image's own footprint in the document flow.
-		     .intro-reveal is absolutely positioned (see the comment above) so
-		     .intro-inner stays exactly one viewport tall at rest — but that
-		     means nothing below ever accounts for the reveal's space once the
-		     scroll sequence makes it visible, and the next panel (Services)
-		     starts immediately after .intro-inner and overlaps it. Mirrors
-		     .intro-reveal's own box model exactly (same width/max-width/
-		     margin-top/aspect-ratio) so the reserved space always matches its
-		     real rendered size, at any viewport width. -->
-		<div class="intro-reveal-spacer" aria-hidden="true"></div>
 	</section>
 
-			<!-- ─── Panel 2: Services ─── -->
-			<section class="panel panel--services">
-				<div class="panel-inner" bind:this={servicesInnerEl}>
-					<header class="panel-hd">
-						<span class="pn" lang="en">02</span>
-						<h2 class="pt" lang="en">Services &amp; Partners</h2>
-					</header>
-					<div class="panel-content services-row" bind:this={servicesRowEl}>
-						{#each services as s}
-							<article class="service-card">
-								{#if s.image}
-									<div class="service-image">
-										<img src={s.image} alt={s.imageAlt ?? s.title} loading="lazy" />
-									</div>
-								{/if}
-								<h3 class="service-title" lang="en">{s.title}</h3>
-								<p class="service-sub" lang="ja">{s.subtitle}</p>
-								<p class="service-en" lang="en">{s.bodyEn}</p>
-								<p class="service-ja" lang="ja">{s.body}</p>
-								{#if s.link}
-									<a
-										class="service-link"
-										href={`https://${s.link}`}
-										target="_blank"
-										rel="noopener noreferrer"
-										lang="en">{s.link} ↗</a
-									>
-								{/if}
-							</article>
-						{/each}
-					</div>
+	<!-- ─── Panel 5: Ethos ─── -->
+	<section class="panel panel--ethos">
+		<div class="panel-inner">
+			<header class="panel-hd">
+				<span class="pn" lang="en">05</span>
+				<h2 class="pt" lang="en">Ethos</h2>
+			</header>
+			<div class="panel-content ethos-row">
+				<div class="ethos-block ethos-block--intro">
+					<p class="ethos-en" lang="en">{ethosIntro.en}</p>
+					<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
 				</div>
-			</section>
-
-			<!-- ─── Panels 3 + 4 + 5: Company / Director / Ethos ───
-			     PC: 3-section layout — Company (top-left) + Director
-			     (bottom-left) stacked in .panel-pair__left, with Ethos as
-			     one tall column on the right (see .panel-pair below). SP:
-			     .panel-pair is display:contents, so all three sections
-			     behave exactly as independent stacked blocks. -->
-			<div class="panel-pair">
-				<div class="panel-pair__left">
-					<!-- ─── Panel 3: Company ─── -->
-					<section class="panel panel--company">
-						<div class="panel-inner">
-							<header class="panel-hd">
-								<span class="pn" lang="en">03</span>
-								<h2 class="pt" lang="en">Company</h2>
-							</header>
-							<div class="panel-content company-row">
-								<dl class="cfacts" lang="en">
-									<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
-									<div class="cfact">
-										<dt>Address</dt>
-										<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
-									</div>
-									<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
-									<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
-								</dl>
-								<dl class="cfacts" lang="ja">
-									<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
-									<div class="cfact">
-										<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
-									</div>
-									<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
-									<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
-								</dl>
-							</div>
-						</div>
-					</section>
-
-					<!-- ─── Panel 4: Director (moved up from panel 5) ─── -->
-					<section class="panel panel--director">
-						<div class="panel-inner">
-							<header class="panel-hd">
-								<span class="pn" lang="en">04</span>
-								<h2 class="pt" lang="en">Director</h2>
-							</header>
-							<div class="panel-content director-row">
-								<div class="director-text">
-									<p lang="en">
-										Born in Japan in 2001.<br />
-										While attending the University of Westminster in the UK, exposed to a wide
-										range of cultures and arts, I developed a strong interest in visual
-										expression and entered the creative industry. After working at several
-										design studios in Tokyo, I established my own practice. Today, as creative
-										director, I run a design office at the core of my work, alongside a type
-										foundry, an image-making studio, and a wine community.
-									</p>
-									<p lang="ja">
-										2001年日本生まれ。<br />
-										英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
-									</p>
-								</div>
-							</div>
-						</div>
-					</section>
-				</div>
-
-				<!-- ─── Panel 5: Ethos (renumbered from panel 4) ─── -->
-				<section class="panel panel--ethos">
-					<div class="panel-inner">
-						<header class="panel-hd">
-							<span class="pn" lang="en">05</span>
-							<h2 class="pt" lang="en">Ethos</h2>
-						</header>
-						<div class="panel-content ethos-row">
-							<div class="ethos-block ethos-block--intro">
-								<p class="ethos-en" lang="en">{ethosIntro.en}</p>
-								<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
-							</div>
-							{#each ethosParts as p}
-								<div class="ethos-block">
-									<h3 class="ethos-part">
-										<span class="ethos-part-en" lang="en">{p.en}</span>
-										<span class="ethos-part-ja" lang="ja">{p.ja}</span>
-									</h3>
-									<p class="ethos-en" lang="en">{p.enBody}</p>
-									<p class="ethos-ja" lang="ja">{p.jaBody}</p>
-								</div>
-							{/each}
-						</div>
+				{#each ethosParts as p}
+					<div class="ethos-block">
+						<h3 class="ethos-part">
+							<span class="ethos-part-en" lang="en">{p.en}</span>
+							<span class="ethos-part-ja" lang="ja">{p.ja}</span>
+						</h3>
+						<p class="ethos-en" lang="en">{p.enBody}</p>
+						<p class="ethos-ja" lang="ja">{p.jaBody}</p>
 					</div>
-				</section>
+				{/each}
 			</div>
+		</div>
+	</section>
 
 </main>
 
@@ -430,7 +254,7 @@
 		display: none;
 	}
 
-	/* ── Page host: normal vertical document flow (no scroll-jacking) ── */
+	/* ── Page host: normal vertical document flow, no scroll-jacking ── */
 	.OfficePage {
 		width: 100%;
 		padding: 0;
@@ -438,119 +262,29 @@
 		background: var(--color-bg);
 	}
 
-	/* Panels stack vertically and size to their own content. */
+	/* Every panel is an independent, normal-flow block — simple vertical
+	   stack, 01 through 05, no pinning/pairing between any of them.
+	   padding-inline:0 overrides base.css's global `section { padding-inline:
+	   var(--padding) }` (a class selector beats that bare element selector
+	   regardless of source order) — .panel-inner's own explicit padding is
+	   the single source of truth for content inset, so a full-bleed sibling
+	   like .wordmark can truly reach the true viewport edge. */
 	.panel {
 		position: relative;
-	}
-	.panel--intro {
-		min-height: 100dvh;
+		padding-inline: 0;
 	}
 
-	/* ── Panel 1: First view ── */
-	.panel--intro .intro-inner {
-		width: 100%;
-		min-height: 100dvh;
-		display: flex;
-		flex-direction: column;
-		padding-top: 80px;
-		padding-bottom: 0;
-	}
-
-	/* Studio description — centred (X/Y) in the space above the logo.
-	   flex:1 claims all height not used by the wordmark/reveal below. */
-	.intro-content {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding-inline: var(--padding);
-	}
-
-	/* Line-height/weight come from base.css p:lang(en). Width-capped so
-	   lines stay readable instead of stretching full-bleed; narrowed further
-	   on SP below. PC gets a smaller font-size override further down. */
-	.intro-text {
-		font-size: var(--fs-h3);
-		text-align: center;
-		max-width: 720px;
-		margin: 0;
-	}
-
-	/* Wrapper for wordmark + reveal — relative so the (absolutely positioned)
-	   reveal image doesn't add to this group's flow height, keeping the
-	   wordmark the true bottom-anchored element (as before). */
-	.wordmark-group {
-		flex: none;
-		position: relative;
-		width: 100%;
-	}
-
-	/* ── Logo wordmark — full-bleed at rest; scroll-scrubbed to shrink down
-	   to the studio text's width (see the onMount ScrollTrigger). ── */
-	.wordmark {
-		width: 100%;
-		margin-inline: auto;
-		overflow: hidden;
-		padding-bottom: 10px;
-		line-height: 1;
-	}
-	.wordmark :global(svg) {
-		width: 100%;
-		height: auto;
-		display: block;
-	}
-
-	/* ── Reveal image — scales up from beneath the shrunk wordmark.
-	   Positioned absolute (not in flow) so its box — invisible at rest but
-	   still occupying space via aspect-ratio — can't push the wordmark up
-	   from the bottom. opacity:0 at rest as a no-JS-yet-applied baseline;
-	   the ScrollTrigger timeline drives scale/opacity from there. Centred
-	   via left/right+margin (not transform) so GSAP's scale transform is
-	   the only thing writing to this element's `transform`. ── */
-	.intro-reveal {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		right: 0;
-		width: 100%;
-		max-width: 720px;
-		margin-inline: auto;
-		margin-top: 24px;
-		aspect-ratio: 4 / 3;
-		overflow: hidden;
-		background: var(--color-bg-gray);
-		opacity: 0;
-	}
-	.intro-reveal img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
-	}
-
-	/* Mirrors .intro-reveal's box model exactly (see the spacer's own
-	   comment in the template) so it always reserves the same footprint,
-	   at any viewport width. */
-	.intro-reveal-spacer {
-		width: 100%;
-		max-width: 720px;
-		margin-inline: auto;
-		margin-top: 24px;
-		aspect-ratio: 4 / 3;
-	}
-
-	/* ── Content panels (Services / Company / Ethos / Director) ──
-	   Mobile-first: stacked, content-sized. PC gets side-by-side columns
-	   via the min-width:1024px block further down. */
-	.panel:not(.panel--intro) .panel-inner {
-		height: auto;
-		padding: 90px var(--padding) var(--padding);
+	/* Shared rhythm for every panel's inner content — mobile-first: number
+	   over title, content stacked below. PC becomes a "label-left,
+	   content-right" grid (see min-width:1024px block), matching the
+	   archives/[slug] page's lead/media split. */
+	.panel-inner {
+		padding: 90px var(--padding) 56px;
 		display: flex;
 		flex-direction: column;
 		gap: 32px;
 	}
 
-	/* Section header — number over title */
 	.panel-hd {
 		flex: none;
 		display: flex;
@@ -568,18 +302,6 @@
 		line-height: 1.15;
 	}
 
-	/* Company / Director / Ethos share a wrapper so PC can lay them out as a
-	   3-section layout (Company + Director stacked on the left, Ethos as one
-	   tall column on the right — see the min-width:1024px block below). SP:
-	   display:contents makes both wrappers invisible to layout — all three
-	   sections behave exactly as independent stacked blocks, unaffected. */
-	.panel-pair,
-	.panel-pair__left {
-		display: contents;
-	}
-
-	/* Content area — mobile-first: stacked column. PC becomes a horizontal
-	   row of columns via the min-width:1024px block further down. */
 	.panel-content {
 		flex: none;
 		display: flex;
@@ -587,8 +309,30 @@
 		gap: 48px;
 	}
 
-	/* ── Services ── */
-	.services-row {
+	/* ── Panel 1: Office ── */
+	.intro-text {
+		font-size: var(--fs-h3);
+		max-width: 640px;
+		margin: 0;
+	}
+
+	/* Wordmark — full-bleed (outside .panel-inner's padding), static, no
+	   scroll-linked animation. */
+	.wordmark {
+		width: 100%;
+		margin-top: 64px;
+		line-height: 1;
+	}
+	.wordmark :global(svg) {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+
+	/* ── Services: 2x2 grid ── */
+	.services-grid {
+		display: grid;
+		grid-template-columns: 1fr;
 		gap: 60px;
 	}
 	.service-card {
@@ -712,202 +456,55 @@
 		.intro-text {
 			max-width: 78%;
 		}
-
-		/* SP: Director (04) and Ethos (05) stack as plain independent panels
-		   (see .panel-pair's display:contents) — tighten the gap between
-		   them to a flat 20px instead of Director's own bottom padding +
-		   Ethos's own top padding stacking up (~110px). Compounds onto the
-		   same specificity as the shared .panel:not(.panel--intro)
-		   .panel-inner rule so it reliably overrides regardless of source
-		   order (same technique as the PC-only overrides further down). */
-		.panel--director.panel:not(.panel--intro) .panel-inner {
-			padding-bottom: 0;
-		}
-		.panel--ethos.panel:not(.panel--intro) .panel-inner {
-			padding-top: 0;
-		}
-		.panel--ethos {
-			margin-top: 20px;
-		}
 	}
 
-	/* ── Desktop: side-by-side columns within each panel (the panels
-	   themselves still stack vertically — this only affects layout inside
-	   a panel, e.g. Services' 4 cards in a row). ── */
+	/* ── Desktop: "label-left, content-right" grid for every panel,
+	   mirroring archives/[slug]'s lead/media split. ── */
 	@media (min-width: 1024px) {
-		/* "A bit smaller" than the shared fs-h3 (PC-only; SP keeps fs-h3). */
+		.panel-inner {
+			display: grid;
+			grid-template-columns: 38% 62%;
+			column-gap: 2vw;
+			padding: 100px calc(var(--padding) * 1.5) 56px;
+		}
+		.panel-hd {
+			grid-column: 1;
+		}
+		.panel-content {
+			grid-column: 2;
+			max-width: 720px;
+			margin-left: auto;
+			margin-right: 0;
+		}
+
 		.intro-text {
 			font-size: var(--fs-h4);
 		}
-
-		.panel:not(.panel--intro) .panel-inner {
-			padding: 100px calc(var(--padding) * 1.5) 56px;
-			gap: 20px;
-		}
-		.panel-content {
-			flex-direction: row;
+		.wordmark {
+			margin-top: 80px;
 		}
 
-		/* Services panel is pinned + scrolled horizontally on PC (see the
-		   matchMedia ScrollTrigger in onMount) — clip so the row's overflow
-		   before/during scroll can't create a page-wide horizontal scrollbar.
-		   `clip` not `hidden`: this codebase avoids overflow:hidden for
-		   horizontal clipping since it previously broke position:sticky
-		   elsewhere. */
-		.panel--services {
-			overflow-x: clip;
-		}
-		.services-row {
-			/* Trailing space so the last card isn't flush against the
-			   viewport edge once the horizontal scroll completes — also
-			   feeds directly into the scroll distance() calc in onMount,
-			   so more of it also paces out the last stretch of the
-			   horizontal reveal (was ending too abruptly at *1.5). */
-			padding-right: calc(var(--padding) * 3);
-		}
-
-		.service-card {
-			flex: none;
-			width: 30vw;
-			max-width: 440px;
-		}
-		.service-title {
-			min-height: auto;
-		}
-		.service-link {
-			margin-top: auto;
-		}
-
-		.company-row {
-			gap: 80px;
-		}
-		.cfacts {
-			flex: none;
-			width: 30vw;
-			max-width: 440px;
-		}
-
-		.ethos-block {
-			flex: none;
-			width: 44vw;
-			max-width: 640px;
-		}
-		.ethos-block--intro {
-			width: 30vw;
-			max-width: 420px;
-		}
-
-		/* Director now always sits in the narrower left column (see
-		   .panel-pair__left below), not as a standalone full-width panel —
-		   fills that column instead of the old 44vw/640px half-page size. */
-		.director-text {
-			flex: none;
-			width: 100%;
+		/* Services' 2x2 grid needs more room than the shared 720px text cap —
+		   let it use the full right-hand column instead. */
+		.services-grid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 56px 40px;
 			max-width: none;
 		}
 
-		/* Company (03) + Director (04) + Ethos (05): a 3-section layout —
-		   Company/Director stacked on the left, Ethos as one tall column on
-		   the right, all sharing a start Y. Padding is set once on the
-		   .panel-pair wrapper itself (not on each section's own panel-inner)
-		   so the left/right page edges are managed in one place instead of
-		   patched per-section. */
-		.panel-pair {
-			display: flex;
-			align-items: flex-start;
-			padding-inline: calc(var(--padding) * 1.5);
-			gap: calc(var(--padding) * 3);
+		.company-row {
+			flex-direction: row;
+			gap: 40px;
 		}
-		/* base.css's global `section { padding-inline: var(--padding) }`
-		   still applies to every .panel here too — a class selector already
-		   beats that bare element selector regardless of source order, so
-		   this is enough to zero it out (the wrapper above is now the only
-		   source of left/right edge padding for this trio). */
-		.panel-pair .panel {
-			padding-inline: 0;
-		}
-		/* Matches .panel:not(.panel--intro) .panel-inner's own specificity
-		   (3 classes-worth, via :not()'s argument) plus .panel-pair, so this
-		   reliably wins regardless of source order — a lower-specificity
-		   `.panel-pair .panel-inner` selector silently loses to that shared
-		   rule's padding, same gotcha as elsewhere in this codebase. */
-		.panel-pair .panel:not(.panel--intro) .panel-inner {
-			padding-left: 0;
-			padding-right: 0;
-		}
-		/* Director only: no gap between its header and body — same
-		   specificity trick as above (compounding onto the same 3
-		   class-equivalents as the shared rule, plus .panel--director,
-		   beats it regardless of source order). Also drop its top padding:
-		   Company/Director spacing comes from .panel-pair__left's own gap
-		   below instead, not from each section's own padding stacking up. */
-		.panel--director.panel:not(.panel--intro) .panel-inner {
-			gap: 0;
-			padding-top: 0;
-		}
-		.panel--company.panel:not(.panel--intro) .panel-inner {
-			padding-bottom: 0;
-		}
-		.panel-pair__left {
-			display: flex;
-			flex-direction: column;
-			flex: none;
-			width: 30vw;
-			max-width: 440px;
-			gap: 32px;
-		}
-		.panel--company {
+		.cfacts {
+			flex: 1;
 			width: auto;
 		}
-		.panel--ethos {
-			flex: 1 1 auto;
-			min-width: 0;
-		}
-		/* Company's own EN/JA fact lists stack (was side-by-side) — the
-		   narrower column no longer fits two 30vw-wide lists side by side. */
-		.company-row {
-			flex-direction: column;
-			gap: 32px;
-		}
-		.cfacts {
-			width: 100%;
-			max-width: none;
-		}
-		/* Ethos's blocks stack vertically in their (now narrower) shared
-		   column instead of sitting side-by-side across the full page. */
-		.ethos-row {
-			flex-direction: column;
-		}
-		.ethos-block,
-		.ethos-block--intro {
-			width: 100%;
-			max-width: none;
-		}
-	}
 
-	/* ── Reduced-motion fallback ──
-	   The onMount that drives the scroll-scrubbed intro (logo shrink + image
-	   reveal) AND the Services horizontal pin early-returns under
-	   prefers-reduced-motion, so neither animation runs. Without this block
-	   that left two broken states: (1) the reveal image stuck at opacity:0
-	   over its reserved spacer (an empty gap), and (2) the Services cards
-	   clipped by overflow-x:clip while the translate that would reveal them
-	   never fires — cards 2-4 permanently off-screen and unreachable by
-	   keyboard. Here we drop the (now non-existent) logo-shrink animation
-	   entirely and present a static, fully reachable layout: the logo stays
-	   at its resting full width, the reveal image just shows, and the
-	   Services row un-clips and stacks vertically like SP. Placed after the
-	   min-width:1024px block so its equal-specificity rules win by order. */
-	@media (prefers-reduced-motion: reduce) {
-		.intro-reveal {
-			opacity: 1;
-			transform: none;
-		}
-		.panel--services {
-			overflow-x: visible;
-		}
-		.services-row {
+		.ethos-row {
+			display: flex;
 			flex-direction: column;
+			gap: 40px;
 		}
 	}
 </style>
