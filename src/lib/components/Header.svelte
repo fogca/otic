@@ -178,6 +178,15 @@
 		padding: 12px 4px;
 		margin: -12px -4px;
 		transition: opacity var(--duration-fast) var(--ease-default);
+		/* base.css sets font-feature-settings:"palt" directly on `a` (a bare
+		   type-selector rule applied straight to the element), which
+		   suppresses even the browser's default "liga" ligature — kills the
+		   ffi in "Office". Override with the same mechanism, keeping "palt"
+		   and adding "liga" (same technique as .OfficePage in
+		   office/+page.svelte). */
+		font-feature-settings:
+			'palt' 1,
+			'liga' 1;
 	}
 
 	/* Current page: dimmed instead of the dot marker */
