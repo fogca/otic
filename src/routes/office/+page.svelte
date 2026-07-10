@@ -5,11 +5,11 @@
 
 	let introEl: HTMLElement | undefined = $state();
 
-	// The site-wide corner-logo starts as a full-bleed hero banner at top:0
-	// on this page (see +layout.svelte's .is-hero state) — once this intro
-	// panel has scrolled fully out of view, flip officeIntro.pastHero so the
-	// logo can smoothly resize/reposition down to its normal small
-	// bottom-left resting state, same as every other page.
+	// The site-wide corner-logo starts oversized on this page (same
+	// bottom-left position as everywhere else — see +layout.svelte's
+	// .is-hero state) — once this intro panel has scrolled fully out of
+	// view, flip officeIntro.pastHero so the logo can smoothly shrink down
+	// to its normal size, same as every other page.
 	onMount(() => {
 		if (!browser || !introEl) return;
 
@@ -135,10 +135,9 @@
 <main class="OfficePage">
 
 	<!-- ─── Panel 1: Office — the page's own logo now lives in the fixed
-	     corner-logo (see +layout.svelte), which starts full-bleed at top:0
-	     here and shrinks to its normal resting state once this panel scrolls
-	     out of view. This section only carries the 01/Office label + intro
-	     text. ─── -->
+	     corner-logo (see +layout.svelte), which starts oversized here and
+	     shrinks to its normal size once this panel scrolls out of view. This
+	     section only carries the 01/Office label + intro text. ─── -->
 	<section class="panel panel--intro" bind:this={introEl}>
 		<div class="panel-inner">
 			<header class="panel-hd">
@@ -353,7 +352,7 @@
 		opacity: 0.55;
 	}
 	.pt {
-		font-size: var(--fs-h3);
+		font-size: var(--fs-h4);
 		font-weight: var(--fw-lead);
 		font-variation-settings: 'wght' var(--fw-lead);
 		line-height: 1.15;
@@ -530,13 +529,6 @@
 
 		.intro-text {
 			font-size: var(--fs-h4);
-		}
-		/* Extra clearance under the fixed hero logo (+layout.svelte's
-		   .corner-logo.is-hero), which is pinned at top:0 full-bleed while
-		   this panel is in view — the base 100px above isn't enough at wide
-		   viewports where the logo's own width-driven height grows past it. */
-		.panel--intro .panel-inner {
-			padding-top: 180px;
 		}
 
 		/* Services' 2x2 grid can use the panel's full right-aligned width. */
