@@ -396,10 +396,21 @@
 		   raw 100vw — left stays at the same var(--padding) as the resting
 		   state, and width subtracts that same padding again on the right,
 		   so it reads as a balanced, symmetrically-inset "full width"
-		   rather than a literal edge-to-edge maximum. */
+		   rather than a literal edge-to-edge maximum.
+
+		   max-width is 100vw here, not `none` — `none` is a keyword, not a
+		   length, so it can't interpolate against the resting state's 32vw:
+		   the transition instead flips discretely partway through, clamping
+		   the still-animating width down to 32vw for a frame (visible as an
+		   instant snap) before the width transition catches up and finishes
+		   shrinking the last few px — exactly the "snaps small, then a few
+		   more px" jank reported when scrolling away from top:0. 100vw is a
+		   real length that transitions smoothly against 32vw, and never
+		   actually constrains anything here since the calc() above is
+		   always < 100vw (padding > 0). */
 		.corner-logo.is-hero {
 			width: calc(100% - var(--padding) * 2);
-			max-width: none;
+			max-width: 100vw;
 		}
 	}
 
