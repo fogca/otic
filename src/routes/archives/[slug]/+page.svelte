@@ -86,15 +86,12 @@
 		};
 	}
 
-	// Show Colophon section only if at least one curated field is filled.
-	// Brand is excluded (auto-populated from work meta).
+	// Show Colophon section only if at least one credit or link is filled in.
+	// Brand alone doesn't count (it's auto-populated from work meta, so it's
+	// present on nearly every work — showing the section for just that would
+	// be noise).
 	const hasColophon = $derived(
-		!!archive.colophonBase.direction ||
-			!!archive.colophonBase.design ||
-			!!archive.colophonBase.webSpec ||
-			(Array.isArray(archive.colophonBase.links) &&
-				archive.colophonBase.links.length > 0) ||
-			(Array.isArray(archive.colophonExtra) && archive.colophonExtra.length > 0)
+		archive.colophonBase.credits.length > 0 || archive.colophonBase.links.length > 0
 	);
 </script>
 
@@ -187,33 +184,29 @@
 				<h2 class="title" lang="en">Colophon</h2>
 				<div class="line" aria-hidden="true"></div>
 				<dl class="rows">
-					<div class="row">
-						<dt lang="en">Brand</dt>
-						<dd lang="en">{archive.colophonBase.brand}</dd>
-					</div>
-					<div class="row">
-						<dt lang="en">Direction</dt>
-						<dd lang="en">{archive.colophonBase.direction}</dd>
-					</div>
-					<div class="row">
-						<dt lang="en">Design</dt>
-						<dd lang="en">{archive.colophonBase.design}</dd>
-					</div>
-					<div class="row">
-						<dt lang="en">Web spec</dt>
-						<dd lang="en">{archive.colophonBase.webSpec}</dd>
-					</div>
-					<div class="row">
-						<dt lang="en">Links</dt>
-						<dd lang="en">{archive.colophonBase.links}</dd>
-					</div>
-					{#if archive.colophonExtra}
-						{#each archive.colophonExtra as { label, value } (label)}
-							<div class="row">
-								<dt lang="en">{label}</dt>
-								<dd lang="en">{value}</dd>
-							</div>
-						{/each}
+					{#if archive.colophonBase.brand}
+						<div class="row">
+							<dt lang="en">Brand</dt>
+							<dd lang="en">{archive.colophonBase.brand}</dd>
+						</div>
+					{/if}
+					{#each archive.colophonBase.credits as credit, i (i)}
+						<div class="row">
+							<dt lang="en">{credit.label}</dt>
+							<dd lang="en">{credit.value}</dd>
+						</div>
+					{/each}
+					{#if archive.colophonBase.links.length > 0}
+						<div class="row">
+							<dt lang="en">Links</dt>
+							<dd lang="en" class="links">
+								{#each archive.colophonBase.links as link, i (i)}
+									<a href={link.url} target="_blank" rel="noopener noreferrer"
+										>{link.label || link.url}</a
+									>
+								{/each}
+							</dd>
+						</div>
 					{/if}
 				</dl>
 			</div>
@@ -327,6 +320,19 @@
 		font-size: var(--fs-h5);
 		line-height: 24px;
 		font-weight: var(--fw-base);
+	}
+	.Colophon .row dd.links {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.Colophon .row dd.links a {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		transition: opacity var(--duration-fast) var(--ease-default);
+	}
+	.Colophon .row dd.links a:hover {
+		opacity: 0.6;
 	}
 
 	/* ──────────────────────────────────────────────────────────────

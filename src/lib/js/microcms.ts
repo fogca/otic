@@ -54,6 +54,20 @@ export type Work = {
 				images?: MicroCMSImage;
 		  }
 		| MicroCMSImage;
+	/** Colophon credits — free-form "label: value" rows (Direction, Design,
+	    Photography, etc). Not yet a live CMS field; optional until added. */
+	colophon_credits?: Array<{
+		fieldId: string;
+		label?: string;
+		value?: string;
+	}>;
+	/** Colophon links — free-form "label -> url" rows. Not yet a live CMS
+	    field; optional until added. */
+	colophon_links?: Array<{
+		fieldId: string;
+		label?: string;
+		url?: string;
+	}>;
 };
 
 // Sort: works with `order` field come first (asc), others fall back to API's default order
