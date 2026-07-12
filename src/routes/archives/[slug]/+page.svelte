@@ -287,14 +287,30 @@
 		display: block;
 	}
 
-	/* SP: hero and gallery thumbnails all full-width. */
+	/* SP: hero full-width; gallery thumbnails keep their centred-narrow /
+	   full-bleed rhythm (mp-1..mp-6, cycling per item — see the template's
+	   class="media__item mp-{(i % 6) + 1}"). mp-4/mp-6 have no override
+	   here, so they fall through to the 90% base. */
 	.media__hero {
 		width: 100%;
 		margin-inline: 0;
 	}
 	.media__item {
-		width: 100%;
-		margin-inline: 0;
+		width: 90%;
+		margin-inline: auto;
+	}
+	.media__item.mp-1 {
+		width: 80%;
+	}
+	.media__item.mp-2 {
+		width: 100vw;
+	}
+	.media__item.mp-5 {
+		width: 100vw;
+		margin-inline: calc(-1 * var(--padding));
+	}
+	.media__item.mp-3 {
+		width: 70%;
 	}
 
 	/* ── Colophon ── */
@@ -401,6 +417,19 @@
 		}
 		.media__hero,
 		.media__item {
+			width: 100%;
+			margin-left: 0;
+			margin-right: 0;
+		}
+		/* Re-assert the uniform width against the SP mp-1/2/3/5 rules above —
+		   those use two classes (higher specificity) so they'd otherwise still
+		   win here even though this block comes later in the cascade. */
+		.media__item.mp-1,
+		.media__item.mp-2,
+		.media__item.mp-3,
+		.media__item.mp-4,
+		.media__item.mp-5,
+		.media__item.mp-6 {
 			width: 100%;
 			margin-left: 0;
 			margin-right: 0;
