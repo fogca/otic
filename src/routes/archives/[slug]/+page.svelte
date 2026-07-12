@@ -307,7 +307,7 @@
 	}
 	.media__item.mp-5 {
 		width: 100vw;
-		margin-inline: calc(-1 * var(--padding));
+		margin-inline: 0;
 	}
 	.media__item.mp-3 {
 		width: 70%;
