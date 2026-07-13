@@ -85,18 +85,18 @@ export default defineConfig({
 								maxAgeSeconds: 60 * 60 * 24 * 30
 							}
 						}
-					},
-					{
-						urlPattern: /^https:\/\/cdn\.takumiisobe\.com\/.*/i,
-						handler: 'CacheFirst',
-						options: {
-							cacheName: 'cdn-media',
-							expiration: {
-								maxEntries: 100,
-								maxAgeSeconds: 60 * 60 * 24 * 30
-							}
-						}
 					}
+					/* NO rule for cdn.takumiisobe.com (videos) — deliberately.
+					   A CacheFirst rule here used to route every <video> fetch
+					   through the service worker, which buffers the whole MP4 in
+					   the SW process and clones it into Cache Storage: a huge
+					   per-video memory spike on iOS (a major cause of the mobile
+					   tab crashes) plus up to 100 videos hoarded on the visitor's
+					   disk for 30 days. Workbox also doesn't honor Range requests
+					   without a dedicated plugin, so SW-mediated video breaks
+					   AVFoundation's ranged streaming anyway. Unmatched requests
+					   bypass the SW and stream natively. +layout.svelte deletes
+					   the legacy 'cdn-media' cache left on existing devices. */
 				]
 			}
 		})

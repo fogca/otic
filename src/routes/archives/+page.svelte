@@ -33,6 +33,13 @@
 
 	let isLoading = $state(true);
 
+	// Preload window for grid videos. Tighter on phones: the sources are 4K,
+	// and decoder memory scales with resolution (not file size) — a single
+	// active 4K decode costs on the order of 100MB on iOS, so every
+	// simultaneously-attached video matters on mobile.
+	const videoMargin =
+		browser && !window.matchMedia('(min-width: 1024px)').matches ? '200px' : '400px';
+
 	// Column count by viewport: SP = 2, Laptop+ (≥1024) = 5
 	function getColumnCount(): number {
 		if (!browser) return 5;
@@ -167,7 +174,11 @@
 				<div class="image-wrapper" style:aspect-ratio={image.aspectRatio}>
 					{#if image.isVideo}
 						<video
-							use:lazyGridVideo={{ src: image.url, onMeta: handleVideoMeta }}
+							use:lazyGridVideo={{
+								src: image.url,
+								onMeta: handleVideoMeta,
+								rootMargin: videoMargin
+							}}
 							loop
 							muted
 							playsinline

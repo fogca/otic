@@ -76,6 +76,17 @@
 		poll();
 	}
 
+	// One-time cleanup: the service worker used to runtime-cache whole video
+	// files from cdn.takumiisobe.com ('cdn-media', CacheFirst — rule now
+	// removed in vite.config.ts). Workbox's cleanupOutdatedCaches only clears
+	// precache versions, never runtime caches, so devices that already
+	// visited keep those multi-MB video blobs on disk forever unless the page
+	// deletes the cache explicitly.
+	onMount(() => {
+		if (!browser || !('caches' in window)) return;
+		caches.delete('cdn-media').catch(() => {});
+	});
+
 	onMount(() => {
 		if (!browser) return;
 
