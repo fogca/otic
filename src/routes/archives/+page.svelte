@@ -287,17 +287,32 @@
 		height: 100%;
 		object-fit: cover;
 		display: block;
-		/* Self lazy-load reveal: blur + fade in once the bytes arrive.
-		   The gray wrapper background acts as the placeholder underneath. */
+		/* Hidden until bytes arrive — the gray wrapper background is the
+		   placeholder. No static filter here: an invisible element doesn't
+		   need the blur, and WebKit can keep a compositing layer alive for
+		   every element with a filter — ~100 grid items' worth of GPU
+		   textures on a page that already fights iOS memory limits. */
 		opacity: 0;
-		filter: blur(12px);
-		transition: opacity 0.6s ease, filter 0.6s ease;
 	}
 
 	.Archives .image-wrapper img:global(.loaded),
 	.Archives .image-wrapper video:global(.loaded) {
 		opacity: 1;
-		filter: blur(0);
+		/* Blur+fade reveal as a one-shot ANIMATION (not a transition to
+		   filter: blur(0)): once it finishes, the computed style carries no
+		   filter at all, so no per-item filter layer lingers after load. */
+		animation: media-reveal 0.6s ease;
+	}
+
+	@keyframes media-reveal {
+		from {
+			opacity: 0;
+			filter: blur(12px);
+		}
+		to {
+			opacity: 1;
+			filter: blur(0);
+		}
 	}
 
 	@media (min-width: 1024px) {

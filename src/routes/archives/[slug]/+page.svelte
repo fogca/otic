@@ -121,10 +121,14 @@
 	<!-- RIGHT: media — hero + gallery, editorial vertical flow -->
 	<div class="media">
 		{#if archive.hero?.isVideo}
-			<!-- Hero is always above the fold — load eagerly, no intersection gate. -->
+			<!-- Hero starts above the fold, so it loads/plays immediately —
+			     lazyVideo is here for the way BACK OUT: it releases the
+			     decoder + buffer once the hero scrolls far off-screen (long
+			     gallery below), instead of holding them for the whole page. -->
 			<div class="media__hero">
 				<video
 					src={archive.hero.src}
+					use:lazyVideo
 					autoplay
 					loop
 					muted

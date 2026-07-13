@@ -1,15 +1,18 @@
 // Archives grid videos: `src` is deferred entirely until the item is near
 // the viewport (rootMargin) — off-screen tiles show only the plain light-gray
-// placeholder, no video element is mounted/fetched at all, so the grid's
-// FIRST layout pass never waits on network for anything off-screen.
+// placeholder, no video fetch happens at all, so the grid's FIRST layout
+// pass never waits on network for anything off-screen.
 //
-// This replaces the old approach of eagerly fetching preload="metadata" for
-// every video on mount (all ~10 competing for bandwidth on load, and the
-// masonry layout itself blocking until every one reported its real size —
-// the actual cause of the slow first paint). The wrapper starts at a
-// reasonable default aspect-ratio (set by the caller) so layout can run
-// immediately; once real metadata arrives this reports back via `onMeta` so
-// the caller can correct it with a (debounced) re-layout.
+// Just as important: leaving the viewport fully RELEASES the video again
+// (pause + detach src + load()), not just pause(). On iOS every <video>
+// that still has a src holds a hardware decoder slot and its buffered data
+// in memory — pause() frees neither. Scrolling a long grid used to
+// accumulate one per passed video until the decoder pool / memory ran out:
+// videos went black (decoder eviction), then the tab itself crashed
+// (jetsam). Detaching returns the slot and the buffer; the wrapper keeps
+// the corrected aspect-ratio (set once via onMeta) so layout never shifts,
+// and re-entering the viewport simply re-attaches the src, re-buffering
+// from the HTTP cache.
 type Opts = {
 	src: string;
 	onMeta: (node: HTMLVideoElement, width: number, height: number) => void;
@@ -17,11 +20,21 @@ type Opts = {
 };
 
 export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
-	const { src, onMeta, rootMargin = '800px' } = opts;
+	// 400px (not the old 800px) halves the "active window" of simultaneously
+	// loaded/decoding videos — the largest single memory lever here — while
+	// still starting buffering roughly a screen ahead of visibility.
+	const { src, onMeta, rootMargin = '400px' } = opts;
 	let loaded = false;
+	let metaReported = false;
 
 	const onLoadedMeta = () => {
-		if (node.videoWidth && node.videoHeight) onMeta(node, node.videoWidth, node.videoHeight);
+		// Report once: the wrapper's aspect-ratio survives unload/reload
+		// cycles, so re-reporting would only churn debounced re-layouts.
+		if (metaReported) return;
+		if (node.videoWidth && node.videoHeight) {
+			metaReported = true;
+			onMeta(node, node.videoWidth, node.videoHeight);
+		}
 	};
 	node.addEventListener('loadedmetadata', onLoadedMeta);
 
@@ -30,6 +43,16 @@ export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 		loaded = true;
 		node.src = src;
 		node.preload = 'auto';
+		node.load();
+	};
+
+	const unload = () => {
+		if (!loaded) return;
+		loaded = false;
+		node.pause();
+		// The canonical WebKit way to free a media element's decoder +
+		// buffer: drop the src attribute, then load() to reset the element.
+		node.removeAttribute('src');
 		node.load();
 	};
 
@@ -49,8 +72,8 @@ export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 				if (entry.isIntersecting) {
 					startLoad();
 					node.play?.().catch(() => {});
-				} else if (loaded) {
-					node.pause();
+				} else {
+					unload();
 				}
 			}
 		},
@@ -62,6 +85,7 @@ export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 		destroy() {
 			io.disconnect();
 			node.removeEventListener('loadedmetadata', onLoadedMeta);
+			unload();
 		}
 	};
 }
