@@ -487,7 +487,13 @@
 
 	.darken-overlay {
 		position: fixed;
-		inset: 0;
+		/* Extends past the fixed-viewport edges: on iOS Safari's floating-tab
+		   UI that viewport ends ABOVE the tab (~110px short of the physical
+		   bottom, measured on device), so an inset:0 veil left the zone
+		   behind the tab un-darkened — raw page content showed through
+		   during the shrink phase. The top overshoot likewise covers the
+		   status-bar zone. Offscreen overshoot is visually free. */
+		inset: -100px 0 -340px 0;
 		background: black;
 		opacity: 0;
 		z-index: 998;

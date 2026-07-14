@@ -247,12 +247,18 @@
 		top: 0;
 		left: 0;
 		width: 100vw;
-		/* 100vh on iOS Safari = toolbar-collapsed (large) height; 100dvh tracks
-		   the real current viewport so this full-screen backdrop always
-		   reaches the true visible bottom, matching the +layout.svelte fix. */
+		/* 100dvh keeps the CONTENT centred in the currently visible area, but
+		   on iOS Safari's floating-tab UI no vh-family unit reaches the
+		   physical screen bottom — the fixed viewport ends above the tab
+		   while the canvas paints on behind it, so the page showed through
+		   behind the tab during the intro. The dark backdrop is therefore
+		   extended via `outline`: it paints outside the box on every side
+		   without affecting the flex centring, and isn't clipped by the
+		   element's own overflow:hidden. */
 		height: 100vh;
 		height: 100dvh;
 		background: var(--color-bg-dark, #121212);
+		outline: 340px solid var(--color-bg-dark, #121212);
 		z-index: 9999;
 		display: flex;
 		flex-direction: column;

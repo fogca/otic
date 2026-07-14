@@ -43,6 +43,17 @@
 			background-color 0.25s var(--ease-default);
 	}
 
+	/* Extends the darkening past the fixed-viewport edges (iOS floating-tab
+	   UI: that viewport ends above the tab; the canvas paints on behind it) —
+	   background:inherit tracks the parent's animated rgba, and the pseudo
+	   doesn't disturb the flex-centred badge. */
+	.lang-switch::before {
+		content: '';
+		position: absolute;
+		inset: -100px 0 -340px 0;
+		background: inherit;
+	}
+
 	.lang-switch.is-visible {
 		opacity: 1;
 		background: rgba(0, 0, 0, 0.55);
