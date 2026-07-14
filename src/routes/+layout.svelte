@@ -198,8 +198,22 @@
 			transformOrigin: `50% ${vhCenter}px`
 		});
 
-		// Panel color: black for home (hands off to Loader), white otherwise
+		// Panel color: black for home (hands off to Loader), white otherwise.
+		// Start position is set in PX from the PHYSICAL screen height, not the
+		// CSS resting translateY(100%): on iOS Safari's floating-tab UI, lvh
+		// (and innerHeight) end at the TOP of the tab zone while the page
+		// canvas extends behind it to the physical bottom — a %-of-height
+		// start made the rising edge visibly appear above the floating tab.
+		// screen.height is the full physical height in CSS px (portrait), so
+		// the edge starts at/below the true screen bottom; on desktop (fine
+		// pointer) innerHeight is exact and screen.height would only add a
+		// perceptible head-start delay, so it keeps the window height.
+		const coarse = window.matchMedia('(pointer: coarse)').matches;
+		const panelStartY = coarse
+			? Math.max(window.screen.height, window.innerHeight) + 12
+			: window.innerHeight + 12;
 		gsap.set('.transition-panel', {
+			y: panelStartY,
 			backgroundColor: isHomeNav ? '#121212' : '#ffffff'
 		});
 
@@ -247,11 +261,12 @@
 				OUT_DURATION * DARKEN_DELAY_RATIO
 			);
 
-			// White panel slides up — silky Awwwards-style ease, slower
+			// White panel slides up — silky Awwwards-style ease, slower.
+			// y in px (from the physical-bottom start set above), not '0%'.
 			tl.to(
 				'.transition-panel',
 				{
-					y: '0%',
+					y: 0,
 					duration: PANEL_DURATION,
 					ease: 'panelSilk'
 				},
@@ -450,19 +465,19 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		/* The panel slides up by its own height (translateY 100% -> 0), so its
-		   height defines WHERE the rising edge first appears. 100lvh alone
-		   isn't enough on iOS Safari's floating-tab UI: the fixed-position
-		   viewport (what lvh measures) ends at the TOP of the floating tab,
-		   while the page canvas extends behind it to the physical bottom
-		   (viewport-fit=cover) — so the edge visibly started above the tab
-		   instead of at the true screen bottom. Overshoot by the safe-area
-		   inset (the tab/home-indicator zone) plus a small buffer: the start
-		   edge moves to/below the physical bottom, and when fully up the
-		   panel just extends past the bottom — both overshoots are offscreen,
-		   visually free in every browser (env() is 0 outside iOS). */
+		/* Big fixed overshoot past lvh: on iOS Safari's floating-tab UI the
+		   fixed-position viewport (what lvh measures) ends at the TOP of the
+		   tab zone, while the page canvas extends behind it to the physical
+		   bottom (viewport-fit=cover) — measured ~150px deeper on device,
+		   beyond env(safe-area-inset-bottom). 240px guarantees the panel
+		   covers down to the physical bottom when fully up, and its resting
+		   translateY(100%) sits fully below the screen on every device. The
+		   overshoot does NOT delay the visible rise: onNavigate starts the
+		   slide from an explicit px offset (physical screen height), not from
+		   the CSS resting spot. Extends 240px past the bottom on other
+		   browsers too — offscreen, visually free. */
 		height: 100vh;
-		height: calc(100lvh + env(safe-area-inset-bottom, 0px) + 40px);
+		height: calc(100lvh + 240px);
 		background: white;
 		transform: translateY(100%);
 		z-index: 1000;
