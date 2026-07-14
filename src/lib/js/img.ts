@@ -59,6 +59,21 @@ export const videoOpt = (url: string, width: number): string => {
 	return `${VIDEO_CDN}cdn-cgi/media/mode=video,width=${width},fit=scale-down/${path}`;
 };
 
+/** Tiny first-frame capture of a CDN video (Media Transformations
+    mode=frame) — used as an LQIP background under <video> elements so
+    loading/unloaded videos show a soft low-res preview of themselves
+    instead of a flat gray/white box (~1KB each). The blur is free: a
+    64px capture upscaled to fill its box by background-size:cover is
+    naturally soft. Returns '' for non-CDN URLs (callers skip the
+    background); if transformations are ever disabled the URL 404s and
+    the background simply doesn't render — the plain wrapper shows,
+    exactly the pre-LQIP behavior. */
+export const videoFrame = (url: string, width = 64): string => {
+	if (!url.startsWith(VIDEO_CDN)) return '';
+	const path = url.slice(VIDEO_CDN.length);
+	return `${VIDEO_CDN}cdn-cgi/media/mode=frame,time=0s,format=jpg,width=${width},fit=scale-down/${path}`;
+};
+
 /** Responsive srcset for a microCMS image across the given widths. */
 export const imgSrcset = (url: string | undefined, widths: number[], quality = 72): string => {
 	if (!url) return '';

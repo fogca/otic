@@ -4,7 +4,7 @@
 	import { getLenis } from '$lib/state/lenis';
 	import { footerNear } from '$lib/state/footerNear.svelte';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
-	import { videoOpt } from '$lib/js/img';
+	import { videoOpt, videoFrame } from '$lib/js/img';
 
 	export type Tile = {
 		src: string;
@@ -180,6 +180,7 @@
 					href={t.href}
 					aria-label={t.alt}
 					style:aspect-ratio={tileRatios[i]}
+					style:background-image={t.isVideo ? `url(${videoFrame(t.src, 96)})` : undefined}
 				>
 					{#if t.isVideo}
 						<!-- No autoplay: lazyVideo starts playback (and full buffering)
@@ -252,7 +253,13 @@
 		display: block;
 		width: 100%;
 		overflow: hidden;
-		background: var(--color-bg-gray);
+		/* Video tiles carry an inline LQIP background (tiny first-frame
+		   capture) — shows while the video buffers and after lazyVideo
+		   releases a scrolled-away tile, instead of a flat gray flash.
+		   cover matches the media's own object-fit below. */
+		background-color: var(--color-bg-gray);
+		background-size: cover;
+		background-position: center;
 	}
 	.feed__tile img,
 	.feed__tile video {

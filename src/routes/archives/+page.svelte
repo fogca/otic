@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { lazyGridVideo } from '$lib/actions/lazyGridVideo';
-	import { imgOpt, imgSrcset, videoOpt } from '$lib/js/img';
+	import { imgOpt, imgSrcset, videoOpt, videoFrame } from '$lib/js/img';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -22,6 +22,16 @@
 				// so supporting browsers still get WebP.
 				src: isMicrocms ? imgOpt(img.url, 700, 60) : img.url,
 				srcset: isMicrocms ? imgSrcset(img.url, GRID_WIDTHS, 60) : undefined,
+				// LQIP under every tile: a ~1KB soft preview of the media itself
+				// (videos: first-frame capture; images: tiny imgix rendition),
+				// stretched by background-size:cover — so loading/unloaded tiles
+				// show a blurred version of their own content instead of a flat
+				// gray box, and the real media's blur-reveal fades in over it.
+				lqip: img.isVideo
+					? videoFrame(img.url, 64)
+					: isMicrocms
+						? imgOpt(img.url, 32, 30)
+						: '',
 				// Videos have no CMS dimensions and their `src` is deferred (loaded
 				// only near the viewport — see lazyGridVideo) — start at a neutral
 				// 1:1 guess so the FIRST layout pass never waits on video network;
@@ -171,7 +181,11 @@
 				aria-label={image.workTitle}
 				draggable="false"
 			>
-				<div class="image-wrapper" style:aspect-ratio={image.aspectRatio}>
+				<div
+					class="image-wrapper"
+					style:aspect-ratio={image.aspectRatio}
+					style:background-image={image.lqip ? `url(${image.lqip})` : undefined}
+				>
 					{#if image.isVideo}
 						<video
 							use:lazyGridVideo={{
@@ -290,7 +304,14 @@
 		position: relative;
 		width: 100%;
 		overflow: hidden;
-		background: var(--color-bg-gray);
+		/* LQIP placeholder: the inline background-image (a ~1KB capture of the
+		   tile's own media, set in the template) stretched to fill — a 64px
+		   source upscaled by cover is naturally soft, no CSS filter needed
+		   (filters would pin a compositing layer per tile). The gray sits
+		   underneath while the LQIP itself is still in flight. */
+		background-color: var(--color-bg-gray);
+		background-size: cover;
+		background-position: center;
 	}
 
 	.Archives .image-wrapper img,

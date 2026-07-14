@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { onNavigate, afterNavigate } from '$app/navigation';
 	import type { PageData } from './$types';
-	import { imgOpt, imgSrcset, videoOpt } from '$lib/js/img';
+	import { imgOpt, imgSrcset, videoOpt, videoFrame } from '$lib/js/img';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
 	import { footerNear } from '$lib/state/footerNear.svelte';
 
@@ -125,7 +125,10 @@
 			     lazyVideo is here for the way BACK OUT: it releases the
 			     decoder + buffer once the hero scrolls far off-screen (long
 			     gallery below), instead of holding them for the whole page. -->
-			<div class="media__hero">
+			<div
+				class="media__hero"
+				style:background-image={`url(${videoFrame(archive.hero.src, 128)})`}
+			>
 				<video
 					src={videoOpt(archive.hero.src, 1920)}
 					use:lazyVideo={{ fallbackSrc: archive.hero.src }}
@@ -160,7 +163,10 @@
 		{/if}
 
 		{#each archive.gallery as item, i (i)}
-			<div class="media__item mp-{(i % 6) + 1}">
+			<div
+				class="media__item mp-{(i % 6) + 1}"
+				style:background-image={item.isVideo ? `url(${videoFrame(item.src, 128)})` : undefined}
+			>
 				{#if item.isVideo}
 					<video
 						src={videoOpt(item.src, 1280)}
@@ -302,6 +308,22 @@
 	.media__item {
 		width: 90%;
 		margin-inline: auto;
+	}
+	/* Video items carry an inline LQIP background (a ~1KB first-frame
+	   capture, set in the template) — visible whenever the <video> above it
+	   has no frame to paint: before first buffer, and after lazyVideo
+	   releases a scrolled-away video's src. A 128px source upscaled to the
+	   box is naturally soft — reads as a blurred preview, not a gray box.
+	   contain + left top mirrors the PC media rules' object-fit/-position,
+	   so the placeholder sits exactly where the video frame will paint
+	   (with cover, an 88vh-clamped video would show placeholder bleeding
+	   beside the contained frame). On SP the box ratio equals the frame
+	   ratio, where contain fills the box edge-to-edge anyway. */
+	.media__hero,
+	.media__item {
+		background-size: contain;
+		background-position: left top;
+		background-repeat: no-repeat;
 	}
 	.media__item.mp-1 {
 		width: 80%;
