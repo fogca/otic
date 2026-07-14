@@ -39,25 +39,17 @@ export const imgOpt = (url: string | undefined, width: number, quality = 72): st
 	return `${url}${sep}auto=format,compress&q=${quality}&w=${width}&fit=max`;
 };
 
-/** Serve-time video optimization — the video analog of imgOpt. Rewrites a
-    cdn.takumiisobe.com URL through Cloudflare Media Transformations
-    (`/cdn-cgi/media/…`), which resizes + re-encodes at the edge and caches
-    the result; the R2 original is untouched. The sources are 4K renders,
-    and decoder memory scales with resolution — a 720px rendition decodes
-    at ~1/25th the frame memory of 3840x2160, which is what iOS needs.
-    Non-CDN URLs pass through unchanged.
-
-    REQUIRES the zone toggle: Cloudflare dashboard -> takumiisobe.com zone
-    -> Stream -> Transformations -> enable. Until then these URLs 404 —
-    every <video> call site pairs this with the raw URL as an on-error
-    fallback (see lazyVideo / lazyGridVideo), so playback works either way
-    and upgrades automatically once the toggle is on. */
+/** Cloudflare Media Transformations CDN root — used by videoFrame() below.
+    NOT used for video `src` itself: mode=video ignores Range requests
+    entirely (confirmed directly — a Range: bytes=0-1023 request against a
+    transformed URL comes back 200 with the full file and no Content-Range
+    header, while the same request against the raw R2 URL correctly returns
+    206/Content-Range). Browsers — Safari especially — rely on real range
+    support to start playback before the whole file arrives; without it a
+    video effectively has to fully download first, which read as "stuck
+    loading, still blurred" on larger files. Video `src` therefore uses the
+    raw URL directly everywhere (see git history for the removed videoOpt). */
 const VIDEO_CDN = 'https://cdn.takumiisobe.com/';
-export const videoOpt = (url: string, width: number): string => {
-	if (!url.startsWith(VIDEO_CDN)) return url;
-	const path = url.slice(VIDEO_CDN.length);
-	return `${VIDEO_CDN}cdn-cgi/media/mode=video,width=${width},fit=scale-down/${path}`;
-};
 
 /** Tiny first-frame capture of a CDN video (Media Transformations
     mode=frame) — used as an LQIP background under <video> elements so

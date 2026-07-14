@@ -4,7 +4,7 @@
 	import { getLenis } from '$lib/state/lenis';
 	import { footerNear } from '$lib/state/footerNear.svelte';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
-	import { videoOpt, videoFrame } from '$lib/js/img';
+	import { videoFrame } from '$lib/js/img';
 
 	export type Tile = {
 		src: string;
@@ -189,8 +189,8 @@
 						     videoMeta can read the real aspect-ratio up front. -->
 						<video
 							use:videoMeta={i}
-							use:lazyVideo={{ rootMargin: '400px', fallbackSrc: t.src }}
-							src={videoOpt(t.src, 1280)}
+							use:lazyVideo={{ rootMargin: '400px' }}
+							src={t.src}
 							loop
 							muted
 							playsinline

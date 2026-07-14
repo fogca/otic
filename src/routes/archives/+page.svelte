@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { lazyGridVideo } from '$lib/actions/lazyGridVideo';
-	import { imgOpt, imgSrcset, videoOpt, videoFrame } from '$lib/js/img';
+	import { imgOpt, imgSrcset, videoFrame } from '$lib/js/img';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -242,8 +242,7 @@
 					{#if image.isVideo}
 						<video
 							use:lazyGridVideo={{
-								src: videoOpt(image.url, 720),
-								fallbackSrc: image.url,
+								src: image.url,
 								onMeta: handleVideoMeta,
 								rootMargin: videoMargin
 							}}

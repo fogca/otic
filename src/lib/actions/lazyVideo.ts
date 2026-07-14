@@ -1,7 +1,7 @@
-// Prioritises Cloudflare video bandwidth AND memory toward whatever is
-// actually on screen. Markup keeps src + preload="metadata", so every video
-// still reports its intrinsic size up front (the gallery's heights depend on
-// it) — that part is cheap: metadata alone holds no decoder.
+// Prioritises video bandwidth AND memory toward whatever is actually on
+// screen. Markup keeps src + preload="metadata", so every video still
+// reports its intrinsic size up front (the gallery's heights depend on it)
+// — that part is cheap: metadata alone holds no decoder.
 //
 // Near the viewport: switch to full buffering + play. Once it scrolls away
 // again: fully RELEASE the video (pause + detach src + load()), not just
@@ -13,32 +13,19 @@
 // intrinsic size (no layout jump); re-entering re-attaches the same src,
 // re-buffered from the HTTP cache.
 //
-// The markup src is normally the serve-time-optimized URL (videoOpt —
-// Cloudflare Media Transformations); `fallbackSrc` is the raw R2 file. If
-// the optimized URL errors (zone toggle not enabled yet, or a transform
-// limit), the action swaps to the fallback once and continues — so
-// enabling/disabling the Cloudflare feature never breaks playback.
-type Opts = {
-	rootMargin?: string;
-	fallbackSrc?: string;
-};
-
-export function lazyVideo(node: HTMLVideoElement, opts: Opts = {}) {
-	const { rootMargin = '400px', fallbackSrc } = opts;
-	// Remember the markup src so it can be re-attached after a release.
-	let src = node.getAttribute('src') ?? '';
+// `src` is always the raw R2 file — NOT routed through Cloudflare Media
+// Transformations. That was tried (see git history) to cut decode memory
+// via a smaller rendition, but mode=video ignores Range requests entirely
+// (confirmed directly: a Range: bytes=0-1023 request against a transformed
+// URL comes back 200 with the whole file, no Content-Range — the same
+// request against the raw R2 URL correctly 206s). Without real range
+// support the browser effectively has to fetch the whole file before
+// playback can start, which read as "stuck loading, still blurred" —
+// worse than the problem it was meant to solve.
+export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } = {}) {
+	const { rootMargin = '400px' } = opts;
+	const src = node.getAttribute('src') ?? '';
 	let active = false;
-
-	// Optimized URL failed — fall back to the raw file permanently for
-	// this element (also covers future re-attachments via `src`).
-	const onError = () => {
-		if (!fallbackSrc || src === fallbackSrc || !node.getAttribute('src')) return;
-		src = fallbackSrc;
-		node.setAttribute('src', src);
-		node.load();
-		if (active) node.play?.().catch(() => {});
-	};
-	node.addEventListener('error', onError);
 
 	const activate = () => {
 		if (!node.getAttribute('src') && src) {
@@ -73,11 +60,7 @@ export function lazyVideo(node: HTMLVideoElement, opts: Opts = {}) {
 
 	if (typeof IntersectionObserver === 'undefined') {
 		node.play?.().catch(() => {});
-		return {
-			destroy() {
-				node.removeEventListener('error', onError);
-			}
-		};
+		return;
 	}
 
 	const io = new IntersectionObserver(
@@ -97,7 +80,6 @@ export function lazyVideo(node: HTMLVideoElement, opts: Opts = {}) {
 	return {
 		destroy() {
 			io.disconnect();
-			node.removeEventListener('error', onError);
 		}
 	};
 }

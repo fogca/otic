@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { onNavigate, afterNavigate } from '$app/navigation';
 	import type { PageData } from './$types';
-	import { imgOpt, imgSrcset, videoOpt, videoFrame } from '$lib/js/img';
+	import { imgOpt, imgSrcset, videoFrame } from '$lib/js/img';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
 	import { footerNear } from '$lib/state/footerNear.svelte';
 
@@ -130,8 +130,8 @@
 				style:background-image={`url(${videoFrame(archive.hero.src, 128)})`}
 			>
 				<video
-					src={videoOpt(archive.hero.src, 1920)}
-					use:lazyVideo={{ fallbackSrc: archive.hero.src }}
+					src={archive.hero.src}
+					use:lazyVideo
 					autoplay
 					loop
 					muted
@@ -169,8 +169,8 @@
 			>
 				{#if item.isVideo}
 					<video
-						src={videoOpt(item.src, 1280)}
-						use:lazyVideo={{ fallbackSrc: item.src }}
+						src={item.src}
+						use:lazyVideo
 						loop
 						muted
 						playsinline

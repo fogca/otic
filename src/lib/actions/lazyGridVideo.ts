@@ -14,24 +14,26 @@
 // and re-entering the viewport simply re-attaches the src, re-buffering
 // from the HTTP cache.
 //
-// `src` is normally the serve-time-optimized URL (videoOpt — Cloudflare
-// Media Transformations); `fallbackSrc` is the raw R2 file. If the
-// optimized URL errors (zone toggle not enabled yet, or a transform
-// limit), the action swaps to the fallback once and continues — so
-// enabling/disabling the Cloudflare feature never breaks playback.
+// `src` is always the raw R2 file — NOT routed through Cloudflare Media
+// Transformations. That was tried (see git history) to cut decode memory
+// via a smaller rendition, but mode=video ignores Range requests entirely
+// (confirmed directly: a Range: bytes=0-1023 request against a transformed
+// URL comes back 200 with the whole file, no Content-Range — the same
+// request against the raw R2 URL correctly 206s). Without real range
+// support the browser effectively has to fetch the whole file before
+// playback can start, which read as "stuck loading, still blurred" —
+// worse than the problem it was meant to solve.
 type Opts = {
 	src: string;
 	onMeta: (node: HTMLVideoElement, width: number, height: number) => void;
 	rootMargin?: string;
-	fallbackSrc?: string;
 };
 
 export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 	// 400px (not the old 800px) halves the "active window" of simultaneously
 	// loaded/decoding videos — the largest single memory lever here — while
 	// still starting buffering roughly a screen ahead of visibility.
-	const { src, onMeta, rootMargin = '400px', fallbackSrc } = opts;
-	let currentSrc = src;
+	const { src, onMeta, rootMargin = '400px' } = opts;
 	let loaded = false;
 	let metaReported = false;
 
@@ -46,21 +48,10 @@ export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 	};
 	node.addEventListener('loadedmetadata', onLoadedMeta);
 
-	// Optimized URL failed (e.g. Media Transformations not enabled on the
-	// zone) — fall back to the raw file permanently for this element.
-	const onError = () => {
-		if (!loaded || !fallbackSrc || currentSrc === fallbackSrc) return;
-		currentSrc = fallbackSrc;
-		node.src = currentSrc;
-		node.load();
-		node.play?.().catch(() => {});
-	};
-	node.addEventListener('error', onError);
-
 	const startLoad = () => {
 		if (loaded) return;
 		loaded = true;
-		node.src = currentSrc;
+		node.src = src;
 		node.preload = 'auto';
 		node.load();
 	};
@@ -81,7 +72,6 @@ export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 		return {
 			destroy() {
 				node.removeEventListener('loadedmetadata', onLoadedMeta);
-				node.removeEventListener('error', onError);
 			}
 		};
 	}
@@ -105,7 +95,6 @@ export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 		destroy() {
 			io.disconnect();
 			node.removeEventListener('loadedmetadata', onLoadedMeta);
-			node.removeEventListener('error', onError);
 			unload();
 		}
 	};
