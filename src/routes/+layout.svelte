@@ -59,6 +59,26 @@
 	let needsEntryAnim = false;
 	let isHomeNav = false; // navigating to "/" — use black panel + hand off to Loader
 
+	// Transition-panel geometry, in raw px. On iOS Safari's floating-tab UI
+	// no CSS viewport unit reaches the physical screen bottom (measured on
+	// device: physical 812 vs lvh 704, dvh/innerHeight 610-704, safe-area
+	// env 0 — the ~110px tab zone is invisible to all of them even though
+	// the canvas paints behind it via viewport-fit=cover). screen.height is
+	// the only metric spanning it, so panel height/offsets are computed from
+	// it at navigation time instead of any vh/dvh/lvh value. Desktop (fine
+	// pointer) uses innerHeight: exact there, while screen.height (the whole
+	// monitor) would only add dead travel before the rising edge appears.
+	function panelMetrics() {
+		const coarse = window.matchMedia('(pointer: coarse)').matches;
+		const physical = coarse
+			? Math.max(window.screen.height, window.innerHeight)
+			: window.innerHeight;
+		return {
+			height: physical + 80, // covers past the physical bottom when fully up
+			offY: physical + 20 // top edge just below the physical bottom when parked
+		};
+	}
+
 	// FONTPLUS (Tazugane webfont) loads via a deferred <script> in app.html, so the
 	// global may not exist yet when navigation callbacks fire. Poll briefly, then run.
 	type FontplusApi = { reload: (init?: boolean) => void };
@@ -199,21 +219,24 @@
 		});
 
 		// Panel color: black for home (hands off to Loader), white otherwise.
-		// Start position is set in PX from the PHYSICAL screen height, not the
-		// CSS resting translateY(100%): on iOS Safari's floating-tab UI, lvh
-		// (and innerHeight) end at the TOP of the tab zone while the page
-		// canvas extends behind it to the physical bottom — a %-of-height
-		// start made the rising edge visibly appear above the floating tab.
-		// screen.height is the full physical height in CSS px (portrait), so
-		// the edge starts at/below the true screen bottom; on desktop (fine
-		// pointer) innerHeight is exact and screen.height would only add a
-		// perceptible head-start delay, so it keeps the window height.
-		const coarse = window.matchMedia('(pointer: coarse)').matches;
-		const panelStartY = coarse
-			? Math.max(window.screen.height, window.innerHeight) + 12
-			: window.innerHeight + 12;
+		// Geometry is set entirely in PX at navigation time — no viewport
+		// units. Measured on-device (iPhone, floating tab bar): physical
+		// screen 812, but lvh=704, dvh/innerHeight=610-704, safe-area env=0 —
+		// i.e. the ~110px zone behind the floating tab is invisible to every
+		// CSS viewport unit, while the page canvas does paint there
+		// (viewport-fit=cover). screen.height is the only metric that spans
+		// it. Desktop (fine pointer) keeps innerHeight: it's exact there, and
+		// screen.height (the monitor) would add dead travel before the edge
+		// appears. yPercent is explicitly zeroed: the resets below park the
+		// panel via yPercent, and GSAP tracks y and yPercent as SEPARATE
+		// channels that add together — without this, every navigation after
+		// the first started from yPercent:100 + y:<px> combined and the panel
+		// never entered the screen at all.
+		const m = panelMetrics();
 		gsap.set('.transition-panel', {
-			y: panelStartY,
+			height: m.height,
+			y: m.offY,
+			yPercent: 0,
 			backgroundColor: isHomeNav ? '#121212' : '#ffffff'
 		});
 
@@ -291,9 +314,16 @@
 
 		if (isHomeNav) {
 			// Hand off to Home page Loader: instant reset, no fade-in
-			// (the Loader has its own dark bg + animation)
+			// (the Loader has its own dark bg + animation).
+			// Park in PX (same channel the slide animates on) — a '100%'
+			// reset would set GSAP's separate yPercent channel, which ADDS to
+			// the px y on the next navigation and kept the panel offscreen.
 			gsap.set('.page-wrapper', { clearProps: 'all' });
-			gsap.set('.transition-panel', { y: '100%', clearProps: 'backgroundColor' });
+			gsap.set('.transition-panel', {
+				y: panelMetrics().offY,
+				yPercent: 0,
+				clearProps: 'backgroundColor'
+			});
 			gsap.set('.darken-overlay', { opacity: 0 });
 			isHomeNav = false;
 			lenisInstance?.start();
@@ -311,7 +341,12 @@
 			},
 			onComplete: () => {
 				gsap.set('.page-wrapper', { clearProps: 'all' });
-				gsap.set('.transition-panel', { y: '100%', clearProps: 'backgroundColor' });
+				// Park in PX — see the home branch above for why not '100%'.
+				gsap.set('.transition-panel', {
+					y: panelMetrics().offY,
+					yPercent: 0,
+					clearProps: 'backgroundColor'
+				});
 				gsap.set('.darken-overlay', { opacity: 0 });
 				lenisInstance?.start();
 			}
