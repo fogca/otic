@@ -12,11 +12,33 @@
 // inline style so the element's rendered height survives losing its
 // intrinsic size (no layout jump); re-entering re-attaches the same src,
 // re-buffered from the HTTP cache.
-export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } = {}) {
-	const { rootMargin = '400px' } = opts;
+//
+// The markup src is normally the serve-time-optimized URL (videoOpt —
+// Cloudflare Media Transformations); `fallbackSrc` is the raw R2 file. If
+// the optimized URL errors (zone toggle not enabled yet, or a transform
+// limit), the action swaps to the fallback once and continues — so
+// enabling/disabling the Cloudflare feature never breaks playback.
+type Opts = {
+	rootMargin?: string;
+	fallbackSrc?: string;
+};
+
+export function lazyVideo(node: HTMLVideoElement, opts: Opts = {}) {
+	const { rootMargin = '400px', fallbackSrc } = opts;
 	// Remember the markup src so it can be re-attached after a release.
-	const src = node.getAttribute('src') ?? '';
+	let src = node.getAttribute('src') ?? '';
 	let active = false;
+
+	// Optimized URL failed — fall back to the raw file permanently for
+	// this element (also covers future re-attachments via `src`).
+	const onError = () => {
+		if (!fallbackSrc || src === fallbackSrc || !node.getAttribute('src')) return;
+		src = fallbackSrc;
+		node.setAttribute('src', src);
+		node.load();
+		if (active) node.play?.().catch(() => {});
+	};
+	node.addEventListener('error', onError);
 
 	const activate = () => {
 		if (!node.getAttribute('src') && src) {
@@ -51,7 +73,11 @@ export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } 
 
 	if (typeof IntersectionObserver === 'undefined') {
 		node.play?.().catch(() => {});
-		return;
+		return {
+			destroy() {
+				node.removeEventListener('error', onError);
+			}
+		};
 	}
 
 	const io = new IntersectionObserver(
@@ -71,6 +97,7 @@ export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } 
 	return {
 		destroy() {
 			io.disconnect();
+			node.removeEventListener('error', onError);
 		}
 	};
 }

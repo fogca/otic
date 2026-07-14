@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { onNavigate, afterNavigate } from '$app/navigation';
 	import type { PageData } from './$types';
-	import { imgOpt, imgSrcset } from '$lib/js/img';
+	import { imgOpt, imgSrcset, videoOpt } from '$lib/js/img';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
 	import { footerNear } from '$lib/state/footerNear.svelte';
 
@@ -127,8 +127,8 @@
 			     gallery below), instead of holding them for the whole page. -->
 			<div class="media__hero">
 				<video
-					src={archive.hero.src}
-					use:lazyVideo
+					src={videoOpt(archive.hero.src, 1920)}
+					use:lazyVideo={{ fallbackSrc: archive.hero.src }}
 					autoplay
 					loop
 					muted
@@ -163,8 +163,8 @@
 			<div class="media__item mp-{(i % 6) + 1}">
 				{#if item.isVideo}
 					<video
-						src={item.src}
-						use:lazyVideo
+						src={videoOpt(item.src, 1280)}
+						use:lazyVideo={{ fallbackSrc: item.src }}
 						loop
 						muted
 						playsinline

@@ -39,6 +39,26 @@ export const imgOpt = (url: string | undefined, width: number, quality = 72): st
 	return `${url}${sep}auto=format,compress&q=${quality}&w=${width}&fit=max`;
 };
 
+/** Serve-time video optimization — the video analog of imgOpt. Rewrites a
+    cdn.takumiisobe.com URL through Cloudflare Media Transformations
+    (`/cdn-cgi/media/…`), which resizes + re-encodes at the edge and caches
+    the result; the R2 original is untouched. The sources are 4K renders,
+    and decoder memory scales with resolution — a 720px rendition decodes
+    at ~1/25th the frame memory of 3840x2160, which is what iOS needs.
+    Non-CDN URLs pass through unchanged.
+
+    REQUIRES the zone toggle: Cloudflare dashboard -> takumiisobe.com zone
+    -> Stream -> Transformations -> enable. Until then these URLs 404 —
+    every <video> call site pairs this with the raw URL as an on-error
+    fallback (see lazyVideo / lazyGridVideo), so playback works either way
+    and upgrades automatically once the toggle is on. */
+const VIDEO_CDN = 'https://cdn.takumiisobe.com/';
+export const videoOpt = (url: string, width: number): string => {
+	if (!url.startsWith(VIDEO_CDN)) return url;
+	const path = url.slice(VIDEO_CDN.length);
+	return `${VIDEO_CDN}cdn-cgi/media/mode=video,width=${width},fit=scale-down/${path}`;
+};
+
 /** Responsive srcset for a microCMS image across the given widths. */
 export const imgSrcset = (url: string | undefined, widths: number[], quality = 72): string => {
 	if (!url) return '';
