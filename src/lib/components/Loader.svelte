@@ -107,11 +107,6 @@
 				clipPath: 'inset(100% 0% 0% 0%)',
 				scale: FRAME_SCALE_FROM
 			});
-			// Safari 26 Liquid Glass tab tint (sampled from the layout's
-			// .chrome-tint strip) follows the loader's backdrop: dark now,
-			// white on the same clock as the Stage-2 background fade below,
-			// released back to the page color at handoff.
-			gsap.set('.chrome-tint', { backgroundColor: '#121212' });
 			gsap.set(validCells, { yPercent: 120, filter: 'blur(3px)', opacity: 0 });
 			if (logoEl) gsap.set(logoEl, { opacity: showLogo ? 0 : 0 });
 
@@ -158,16 +153,6 @@
 					ease: 'power2.inOut'
 				},
 				`>${BG_FADE_DELAY}`
-			);
-			// Liquid Glass tab follows the same black -> white fade.
-			tl.to(
-				'.chrome-tint',
-				{
-					backgroundColor: '#ffffff',
-					duration: BG_FADE_DURATION,
-					ease: 'power2.inOut'
-				},
-				'<'
 			);
 
 			// Stage 2b: Scale the LAST frame back to 1 so handoff to Archives card-01 is seamless
@@ -223,8 +208,6 @@
 					ease: 'power2.inOut',
 					onComplete: () => {
 						if (rootEl) rootEl.style.display = 'none';
-						// Release the tab tint back to the page color.
-						gsap.set('.chrome-tint', { clearProps: 'backgroundColor' });
 					}
 				},
 				'handoff'

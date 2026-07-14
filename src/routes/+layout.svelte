@@ -295,21 +295,6 @@
 				OUT_DURATION * DARKEN_DELAY_RATIO
 			);
 
-			// Keep Safari 26's Liquid Glass tab in step with the darkening:
-			// the glass zone below the layout viewport can't be painted by the
-			// page — it tints itself from .chrome-tint's background-color (see
-			// the markup comment), so the strip darkens on the same clock as
-			// the darken-overlay above.
-			tl.to(
-				'.chrome-tint',
-				{
-					backgroundColor: '#5c5c5c',
-					duration: OUT_DURATION * DARKEN_DURATION_RATIO,
-					ease: 'power2.inOut'
-				},
-				OUT_DURATION * DARKEN_DELAY_RATIO
-			);
-
 			// White panel slides up — silky Awwwards-style ease, slower.
 			// y in px (from the physical-bottom start set above), not '0%'.
 			tl.to(
@@ -320,18 +305,6 @@
 					ease: 'panelSilk'
 				},
 				OUT_DURATION * PANEL_DELAY_RATIO
-			);
-
-			// ...and hand the glass zone over to the panel's color as the
-			// panel sweeps past the bottom edge (its first ~15% of travel).
-			tl.to(
-				'.chrome-tint',
-				{
-					backgroundColor: panelColor,
-					duration: PANEL_DURATION * 0.3,
-					ease: 'power1.inOut'
-				},
-				OUT_DURATION * PANEL_DELAY_RATIO + PANEL_DURATION * 0.05
 			);
 		});
 	});
@@ -356,9 +329,7 @@
 			// Park in PX (same channel the slide animates on) — a '100%'
 			// reset would set GSAP's separate yPercent channel, which ADDS to
 			// the px y on the next navigation and kept the panel offscreen.
-			// display:none while idle: Safari 26's Liquid Glass samples the
-			// background-color of fixed elements near the bottom edge even at
-			// opacity 0, so parked overlays would otherwise tint the tab bar.
+			// display:none while idle keeps them out of the paint tree.
 			gsap.set('.page-wrapper', { clearProps: 'all' });
 			gsap.set('.transition-panel', {
 				display: 'none',
@@ -367,7 +338,6 @@
 				clearProps: 'backgroundColor'
 			});
 			gsap.set('.darken-overlay', { display: 'none', opacity: 0 });
-			gsap.set('.chrome-tint', { clearProps: 'backgroundColor' });
 			isHomeNav = false;
 			lenisInstance?.start();
 			return;
@@ -384,8 +354,7 @@
 			},
 			onComplete: () => {
 				gsap.set('.page-wrapper', { clearProps: 'all' });
-				// Park in PX — see the home branch above for why not '100%';
-				// display:none for the same Liquid Glass sampling reason.
+				// Park in PX — see the home branch above for why not '100%'.
 				gsap.set('.transition-panel', {
 					display: 'none',
 					y: panelMetrics().offY,
@@ -393,7 +362,6 @@
 					clearProps: 'backgroundColor'
 				});
 				gsap.set('.darken-overlay', { display: 'none', opacity: 0 });
-				gsap.set('.chrome-tint', { clearProps: 'backgroundColor' });
 				lenisInstance?.start();
 			}
 		});
@@ -450,16 +418,6 @@
 >
 	<Logo />
 </a>
-
-<!-- Safari 26 Liquid Glass hook. The tab bar's glass tints itself by
-     sampling the background-color of a fixed/sticky element within a few
-     px of the viewport bottom (html/body bg as fallback; pseudo-elements
-     and absolute children are ignored). This 2px strip is that sample:
-     page-colored at rest (invisible against the page), and the transition
-     timeline animates its color in sync with the darken/panel phases so
-     the glass follows the transition instead of holding a stale tint.
-     Deliberately position:fixed — it exists FOR the fixed-layer sampler. -->
-<div class="chrome-tint" aria-hidden="true"></div>
 
 <LangSwitchOverlay />
 
@@ -593,20 +551,5 @@
 		/* display:none while idle — out of Liquid Glass sampling and the
 		   paint tree; the timeline flips display around the animation. */
 		display: none;
-	}
-
-	/* Safari 26 Liquid Glass tint source — see the markup comment. Sits at
-	   the very bottom edge (the sampler looks within ~3px of it), page-
-	   colored at rest so it's invisible, recolored by the transition
-	   timeline. Above every overlay so it stays the topmost sample. */
-	.chrome-tint {
-		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		height: 2px;
-		background-color: var(--color-bg);
-		z-index: 3000;
-		pointer-events: none;
 	}
 </style>
