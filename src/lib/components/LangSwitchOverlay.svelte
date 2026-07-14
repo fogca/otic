@@ -2,6 +2,7 @@
 	import { lang } from '$lib/state/lang.svelte';
 
 	let visible = $state(false);
+	let overlayEl = $state<HTMLElement | null>(null);
 	let hideTimer: ReturnType<typeof setTimeout>;
 
 	// Fires on every genuine user toggle (switchToken only increments from
@@ -10,6 +11,18 @@
 	$effect(() => {
 		const token = lang.switchToken;
 		if (token === 0) return;
+		// Box the overlay around the CURRENT viewport in document coords —
+		// it's position:absolute in the scroll layer (iOS 26 clips the fixed
+		// layer above the floating tab; the scroll layer paints to the
+		// physical bottom). Physical screen height + padding both ways.
+		if (overlayEl) {
+			const coarse = window.matchMedia('(pointer: coarse)').matches;
+			const physical = coarse
+				? Math.max(window.screen.height, window.innerHeight)
+				: window.innerHeight;
+			overlayEl.style.top = `${window.scrollY - 150}px`;
+			overlayEl.style.height = `${physical + 300}px`;
+		}
 		visible = true;
 		clearTimeout(hideTimer);
 		hideTimer = setTimeout(() => {
@@ -18,7 +31,7 @@
 	});
 </script>
 
-<div class="lang-switch" class:is-visible={visible} aria-hidden="true">
+<div class="lang-switch" class:is-visible={visible} bind:this={overlayEl} aria-hidden="true">
 	<div class="lang-switch__badge">
 		<span lang={lang.current}>{lang.current === 'en' ? 'EN' : 'JP'}</span>
 	</div>
@@ -29,8 +42,15 @@
 	   confirming the language just changed. Non-interactive (aria-hidden,
 	   pointer-events:none) — it's a transient confirmation, not a control. */
 	.lang-switch {
-		position: fixed;
-		inset: 0;
+		/* Absolute in the scroll layer, NOT fixed — iOS 26 clips the fixed
+		   layer above the floating tab; the scroll layer paints to the
+		   physical bottom. top/height are set per show from scrollY +
+		   physical screen height (see the $effect). */
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 100vh; /* pre-JS fallback; JS sets the real box each show */
 		z-index: 2000;
 		display: flex;
 		align-items: center;
@@ -41,17 +61,6 @@
 		transition:
 			opacity 0.25s var(--ease-default),
 			background-color 0.25s var(--ease-default);
-	}
-
-	/* Extends the darkening past the fixed-viewport edges (iOS floating-tab
-	   UI: that viewport ends above the tab; the canvas paints on behind it) —
-	   background:inherit tracks the parent's animated rgba, and the pseudo
-	   doesn't disturb the flex-centred badge. */
-	.lang-switch::before {
-		content: '';
-		position: absolute;
-		inset: -100px 0 -340px 0;
-		background: inherit;
 	}
 
 	.lang-switch.is-visible {

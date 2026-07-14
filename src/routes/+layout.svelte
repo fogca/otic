@@ -59,23 +59,30 @@
 	let needsEntryAnim = false;
 	let isHomeNav = false; // navigating to "/" — use black panel + hand off to Loader
 
-	// Transition-panel geometry, in raw px. On iOS Safari's floating-tab UI
-	// no CSS viewport unit reaches the physical screen bottom (measured on
-	// device: physical 812 vs lvh 704, dvh/innerHeight 610-704, safe-area
-	// env 0 — the ~110px tab zone is invisible to all of them even though
-	// the canvas paints behind it via viewport-fit=cover). screen.height is
-	// the only metric spanning it, so panel height/offsets are computed from
-	// it at navigation time instead of any vh/dvh/lvh value. Desktop (fine
-	// pointer) uses innerHeight: exact there, while screen.height (the whole
-	// monitor) would only add dead travel before the rising edge appears.
+	// Transition-surface geometry, in raw px and DOCUMENT coordinates.
+	// Two iOS 26 floating-tab facts drive this (measured on device via
+	// /debug-viewport + user screenshots):
+	// 1. No CSS viewport unit reaches the physical screen bottom (physical
+	//    812 vs lvh 704, dvh/innerHeight 610-704, safe-area env 0) —
+	//    screen.height is the only metric spanning the tab zone.
+	// 2. The position:fixed layer is CLIPPED at the layout viewport (ends
+	//    above the tab), while the scroll layer paints edge-to-edge — so
+	//    the transition surfaces are position:absolute inside the scroll
+	//    layer, boxed around the current scrollY each navigation.
+	// Desktop (fine pointer) uses innerHeight: exact there, while
+	// screen.height (the whole monitor) would only add dead travel.
+	const SURFACE_PAD = 150; // coverage beyond the viewport on each side
 	function panelMetrics() {
 		const coarse = window.matchMedia('(pointer: coarse)').matches;
 		const physical = coarse
 			? Math.max(window.screen.height, window.innerHeight)
 			: window.innerHeight;
 		return {
-			height: physical + 80, // covers past the physical bottom when fully up
-			offY: physical + 20 // top edge just below the physical bottom when parked
+			top: window.scrollY - SURFACE_PAD, // document-coord box top
+			height: physical + SURFACE_PAD * 2, // pad above + screen + pad below
+			// translateY that parks the box's top edge just below the
+			// physical screen bottom (rising starts here, ends at y:0).
+			offY: physical + SURFACE_PAD + 20
 		};
 	}
 
@@ -236,12 +243,13 @@
 		const panelColor = isHomeNav ? '#121212' : '#ffffff';
 		gsap.set('.transition-panel', {
 			display: 'block',
+			top: m.top,
 			height: m.height,
 			y: m.offY,
 			yPercent: 0,
 			backgroundColor: panelColor
 		});
-		gsap.set('.darken-overlay', { display: 'block' });
+		gsap.set('.darken-overlay', { display: 'block', top: m.top, height: m.height });
 
 		return new Promise<void>((resolve) => {
 			const tl = gsap.timeline({
@@ -404,6 +412,15 @@
 		{@render children()}
 		<Footer />
 	</div>
+	<!-- Transition surfaces live INSIDE the scroll layer (absolute, document
+	     coordinates set per-navigation from scrollY), NOT position:fixed:
+	     iOS 26 Safari clips the fixed layer at the layout viewport (which
+	     ends above the floating tab bar), while in-flow/scroll-layer content
+	     paints edge-to-edge to the physical screen bottom — the user-visible
+	     proof being that page content shows behind the tab but fixed
+	     overlays visibly cut off at the tab's top edge. -->
+	<div class="darken-overlay" aria-hidden="true"></div>
+	<div class="transition-panel" aria-hidden="true"></div>
 </div>
 
 <!-- Header lives OUTSIDE .page-wrapper — the wrapper's `will-change:transform`
@@ -434,18 +451,14 @@
 	<Logo />
 </a>
 
-<div class="darken-overlay" aria-hidden="true"></div>
-<div class="transition-panel" aria-hidden="true"></div>
-
-<!-- Safari 26 Liquid Glass hook. The floating tab bar's zone sits BELOW the
-     layout viewport — no page painting or animation can reach it live; the
-     glass tints itself by sampling the background-color of a fixed/sticky
-     element within a few px of the viewport bottom (html/body bg as
-     fallback; pseudo-elements and absolute children are ignored). This 2px
-     strip is that sample: page-colored at rest (invisible against the
-     page), and the transition timeline animates its color in sync with the
-     darken/panel phases so the glass zone follows the transition instead
-     of holding a stale tint. -->
+<!-- Safari 26 Liquid Glass hook. The tab bar's glass tints itself by
+     sampling the background-color of a fixed/sticky element within a few
+     px of the viewport bottom (html/body bg as fallback; pseudo-elements
+     and absolute children are ignored). This 2px strip is that sample:
+     page-colored at rest (invisible against the page), and the transition
+     timeline animates its color in sync with the darken/panel phases so
+     the glass follows the transition instead of holding a stale tint.
+     Deliberately position:fixed — it exists FOR the fixed-layer sampler. -->
 <div class="chrome-tint" aria-hidden="true"></div>
 
 <LangSwitchOverlay />
@@ -463,6 +476,10 @@
 		   (visualViewport-based) transform-origin math above. */
 		min-height: 100vh;
 		min-height: 100dvh;
+		/* Anchor for the absolutely-positioned transition surfaces inside
+		   (.darken-overlay / .transition-panel) — its top is the document
+		   top, so their JS-set `top` values are plain scrollY offsets. */
+		position: relative;
 	}
 
 	/* ── Global corner wordmark (PC), normally bottom-left/small. On Office
@@ -535,52 +552,46 @@
 	}
 
 	.darken-overlay {
-		position: fixed;
-		/* Extends past the fixed-viewport edges: on iOS Safari's floating-tab
-		   UI that viewport ends ABOVE the tab (~110px short of the physical
-		   bottom, measured on device), so an inset:0 veil left the zone
-		   behind the tab un-darkened — raw page content showed through
-		   during the shrink phase. The top overshoot likewise covers the
-		   status-bar zone. Offscreen overshoot is visually free. */
-		inset: -100px 0 -340px 0;
+		/* Absolute in the scroll layer, NOT fixed: iOS 26 clips the fixed
+		   layer at the layout viewport (ends above the floating tab), while
+		   scroll-layer content paints to the physical screen bottom — the
+		   only way this veil can actually cover the whole screen there.
+		   top/height are set per-navigation from scrollY + physical screen
+		   height (with padding both ways); left/right span the document. */
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 100px; /* placeholder — JS sets the real box every navigation */
 		background: black;
 		opacity: 0;
 		z-index: 998;
 		pointer-events: none;
 		will-change: opacity;
-		/* Idle overlays must be display:none, not just opacity:0 — Safari
-		   26's Liquid Glass samples fixed elements' background-color near the
-		   viewport edges EVEN at opacity 0, so a parked black veil would
-		   permanently tint the tab bar. The transition timeline flips display
-		   on/off around the animation. */
+		/* display:none while idle — keeps it out of Safari's Liquid Glass
+		   background sampling and out of the paint tree entirely. The
+		   transition timeline flips display on/off around the animation. */
 		display: none;
 	}
 
 	.transition-panel {
-		position: fixed;
+		/* Absolute in the scroll layer for the same iOS 26 fixed-layer-clip
+		   reason as .darken-overlay above — the rising sheet can only reach
+		   the physical screen bottom from inside the scroll layer. Its box
+		   (top/height) is set per-navigation from scrollY + physical screen
+		   height; the slide is a px translateY within that box. */
+		position: absolute;
 		top: 0;
 		left: 0;
 		right: 0;
-		/* Big fixed overshoot past lvh: on iOS Safari's floating-tab UI the
-		   fixed-position viewport (what lvh measures) ends at the TOP of the
-		   tab zone, while the page canvas extends behind it to the physical
-		   bottom (viewport-fit=cover) — measured ~150px deeper on device,
-		   beyond env(safe-area-inset-bottom). 240px guarantees the panel
-		   covers down to the physical bottom when fully up, and its resting
-		   translateY(100%) sits fully below the screen on every device. The
-		   overshoot does NOT delay the visible rise: onNavigate starts the
-		   slide from an explicit px offset (physical screen height), not from
-		   the CSS resting spot. Extends 240px past the bottom on other
-		   browsers too — offscreen, visually free. */
-		height: 100vh;
-		height: calc(100lvh + 240px);
+		height: 100px; /* placeholder — JS sets the real box every navigation */
 		background: white;
 		transform: translateY(100%);
 		z-index: 1000;
 		pointer-events: none;
 		will-change: transform;
-		/* Same Liquid Glass sampling reason as .darken-overlay: parked
-		   overlays must be display:none or their background tints the tab. */
+		/* display:none while idle — out of Liquid Glass sampling and the
+		   paint tree; the timeline flips display around the animation. */
 		display: none;
 	}
 

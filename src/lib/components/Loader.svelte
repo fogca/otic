@@ -69,6 +69,20 @@
 		const prevOverflow = document.body.style.overflow;
 		document.body.style.overflow = 'hidden';
 
+		// Size the backdrop to the PHYSICAL screen: on iOS 26's floating-tab
+		// UI no CSS viewport unit reaches the physical bottom (the fixed
+		// layer is also clipped there, which is why this component is
+		// position:absolute in the scroll layer — that layer paints
+		// edge-to-edge). Scroll is locked at 0 while the loader runs, so
+		// top:0 in document coords is the screen top for the whole intro.
+		{
+			const coarse = window.matchMedia('(pointer: coarse)').matches;
+			const physical = coarse
+				? Math.max(window.screen.height, window.innerHeight)
+				: window.innerHeight;
+			if (rootEl) rootEl.style.height = `${physical}px`;
+		}
+
 		let cancelled = false;
 		import('gsap').then(async ({ gsap }) => {
 			if (cancelled) return;
@@ -93,6 +107,11 @@
 				clipPath: 'inset(100% 0% 0% 0%)',
 				scale: FRAME_SCALE_FROM
 			});
+			// Safari 26 Liquid Glass tab tint (sampled from the layout's
+			// .chrome-tint strip) follows the loader's backdrop: dark now,
+			// white on the same clock as the Stage-2 background fade below,
+			// released back to the page color at handoff.
+			gsap.set('.chrome-tint', { backgroundColor: '#121212' });
 			gsap.set(validCells, { yPercent: 120, filter: 'blur(3px)', opacity: 0 });
 			if (logoEl) gsap.set(logoEl, { opacity: showLogo ? 0 : 0 });
 
@@ -139,6 +158,16 @@
 					ease: 'power2.inOut'
 				},
 				`>${BG_FADE_DELAY}`
+			);
+			// Liquid Glass tab follows the same black -> white fade.
+			tl.to(
+				'.chrome-tint',
+				{
+					backgroundColor: '#ffffff',
+					duration: BG_FADE_DURATION,
+					ease: 'power2.inOut'
+				},
+				'<'
 			);
 
 			// Stage 2b: Scale the LAST frame back to 1 so handoff to Archives card-01 is seamless
@@ -194,6 +223,8 @@
 					ease: 'power2.inOut',
 					onComplete: () => {
 						if (rootEl) rootEl.style.display = 'none';
+						// Release the tab tint back to the page color.
+						gsap.set('.chrome-tint', { clearProps: 'backgroundColor' });
 					}
 				},
 				'handoff'
@@ -243,18 +274,19 @@
 
 <style>
 	.loader {
-		position: fixed;
+		/* Absolute in the scroll layer, NOT fixed: iOS 26 clips the fixed
+		   layer at the layout viewport (which ends above the floating tab),
+		   while scroll-layer content paints to the physical screen bottom —
+		   the only way this backdrop can truly fill the screen there. Scroll
+		   is locked at 0 for the whole intro, so document top == screen top.
+		   Height is corrected to the physical screen height in px by
+		   onMount (no CSS viewport unit reaches the physical bottom on that
+		   UI); 100vh/100dvh below are just the pre-JS fallback. The outline
+		   keeps a bleed past every edge as extra safety-margin. */
+		position: absolute;
 		top: 0;
 		left: 0;
 		width: 100vw;
-		/* 100dvh keeps the CONTENT centred in the currently visible area, but
-		   on iOS Safari's floating-tab UI no vh-family unit reaches the
-		   physical screen bottom — the fixed viewport ends above the tab
-		   while the canvas paints on behind it, so the page showed through
-		   behind the tab during the intro. The dark backdrop is therefore
-		   extended via `outline`: it paints outside the box on every side
-		   without affecting the flex centring, and isn't clipped by the
-		   element's own overflow:hidden. */
 		height: 100vh;
 		height: 100dvh;
 		background: var(--color-bg-dark, #121212);
