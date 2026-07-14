@@ -71,6 +71,12 @@
 		const columnCount = getColumnCount();
 		const gap = getGap();
 		const containerWidth = container.offsetWidth;
+		// A transient collapsed measurement (mid page-transition / rotation /
+		// browser-chrome resize) would lay every item out at ~2px wide and pin
+		// the container height to ~200px — a fully broken grid that sticks
+		// until the next re-layout. Skip; whatever event follows the transient
+		// state (resize, video meta) re-runs layout once geometry is sane.
+		if (containerWidth < 100) return;
 		const columnWidth = (containerWidth - gap * (columnCount - 1)) / columnCount;
 
 		items.forEach((item) => {
@@ -102,16 +108,25 @@
 	let resizeTimer: number;
 	let metaTimer: number;
 
-	// Video `src` is deferred by lazyGridVideo until near the viewport, so a
-	// real <video> only reports metadata once it actually starts loading —
-	// this corrects that one item's aspect-ratio from the 1:1 default and
-	// re-runs layout. Debounced: a scroll can bring several videos into range
-	// at once, and each would otherwise trigger its own full re-layout.
-	function handleVideoMeta(node: HTMLVideoElement, width: number, height: number) {
-		const wrapper = node.closest<HTMLElement>('.image-wrapper');
-		if (wrapper) wrapper.style.aspectRatio = `${width} / ${height}`;
+	// Correct a video wrapper's aspect-ratio and re-run layout (debounced —
+	// several corrections can land at once and each would otherwise trigger
+	// its own full re-layout). Fed from two sources: the LQIP frame probes in
+	// onMount (all videos, right after mount) and each video's own metadata
+	// once it actually loads near the viewport.
+	function setVideoRatio(wrapper: HTMLElement | null, width: number, height: number) {
+		if (!wrapper || !width || !height) return;
+		// Skip when the ratio is already right (e.g. metadata confirming what
+		// the frame probe set — same frame, only rounded differently): a
+		// sub-pixel "correction" isn't worth reshuffling the masonry for.
+		const [w, h] = (wrapper.style.aspectRatio || '1 / 1').split('/').map(parseFloat);
+		if (w && h && Math.abs(w / h - width / height) / (width / height) < 0.02) return;
+		wrapper.style.aspectRatio = `${width} / ${height}`;
 		clearTimeout(metaTimer);
 		metaTimer = window.setTimeout(layoutMasonry, 120);
+	}
+
+	function handleVideoMeta(node: HTMLVideoElement, width: number, height: number) {
+		setVideoRatio(node.closest<HTMLElement>('.image-wrapper'), width, height);
 	}
 
 	onMount(() => {
@@ -142,6 +157,44 @@
 		setTimeout(() => {
 			isLoading = false;
 		}, 80);
+
+		// Resolve every video's real proportions from its LQIP frame capture
+		// (~1KB, same aspect ratio as the video) immediately and in parallel —
+		// NOT gated on the viewport like the videos themselves. Without this,
+		// each video kept its 1:1 placeholder ratio until its own metadata
+		// loaded near the viewport, so the masonry reshuffled under the user
+		// again and again while scrolling (reported as "layout drifting
+		// further and further"). All probes land within the debounce window
+		// on a warm cache, collapsing into one early re-layout right after
+		// mount, before the user has scrolled anywhere.
+		const wrappers = document.querySelectorAll<HTMLElement>(
+			'.grid_gallery_item .image-wrapper'
+		);
+		images.forEach((img, i) => {
+			if (!img.isVideo || !img.lqip) return;
+			const wrapper = wrappers[i]; // template renders one item per image, in order
+			const probe = new Image();
+			let retried = false;
+			probe.onload = () =>
+				setVideoRatio(wrapper, probe.naturalWidth, probe.naturalHeight);
+			// A frame's very first extraction (cold edge transform) can fail or
+			// time out; one delayed retry catches it once warmed (a fresh Image
+			// instance — re-setting the same src on an errored one can be a
+			// no-op). If both attempts fail, the video's own metadata still
+			// corrects the ratio when it loads near the viewport (the pre-probe
+			// behavior).
+			probe.onerror = () => {
+				if (retried) return;
+				retried = true;
+				setTimeout(() => {
+					const retry = new Image();
+					retry.onload = () =>
+						setVideoRatio(wrapper, retry.naturalWidth, retry.naturalHeight);
+					retry.src = img.lqip;
+				}, 2500);
+			};
+			probe.src = img.lqip;
+		});
 
 		const handleResize = () => {
 			clearTimeout(resizeTimer);
