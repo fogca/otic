@@ -450,10 +450,19 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		/* Use the LARGE viewport height so translateY(100%) always clears the
-		   collapsed-toolbar height on iOS (prevents a white band at the bottom). */
+		/* The panel slides up by its own height (translateY 100% -> 0), so its
+		   height defines WHERE the rising edge first appears. 100lvh alone
+		   isn't enough on iOS Safari's floating-tab UI: the fixed-position
+		   viewport (what lvh measures) ends at the TOP of the floating tab,
+		   while the page canvas extends behind it to the physical bottom
+		   (viewport-fit=cover) — so the edge visibly started above the tab
+		   instead of at the true screen bottom. Overshoot by the safe-area
+		   inset (the tab/home-indicator zone) plus a small buffer: the start
+		   edge moves to/below the physical bottom, and when fully up the
+		   panel just extends past the bottom — both overshoots are offscreen,
+		   visually free in every browser (env() is 0 outside iOS). */
 		height: 100vh;
-		height: 100lvh;
+		height: calc(100lvh + env(safe-area-inset-bottom, 0px) + 40px);
 		background: white;
 		transform: translateY(100%);
 		z-index: 1000;
