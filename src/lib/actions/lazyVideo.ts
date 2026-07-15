@@ -23,7 +23,16 @@
 // playback can start, which read as "stuck loading, still blurred" —
 // worse than the problem it was meant to solve.
 export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } = {}) {
-	const { rootMargin = '400px' } = opts;
+	// 200px (not 400px) — slug's gallery items run close to full-viewport
+	// height stacked in a single column (unlike the grid's multi-column
+	// layout), so 400px could put 2+ heavy videos "active" simultaneously,
+	// contending for iOS's small shared hardware-decoder pool. Reported as
+	// "stuck blurred, never plays" on some slug videos — plausible but not
+	// reproduced directly here (tested multiple slugs, local + production,
+	// slow and fast/stress scrolling, all loaded fine); this narrows the
+	// concurrent-decoder window as a targeted, low-risk mitigation rather
+	// than a confirmed fix. Flag it again if it recurs.
+	const { rootMargin = '200px' } = opts;
 	const src = node.getAttribute('src') ?? '';
 	let active = false;
 
