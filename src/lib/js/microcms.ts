@@ -102,9 +102,17 @@ export const getList = async (queries?: MicroCMSQueries) => {
 };
 
 /** getList + drop works flagged `hidden`. Prefer this for public listings.
-    When narrowing with `fields`, include 'hidden' or the flag won't be read. */
+    When narrowing with `fields`, include 'hidden' or the flag won't be read.
+    The hidden exclusion is applied server-side (via `filters`), not just
+    filtered out of the response after the fact — a caller-supplied `limit`
+    must cap the VISIBLE count, otherwise a hidden work occupying one of the
+    first N raw slots silently pushes a real, visible work out of the page
+    entirely (confirmed live: order=9 had a hidden dupe crowding out order=10
+    "thalassic" from the home page's top-10 query). */
 export const getVisibleWorks = async (queries?: MicroCMSQueries) => {
-	const data = await getList(queries);
+	const hiddenFilter = 'hidden[not_equals]true';
+	const filters = queries?.filters ? `(${queries.filters})[and](${hiddenFilter})` : hiddenFilter;
+	const data = await getList({ ...queries, filters });
 	return { ...data, contents: data.contents.filter((w) => w.hidden !== true) };
 };
 
