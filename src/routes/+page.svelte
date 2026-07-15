@@ -43,6 +43,24 @@
 	onMount(() => {
 		if (!browser) return;
 
+		// card-01 hands off from the Loader's frame-stack, which centers
+		// itself on the PHYSICAL screen height measured in JS (no CSS
+		// viewport unit reaches the true bottom on iOS 26 Safari's
+		// floating-tab UI — see Loader.svelte). card-01's own centering
+		// math used raw 100dvh, which resolves to a different, smaller
+		// value on that UI, so the card visibly jumped the instant the
+		// loader faded out. Mirror the same measurement here so the two
+		// agree; --physical-vh falls back to 100dvh (the CSS default) for
+		// the instant before this runs, which the opaque Loader covers
+		// entirely, so there's nothing to see anyway.
+		{
+			const coarse = window.matchMedia('(pointer: coarse)').matches;
+			const physical = coarse
+				? Math.max(window.screen.height, window.innerHeight)
+				: window.innerHeight;
+			document.documentElement.style.setProperty('--physical-vh', `${physical}px`);
+		}
+
 		const prefersReducedMotion = window.matchMedia(
 			'(prefers-reduced-motion: reduce)'
 		).matches;
@@ -163,7 +181,7 @@
 
 	/* ----- Archives stream ----- */
 	.Home .Archives {
-		padding-bottom: 120px;
+		padding-bottom: 0;
 	}
 
 	.Home .Archives .wrapper {
@@ -231,10 +249,11 @@
 		width: 257px;
 		max-width: 100%;
 		margin-inline: auto;
-		/* dvh (not vh) so the iOS Safari toolbar doesn't push this centred hero
-		   below the fold when it's showing. */
-		padding-top: calc((100dvh - 385px) / 2);
-		margin-bottom: calc((100dvh - 385px) / 2 - 103px);
+		/* --physical-vh (set in onMount, see comment there) so this centres on
+		   the same physical screen height the Loader's frame-stack handed off
+		   from — 100dvh is only the pre-JS fallback. */
+		padding-top: calc((var(--physical-vh, 100dvh) - 385px) / 2);
+		margin-bottom: calc((var(--physical-vh, 100dvh) - 385px) / 2 - 103px);
 	}
 
 	.Home .Archives .card-01 .image {
@@ -308,8 +327,8 @@
 	@media (min-width: 768px) {
 		.Home .Archives .card-01 {
 			width: 320px;
-			padding-top: calc((100dvh - 480px) / 2);
-			margin-bottom: calc((100dvh - 480px) / 2);
+			padding-top: calc((var(--physical-vh, 100dvh) - 480px) / 2);
+			margin-bottom: calc((var(--physical-vh, 100dvh) - 480px) / 2);
 		}
 	}
 
@@ -351,8 +370,8 @@
 		/* 01 — hero, centered on first viewport */
 		.Home .Archives .card-01 {
 			width: 380px;
-			padding-top: calc((100dvh - 570px) / 2);
-			margin-bottom: calc((100dvh - 570px) / 2);
+			padding-top: calc((var(--physical-vh, 100dvh) - 570px) / 2);
+			margin-bottom: calc((var(--physical-vh, 100dvh) - 570px) / 2);
 		}
 
 		/* 02 — right-shifted medium */
