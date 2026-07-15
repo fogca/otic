@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import { lazyGridVideo } from '$lib/actions/lazyGridVideo';
 	import { imgOpt, imgSrcset, videoFrame } from '$lib/js/img';
+	import ArchivesTitleBar from '$lib/components/ArchivesTitleBar.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -215,16 +216,7 @@
 </svelte:head>
 
 <main class="Archives">
-	<section class="Title">
-		<h1 class="title" lang="en">Work Archives</h1>
-	</section>
-
-	<section class="ViewSwitch">
-		<div class="wrapper">
-			<span class="link is-active" lang="en">Index</span>
-			<a href="/archives/list" class="link is-mute" lang="en">List</a>
-		</div>
-	</section>
+	<ArchivesTitleBar active="image" />
 
 	<section class="Gallery" class:loading={isLoading} id="grid-gallery">
 		{#each images as image, i (i + image.workId + image.url)}
@@ -284,50 +276,10 @@
 		padding-inline: 0;
 	}
 
-	/* SP: Title / ViewSwitch align with header padding,
-	   Gallery hugs closer to the edge for the masonry rhythm. */
-	.Archives .Title,
-	.Archives .ViewSwitch {
-		padding-inline: var(--padding);
-	}
-
+	/* SP: Gallery hugs closer to the edge for the masonry rhythm
+	   (ArchivesTitleBar handles its own padding). */
 	.Archives .Gallery {
 		padding-inline: 5px;
-	}
-
-	/* Title */
-	.Archives .Title {
-		padding-block: 24px 0;
-	}
-
-	.Archives .Title .title {
-		font-size: var(--fs-h2);
-		font-weight: var(--fw-base);
-		margin: 0;
-	}
-
-	/* View switch */
-	.Archives .ViewSwitch {
-		padding-block: 8px 24px;
-	}
-
-	.Archives .ViewSwitch .wrapper {
-		display: flex;
-		gap: 16px;
-	}
-
-	.Archives .ViewSwitch .link {
-		font-size: var(--fs-h6);
-		font-weight: var(--fw-base);
-	}
-
-	.Archives .ViewSwitch .link.is-mute {
-		opacity: 0.55;
-		transition: opacity var(--duration-fast) var(--ease-default);
-	}
-
-	.Archives .ViewSwitch .link.is-mute:hover {
-		opacity: 1;
 	}
 
 	/* Masonry */
@@ -411,23 +363,10 @@
 			margin-inline: auto;
 		}
 
-		/* PC: child sections inherit .Archives padding-inline, no own padding. */
-		.Archives .Title,
-		.Archives .ViewSwitch,
+		/* PC: Gallery inherits .Archives padding-inline, no own padding
+		   (ArchivesTitleBar handles its own PC padding). */
 		.Archives .Gallery {
 			padding-inline: 0;
-		}
-
-		.Archives .Title {
-			padding-block: 32px 0;
-		}
-
-		.Archives .ViewSwitch {
-			padding-block: 12px 32px;
-		}
-
-		.Archives .ViewSwitch .link {
-			font-size: var(--fs-h5);
 		}
 	}
 </style>

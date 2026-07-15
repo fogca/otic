@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { padNumber } from '$lib/js/format';
+	import ArchivesTitleBar from '$lib/components/ArchivesTitleBar.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -10,12 +11,7 @@
 </svelte:head>
 
 <main class="Archives">
-	<section class="ViewSwitch">
-		<div class="wrapper">
-			<a href="/archives" class="link is-mute" lang="en">Index</a>
-			<span class="link is-active" lang="en">List</span>
-		</div>
-	</section>
+	<ArchivesTitleBar active="text" />
 
 	<section class="List">
 		<div class="wrapper">
@@ -40,32 +36,8 @@
 		padding-bottom: 120px;
 	}
 
-	.Archives .ViewSwitch .wrapper,
 	.Archives .List .wrapper {
 		padding-inline: var(--gutter);
-	}
-
-	.Archives .ViewSwitch {
-		padding-block: 24px 0;
-	}
-
-	.Archives .ViewSwitch .wrapper {
-		display: flex;
-		gap: 16px;
-	}
-
-	.Archives .ViewSwitch .link {
-		font-size: var(--fs-h6);
-		font-weight: var(--fw-base);
-	}
-
-	.Archives .ViewSwitch .link.is-mute {
-		opacity: 0.55;
-		transition: opacity var(--duration-fast) var(--ease-default);
-	}
-
-	.Archives .ViewSwitch .link.is-mute:hover {
-		opacity: 1;
 	}
 
 	.Archives .List {
@@ -99,14 +71,6 @@
 		.Archives {
 			padding-top: 80px;
 			padding-bottom: 160px;
-		}
-
-		.Archives .ViewSwitch {
-			padding-block: 32px 0;
-		}
-
-		.Archives .ViewSwitch .link {
-			font-size: var(--fs-h5);
 		}
 
 		.Archives .List .archive-row {
