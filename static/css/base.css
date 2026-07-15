@@ -129,7 +129,7 @@ a {
   --text-font:    var(--font-en);
 
   /* --- Type scale (mobile) --- */
-  --fs-h0:   24px;   /* Display larger than h1 if needed */
+  --fs-h0:   32px;   /* Display larger than h1 if needed */
   --fs-h1:   24px;   /* Archive title */
   --fs-h2:   20px;   /* Major section (interpolated) */
   --fs-h3:   16px;   /* PC section title ("Office", "Ethos:") */
@@ -144,14 +144,15 @@ a {
   --fs-p-ja: 11.5px;   /* Body copy (JP) — SP */
 
   /* --- Font weights (single source of truth — no per-component weights) --- */
-  --fw-base:   350;   /* default for all text unless emphasized */
+  --fw-base:   400;   /* default for all text unless emphasized */
   --fw-medium: 450;   /* medium emphasis */
   --fw-bold:   450;   /* bold — same as medium per spec */
   --fw-lead:   325;   /* exception: large display lead (Radix. For what endures.) */
 
   /* --- Line heights --- */
+  --lh-h0:   1.2;
   --lh-h1:   1.2;
-  --lh-h2:   1.2;
+  --lh-h2:   1.3;
   --lh-h3:   1.33;
   --lh-h4:   1.4;
   --lh-h5:   1.4;
@@ -159,6 +160,7 @@ a {
   --lh-body: 1.5;
   --lh-en:   1.4;   /* Latin body line-height — used by p:lang(en) */
   --lh-ja:   1.8;   /* JP body line-height — used by p:lang(ja) */
+  --lh-h-ja: 1.6;   /* JP heading/lead line-height — tighter than body JA (1.8), looser than the h1–h6 tiers (tuned for Latin) */
   --lh-row:  2;
 
   /* --- Spacing scale (component padding/gap, 4px base) --- */
@@ -258,8 +260,8 @@ a {
 }
 
 :lang(ja) {
-  --heading-font: var(--font-ja-light);
-  --text-font:    var(--font-ja-light);
+  --heading-font: var(--font-ja);
+  --text-font:    var(--font-ja);
 }
 
 /* ------------------------------------------------------------
@@ -295,8 +297,10 @@ body {
 /* JP-specific line-height (font-family is already switched by :lang) */
 :lang(ja) {
   line-height: var(--lh-ja);
-  /* Tazugane Book (font-weight: 400) pairs with Steiner wght400.
-     For Tazugane Light, use --font-ja-light + font-variation-settings: 'wght' 330. */
+  /* --heading-font/--text-font resolve to --font-ja (Tazugane Book) via the
+     :lang(ja) block above — Book pairs with Steiner wght400, close to the
+     current --fw-base. --font-ja-light (Tazugane Light, pairs with wght330)
+     is still available for any element that opts in explicitly. */
   font-weight: var(--fw-base);
   font-variation-settings: 'wght' var(--fw-base);
 }
@@ -320,7 +324,7 @@ tr, td, th, p, li {
 
 .h0 {
   font-size: var(--fs-h0);
-  line-height: var(--lh-h1);
+  line-height: var(--lh-h0);
 }
 
 h1, .h1 {

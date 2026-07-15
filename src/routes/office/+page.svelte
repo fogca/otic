@@ -118,15 +118,29 @@
 
 	<!-- ─── Panel 1: Office — the page's own logo now lives in the fixed
 	     corner-logo (see +layout.svelte), which starts oversized and shrinks
-	     to its normal size the instant the user scrolls. This section only
-	     carries the 01/Office label + intro text. ─── -->
+	     to its normal size the instant the user scrolls. Structure is now
+	     intro (unnumbered hero) → About Office, no eyebrow numbering. ─── -->
 	<section class="panel panel--intro">
 		<div class="panel-inner">
+			<!-- DRAFT — headline not yet approved, see chat. -->
+			<p class="intro-headline" lang="en">
+				An independent<br />
+				multidisciplinary<br />
+				design office.
+			</p>
+
 			<header class="panel-hd">
-				<span class="pn" lang="en">01</span>
-				<h2 class="pt" lang="en">Office</h2>
+				<h2 class="pt" lang="en">About Office</h2>
 			</header>
 			<div class="panel-content">
+				<!-- DRAFT — lead + JA translation not yet approved, see chat. -->
+				<p class="panel-lead" lang="en">
+					A creative office in Tokyo, working across identity, product, and digital
+					craft.
+				</p>
+				<p class="panel-lead panel-lead--ja" lang="ja">
+					東京を拠点に、アイデンティティ・プロダクト・デジタルの領域を横断するクリエイティブオフィスです。
+				</p>
 				<p class="intro-text" lang="en">
 					Office / TAKUMI ISOBE is a creative office based in Tokyo working across
 					visual identity and design engineering — experience, brand, product, type,
@@ -135,18 +149,29 @@
 					physicality, our emotion. Day by day, learning further, we strive toward
 					better creation.
 				</p>
+				<p class="intro-text intro-text--ja" lang="ja">
+					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学、デザインを掛け合わせながら、わたしたちを人間たらしめるもの——身体性と情緒に語りかける戦略をつくっています。日々学びを重ねながら、より良い創作を目指しています。
+				</p>
 			</div>
 		</div>
 	</section>
 
-	<!-- ─── Panel 2: Services — 2x2 grid ─── -->
+	<!-- ─── Panel 2: Services — single-column stack ─── -->
 	<section class="panel panel--services">
 		<div class="panel-inner">
 			<header class="panel-hd">
-				<span class="pn" lang="en">02</span>
 				<h2 class="pt" lang="en">Services &amp; Partners</h2>
 			</header>
-			<div class="panel-content services-grid">
+			<div class="panel-content">
+				<!-- DRAFT — lead + JA translation not yet approved, see chat. -->
+				<p class="panel-lead" lang="en">
+					Four practices and a network of partner studios, shaping a brand from
+					strategy to craft.
+				</p>
+				<p class="panel-lead panel-lead--ja" lang="ja">
+					4つの専門領域と複数のパートナースタジオが、戦略から制作までブランドを一貫して形にします。
+				</p>
+				<div class="services-grid">
 				{#each services as s}
 					<article class="service-card">
 						{#if s.image}
@@ -158,17 +183,22 @@
 						<p class="service-sub" lang="ja">{s.subtitle}</p>
 						<p class="service-en" lang="en">{s.bodyEn}</p>
 						<p class="service-ja" lang="ja">{s.body}</p>
+						<!-- TODO — Takram reference has a "/"-separated capability-tag
+						     row here (e.g. "データ分析と可視化 / AI応用プロダクト / ...").
+						     No real tag data exists for these services yet; not
+						     fabricating business-capability claims, see chat. -->
 						{#if s.link}
 							<a
 								class="service-link"
 								href={`https://${s.link}`}
 								target="_blank"
 								rel="noopener noreferrer"
-								lang="en">{s.link} ↗</a
+								lang="en">{s.link.replace(/^www\./, '')} ↗</a
 							>
 						{/if}
 					</article>
 				{/each}
+				</div>
 			</div>
 		</div>
 	</section>
@@ -180,49 +210,55 @@
 		<div class="panel-inner duo-inner">
 			<div class="duo-col">
 				<header class="panel-hd">
-					<span class="pn" lang="en">03</span>
-					<h2 class="pt" lang="en">Company</h2>
+					<h2 class="pt" lang="en">Director</h2>
 				</header>
-				<div class="panel-content company-row">
-					<dl class="cfacts" lang="en">
-						<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
-						<div class="cfact">
-							<dt>Address</dt>
-							<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
+				<div class="panel-content">
+					<p class="panel-lead" lang="en">Takumi Isobe</p>
+					<p class="panel-lead panel-lead--ja" lang="ja">磯部タクミ</p>
+					<div class="director-row">
+						<div class="director-text">
+							<p lang="en">
+								Born in Japan in 2001.<br />
+								While attending the University of Westminster in the UK, exposed to a wide
+								range of cultures and arts, I developed a strong interest in visual
+								expression and entered the creative industry. After working at several
+								design studios in Tokyo, I established my own practice. Today, as creative
+								director, I run a design office at the core of my work, alongside a type
+								foundry, an image-making studio, and a wine community.
+							</p>
+							<p lang="ja">
+								2001年日本生まれ。<br />
+								英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
+							</p>
 						</div>
-						<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
-						<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
-					</dl>
-					<dl class="cfacts" lang="ja">
-						<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
-						<div class="cfact">
-							<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
-						</div>
-						<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
-						<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
-					</dl>
+					</div>
 				</div>
 			</div>
 			<div class="duo-col">
 				<header class="panel-hd">
-					<span class="pn" lang="en">04</span>
-					<h2 class="pt" lang="en">Director</h2>
+					<h2 class="pt" lang="en">Company</h2>
 				</header>
-				<div class="panel-content director-row">
-					<div class="director-text">
-						<p lang="en">
-							Born in Japan in 2001.<br />
-							While attending the University of Westminster in the UK, exposed to a wide
-							range of cultures and arts, I developed a strong interest in visual
-							expression and entered the creative industry. After working at several
-							design studios in Tokyo, I established my own practice. Today, as creative
-							director, I run a design office at the core of my work, alongside a type
-							foundry, an image-making studio, and a wine community.
-						</p>
-						<p lang="ja">
-							2001年日本生まれ。<br />
-							英国University of Westminster(ウェストミンスター大学)在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブインダストリーへ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスの取締役／クリエイティブ事業部のファウンダーとして、デザインオフィスを基軸にタイプファウンダリやイメージメークスタジオ、ワインコミュニティの運営を行っている。
-						</p>
+				<div class="panel-content">
+					<p class="panel-lead" lang="en">Operating Company</p>
+					<p class="panel-lead panel-lead--ja" lang="ja">運営会社</p>
+					<div class="company-row">
+						<dl class="cfacts" lang="en">
+							<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
+							<div class="cfact">
+								<dt>Address</dt>
+								<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
+							</div>
+							<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
+							<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
+						</dl>
+						<dl class="cfacts" lang="ja">
+							<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
+							<div class="cfact">
+								<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
+							</div>
+							<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
+							<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
+						</dl>
 					</div>
 				</div>
 			</div>
@@ -233,24 +269,30 @@
 	<section class="panel panel--ethos">
 		<div class="panel-inner">
 			<header class="panel-hd">
-				<span class="pn" lang="en">05</span>
 				<h2 class="pt" lang="en">Ethos</h2>
 			</header>
-			<div class="panel-content ethos-row">
-				<div class="ethos-block ethos-block--intro">
-					<p class="ethos-en" lang="en">{ethosIntro.en}</p>
-					<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
-				</div>
-				{#each ethosParts as p}
-					<div class="ethos-block">
-						<h3 class="ethos-part">
-							<span class="ethos-part-en" lang="en">{p.en}</span>
-							<span class="ethos-part-ja" lang="ja">{p.ja}</span>
-						</h3>
-						<p class="ethos-en" lang="en">{p.enBody}</p>
-						<p class="ethos-ja" lang="ja">{p.jaBody}</p>
+			<div class="panel-content">
+				<!-- DRAFT — reuses the homepage's own ethos tagline (see
+				     HomeFeed.svelte ".ethos__line") for consistency rather than
+				     inventing new copy; JA translation not yet approved, see chat. -->
+				<p class="panel-lead" lang="en">Embodied humanism.</p>
+				<p class="panel-lead panel-lead--ja" lang="ja">身体性に根ざしたヒューマニズム。</p>
+				<div class="ethos-row">
+					<div class="ethos-block ethos-block--intro">
+						<p class="ethos-en" lang="en">{ethosIntro.en}</p>
+						<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
 					</div>
-				{/each}
+					{#each ethosParts as p}
+						<div class="ethos-block">
+							<h3 class="ethos-part">
+								<span class="ethos-part-en" lang="en">{p.en}</span>
+								<span class="ethos-part-ja" lang="ja">{p.ja}</span>
+							</h3>
+							<p class="ethos-en" lang="en">{p.enBody}</p>
+							<p class="ethos-ja" lang="ja">{p.jaBody}</p>
+						</div>
+					{/each}
+				</div>
 			</div>
 		</div>
 	</section>
@@ -266,20 +308,24 @@
 	:global([data-lang='en']) .ethos-part-ja,
 	:global([data-lang='en']) .ethos-ja,
 	:global([data-lang='en']) .cfacts[lang='ja'],
-	:global([data-lang='en']) .director-text p[lang='ja'] {
+	:global([data-lang='en']) .director-text p[lang='ja'],
+	:global([data-lang='en']) .intro-text--ja,
+	:global([data-lang='en']) .panel-lead--ja {
 		display: none;
 	}
 	:global([data-lang='ja']) .service-en,
 	:global([data-lang='ja']) .ethos-en,
 	:global([data-lang='ja']) .cfacts[lang='en'],
-	:global([data-lang='ja']) .director-text p[lang='en'] {
+	:global([data-lang='ja']) .director-text p[lang='en'],
+	:global([data-lang='ja']) .intro-text:not(.intro-text--ja),
+	:global([data-lang='ja']) .panel-lead:not(.panel-lead--ja) {
 		display: none;
 	}
 
 	/* ── Page host: normal vertical document flow, no scroll-jacking ── */
 	.OfficePage {
 		width: 100%;
-		padding: 0;
+		padding-top: 80px;
 		margin: 0;
 		background: var(--color-bg);
 	}
@@ -302,7 +348,7 @@
 	}
 
 	/* Every panel is an independent, normal-flow block — simple vertical
-	   stack, 01 through 05, no pinning/pairing between any of them.
+	   stack, no eyebrow numbering, no pinning/pairing between any of them.
 	   padding-inline:0 overrides base.css's global `section { padding-inline:
 	   var(--padding) }` (a class selector beats that bare element selector
 	   regardless of source order) — .panel-inner's own explicit padding is
@@ -312,15 +358,15 @@
 		padding-inline: 0;
 	}
 
-	/* Shared rhythm for every panel's inner content — mobile-first: number
-	   over title, content stacked below. PC becomes a "label-left,
-	   content-right" grid (see min-width:1024px block), matching the
-	   archives/[slug] page's lead/media split. */
+	/* Shared rhythm for every panel's inner content — mobile-first: title,
+	   content stacked below. PC becomes a "label-left, content-right" grid
+	   (see min-width:1024px block), matching the archives/[slug] page's
+	   lead/media split. */
 	.panel-inner {
-		padding: 90px var(--padding) 56px;
+		padding: 40px var(--padding) 40px;
 		display: flex;
 		flex-direction: column;
-		gap: 32px;
+		gap: 10px;
 	}
 
 	.panel-hd {
@@ -329,36 +375,79 @@
 		flex-direction: column;
 		gap: 10px;
 	}
-	.pn {
-		font-size: var(--fs-h5);
-		opacity: 0.55;
-	}
+	/* One step down from the old fs-h4 — titles now read as a smaller label
+	   sitting above each section's own panel-lead statement, not as a
+	   standalone heading (the eyebrow number they used to pair with is gone). */
 	.pt {
-		font-size: var(--fs-h4);
+		font-size: var(--fs-h5);
 		font-weight: var(--fw-medium);
 		font-variation-settings: 'wght' var(--fw-medium);
-		line-height: 1.15;
+		line-height: var(--lh-h5);
 	}
 
 	.panel-content {
 		flex: none;
 		display: flex;
 		flex-direction: column;
-		gap: 48px;
+		gap: 10px;
 	}
 
-	/* ── Panel 1: Office ── */
-	.intro-text {
-		font-size: var(--fs-h3);
+	/* Short lead statement under a panel title — h2-tier, sized to run
+	   roughly 3 lines on SP. Sits between the (now smaller) .pt label and
+	   that section's own longer content. Title stays English-only per the
+	   site's heading convention; panel-lead toggles EN/JA like body copy. */
+	.panel-lead {
+		font-size: var(--fs-h2);
+		font-weight: var(--fw-base);
+		line-height: var(--lh-h2);
 		max-width: 640px;
 		margin: 0;
 	}
+	/* lh-h2 (1.3) is tuned for Latin display text — CJK needs more room, so
+	   the JA variant switches to the dedicated JP heading line-height (looser
+	   than Latin h2, tighter than JP body copy). Same specificity as
+	   .panel-lead, so this must stay after it in source order to win. */
+	.panel-lead--ja {
+		line-height: var(--lh-h-ja);
+	}
 
-	/* ── Services: 2x2 grid ── */
+	/* ── Panel 1: Office ── */
+	/* Display statement — the "headline" tier, size alone (fs-h0) carries
+	   it, weight stays at base like the rest of the page's text. Stays
+	   English always (matches the site's convention that headings/titles
+	   don't toggle, only body copy does — see the lang-toggle rules above). */
+	.intro-headline {
+		font-size: var(--fs-h0);
+		font-weight: var(--fw-base);
+		font-variation-settings: 'wght' var(--fw-base);
+		line-height: var(--lh-h0);
+		max-width: 780px;
+		/* .panel-inner's gap alone (now 10px) would pull "About Office" in
+		   right under the hero — too tight for a hero→section break. This
+		   hasn't been part of the requested tightening rounds, so keep it at
+		   the original ~32px total by making up the rest here. */
+		margin: 0 0 22px;
+	}
+	/* Body paragraph — secondary to the headline now, so no explicit
+	   font-size override: falls back to base.css's standard p:lang(en|ja)
+	   presets, same convention .service-en/.ethos-en etc already use
+	   elsewhere on this page. Spacing above comes solely from
+	   .panel-content's gap now — no own margin, so it doesn't stack. */
+	.intro-text {
+		max-width: 560px;
+		margin: 0;
+	}
+
+	/* ── Services: single-column stack, generous vertical rhythm between
+	   entries (Takram reference) — not a card grid; each service reads as
+	   its own full-width statement: image, then a bold heading matching the
+	   panel-1 headline's weight (not the generic h4 label style used
+	   elsewhere), then the toggling EN/JA body. ── */
 	.services-grid {
-		display: grid;
-		grid-template-columns: 1fr;
+		display: flex;
+		flex-direction: column;
 		gap: 60px;
+		margin-top: 20px;
 	}
 	.service-card {
 		width: 100%;
@@ -367,10 +456,10 @@
 	}
 	.service-image {
 		width: 100%;
-		aspect-ratio: 16 / 10;
+		aspect-ratio: 2.69 / 1;
 		overflow: hidden;
 		background: var(--color-bg-gray);
-		margin-bottom: 25px;
+		margin-bottom: 20px;
 	}
 	.service-image img {
 		width: 100%;
@@ -379,26 +468,32 @@
 		display: block;
 	}
 	.service-title {
-		font-size: var(--fs-h4);
+		font-size: var(--fs-h2);
+		font-weight: var(--fw-bold);
+		font-variation-settings: 'wght' var(--fw-bold);
+		line-height: var(--lh-h2);
 		margin: 0;
 	}
 	.service-sub {
 		font-size: 10px;
 		line-height: 1.7;
-		margin: 4px 0 0;
+		margin: 6px 0 0;
 		opacity: 0.6;
 	}
 	.service-en {
-		margin: 16px 0 0;
-		line-height: 1.45;
+		max-width: 560px;
+		margin: 10px 0 0;
 	}
 	.service-ja {
-		margin: 10px 0 0;
+		max-width: 560px;
+		margin: 12px 0 0;
 	}
 	.service-link {
 		font-size: var(--fs-h5);
-		margin-top: 16px;
-		padding-top: 16px;
+		font-weight: var(--fw-bold);
+		font-variation-settings: 'wght' var(--fw-bold);
+		margin-top: 20px;
+		padding-top: 0;
 		text-decoration: underline;
 		text-underline-offset: 3px;
 		transition: opacity var(--duration-fast) var(--ease-default);
@@ -408,7 +503,12 @@
 	}
 
 	/* ── Company ── */
+	/* Own explicit display/direction — no longer combined with .panel-content
+	   on the same element (that now carries .panel-lead too), so this can't
+	   ride on panel-content's flex context anymore. */
 	.company-row {
+		display: flex;
+		flex-direction: column;
 		gap: 40px;
 		align-items: flex-start;
 	}
@@ -419,7 +519,7 @@
 	.cfact {
 		display: flex;
 		align-items: baseline;
-		padding: 12px 0;
+		padding: 14px 0 10px;
 		border-top: 1px solid var(--color-line);
 	}
 	.cfact:last-child {
@@ -437,6 +537,15 @@
 	}
 
 	/* ── Ethos ── */
+	/* Own explicit gap at every breakpoint — previously this and
+	   .panel-content were the same element, so it rode on panel-content's
+	   gap; now it's a nested wrapper (sibling to .panel-lead), it needs its
+	   own layout instead of inheriting one meant for a lead→body transition. */
+	.ethos-row {
+		display: flex;
+		flex-direction: column;
+		gap: 40px;
+	}
 	.ethos-block {
 		width: 100%;
 		display: flex;
@@ -449,7 +558,7 @@
 		display: block;
 		font-size: var(--fs-h4);
 		font-weight: var(--fw-medium);
-		line-height: 1.3;
+		line-height: var(--lh-h4);
 	}
 	.ethos-part-ja {
 		display: block;
@@ -461,7 +570,6 @@
 	}
 	.ethos-en {
 		margin: 0;
-		line-height: 1.45;
 	}
 	.ethos-ja {
 		margin: 0;
@@ -480,43 +588,49 @@
 	   between them since they're no longer separate sections. Desktop: side
 	   by side (see min-width:1024px below). ── */
 	.duo-inner {
-		gap: 80px;
+		gap: 60px;
 	}
 	.duo-col {
 		display: flex;
 		flex-direction: column;
-		gap: 32px;
+		gap: 10px;
 	}
 
 	/* SP: narrow the studio text a bit further than the page's standard
 	   side padding already does. */
 	@media (max-width: 1023px) {
-		.intro-text {
-			max-width: 78%;
+		.intro-headline,
+		.intro-text,
+		.panel-lead {
+			max-width: 85%;
 		}
 	}
 
-	/* ── Desktop: whole panel (number + title + content together) pushed to
-	   a right-aligned column, mirroring archives/[slug]'s right-weighted
-	   layout — unlike slug's own lead/media split, the number+title stay
-	   WITH the content on the right rather than sitting in a separate left
-	   column; the left ~38% of the page is simply open space. ── */
+	/* ── Desktop: whole panel (title + content together) pushed to a
+	   right-aligned column, mirroring archives/[slug]'s right-weighted
+	   layout — unlike slug's own lead/media split, the title stays WITH the
+	   content on the right rather than sitting in a separate left column;
+	   the left ~38% of the page is simply open space. ── */
 	@media (min-width: 1024px) {
 		.panel-inner {
 			width: 62%;
 			margin-left: auto;
 			margin-right: 0;
-			padding: 100px calc(var(--padding) * 1.5) 56px;
+			padding: 72px calc(var(--padding) * 1.5) 40px;
 		}
 
-		.intro-text {
-			font-size: var(--fs-h4);
-		}
-
-		/* Services' 2x2 grid can use the panel's full right-aligned width. */
+		/* A bit more room than SP for a full-bleed image and a longer,
+		   multi-line service body — but tightened from the original 100/32/20.
+		   service-image's margin-bottom isn't split here — 20px is now a
+		   single flat value across breakpoints. */
 		.services-grid {
-			grid-template-columns: repeat(2, 1fr);
-			gap: 56px 40px;
+			gap: 80px;
+		}
+		.service-en {
+			margin-top: 16px;
+		}
+		.service-link {
+			padding-top: 12px;
 		}
 
 		.company-row {
@@ -531,17 +645,11 @@
 		/* Company / Director side by side, sharing the duo-inner row. */
 		.duo-inner {
 			flex-direction: row;
-			gap: 64px;
+			gap: 56px;
 		}
 		.duo-col {
 			flex: 1;
 			min-width: 0;
-		}
-
-		.ethos-row {
-			display: flex;
-			flex-direction: column;
-			gap: 40px;
 		}
 	}
 </style>
