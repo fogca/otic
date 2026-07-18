@@ -15,17 +15,17 @@
 	// no new asset work needed. Image-only: this is a static cycle, not a
 	// video player (matches how the home Loader also can't play video).
 	// `portrait` (height >= width — square counts too, from microCMS's own
-	// image metadata) lets SP use a taller-or-square subset — its slider is
-	// now a full-screen 100vw/100dvh backdrop, and a landscape source cropped
-	// into that tall a frame reads badly. Strictly-portrait-only left the
-	// pool too thin to feel like a real rotation.
+	// image metadata) lets SP use a taller-or-square subset — its slider box
+	// is taller than it is wide (70vw × 60vh), and a landscape source
+	// cropped into that reads badly. Strictly-portrait-only left the pool
+	// too thin to feel like a real rotation.
 	const allFrames: Frame[] = (() => {
 		const list: Frame[] = [];
 		const push = (img: { url: string; width?: number; height?: number } | undefined, alt: string) => {
 			if (!img) return;
-			// Quality 85, not the site-wide default 72 — these fill the whole
-			// screen (SP: literally 100vw/100dvh) instead of sitting as a
-			// thumbnail, so compression artifacts read much more.
+			// Quality 85, not the site-wide default 72 — these fill their whole
+			// slider box (large even on SP: 70vw × 60vh) instead of sitting as
+			// a thumbnail, so compression artifacts read much more.
 			list.push({
 				src: imgOpt(img.url, 1200, 85),
 				srcset: imgSrcset(img.url, [600, 900, 1200, 1800], 85),
@@ -87,39 +87,45 @@
 		let cancelled = false;
 		let timer: ReturnType<typeof setTimeout> | undefined;
 		let index = 0;
+		let z = 1;
 
 		import('gsap').then(({ gsap }) => {
 			if (cancelled) return;
 			const els = frameEls.filter(Boolean);
 			if (els.length < 2) return;
 
-			const HOLD = 450; // ms each frame stays fully revealed
-			const REVEAL = 0.85; // s wipe duration
+			// Same reveal duration + stagger as the home Loader
+			// (Loader.svelte's REVEAL_DURATION/REVEAL_STAGGER) so this loop
+			// shares its exact speed feel: each next frame starts while the
+			// current one is still mid-wipe, not after it finishes — that
+			// overlap is what makes the Loader read as fast.
+			const DURATION = 1.2; // s wipe duration
+			const STAGGER = 0.35; // s of overlap with the next frame
+			const INTERVAL = (DURATION - STAGGER) * 1000; // ms between frame starts
 
 			// Bottom-up clip-path wipe — same visual language as the home
 			// Loader's own frame reveal, just looping instead of running once.
 			gsap.set(els, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1, zIndex: 0 });
-			gsap.set(els[0], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: 1 });
+			gsap.set(els[0], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: z });
 
+			// Each new frame gets a strictly higher z-index, so it always
+			// wipes in over everything before it — no separate step to
+			// demote older frames needed once overlap is in play.
 			const advance = () => {
 				if (cancelled) return;
-				const prev = index;
 				index = (index + 1) % els.length;
-				gsap.set(els[index], { clipPath: 'inset(100% 0% 0% 0%)', scale: 1, zIndex: 2 });
+				z++;
+				gsap.set(els[index], { clipPath: 'inset(100% 0% 0% 0%)', scale: 1, zIndex: z });
 				gsap.to(els[index], {
 					clipPath: 'inset(0% 0% 0% 0%)',
 					scale: 1.05,
-					duration: REVEAL,
-					ease: 'power3.out',
-					onComplete: () => {
-						gsap.set(els[prev], { zIndex: 0 });
-						gsap.set(els[index], { zIndex: 1 });
-						if (!cancelled) timer = setTimeout(advance, HOLD);
-					}
+					duration: DURATION,
+					ease: 'power3.out'
 				});
+				timer = setTimeout(advance, INTERVAL);
 			};
 
-			timer = setTimeout(advance, HOLD);
+			timer = setTimeout(advance, INTERVAL);
 		});
 
 		return () => {
@@ -147,7 +153,7 @@
 					bind:this={frameEls[i]}
 					src={frame.src}
 					srcset={frame.srcset}
-					sizes="(min-width: 1024px) 900px, 100vw"
+					sizes="(min-width: 1024px) 900px, 70vw"
 					alt={frame.alt}
 					loading={i === 0 ? 'eager' : 'lazy'}
 					fetchpriority={i === 0 ? 'high' : undefined}
@@ -188,10 +194,8 @@
 		height: auto;
 	}
 
-	/* PC default (unchanged): a contained box in normal flow. SP gets a
-	   completely different, full-bleed treatment below — easier to add that
-	   as a max-width override than to reset this back per-property inside
-	   a min-width block. */
+	/* PC default: a contained box in normal flow, 900px/16:9. SP overrides
+	   the size below (70vw/60vh) but stays the same contained-box shape. */
 	.Teaser .slider {
 		position: relative;
 		z-index: 0;
@@ -243,48 +247,14 @@
 		}
 	}
 
-	/* SP: slider becomes a full-bleed backdrop (100vw/100dvh, fixed — this is
-	   a single-screen page, nothing to scroll), logo + tagline overlaid on
-	   top. White + shadow, not the default black, since it now sits over
-	   arbitrary photo content instead of the page's own white background. */
+	/* SP: back to a contained box (not the full-bleed backdrop this used to
+	   be) — logo/slider/tagline all stay in the base rules' normal-flow,
+	   dark-on-white layout above; only the box itself needs resizing. */
 	@media (max-width: 1023px) {
-		.Teaser {
-			padding: 0;
-		}
-
-		.Teaser .logo,
-		.Teaser .tagline {
-			color: #fff;
-			text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
-		}
-
-		.Teaser .logo {
-			position: fixed;
-			z-index: 2;
-			top: 20px;
-			left: var(--padding);
-			width: calc(100vw - var(--padding) * 2);
-		}
-
 		.Teaser .slider {
-			position: fixed;
-			z-index: 0;
-			inset: 0;
-			width: 100vw;
-			height: 100vh;
-			height: 100dvh;
-			max-width: none;
+			width: 70vw;
+			height: 60vh;
 			aspect-ratio: auto;
-			margin-top: 0;
-		}
-
-		.Teaser .tagline {
-			position: fixed;
-			z-index: 2;
-			left: var(--padding);
-			right: var(--padding);
-			bottom: 24px;
-			margin-top: 0;
 		}
 	}
 </style>
