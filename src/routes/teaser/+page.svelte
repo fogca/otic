@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import Logo from '$lib/components/Logo.svelte';
 	import { typeText } from '$lib/actions/typeText';
@@ -8,20 +7,18 @@
 
 	let { data }: { data: PageData } = $props();
 
-	type Frame = { src: string; srcset: string; alt: string; portrait: boolean };
+	type Frame = { src: string; srcset: string; alt: string };
 
 	// Each work contributes up to 2 frames — its main visual, and (if present)
 	// the first image in `repeat` — same visuals used elsewhere on the site,
 	// no new asset work needed. Image-only: this is a static cycle, not a
-	// video player (matches how the home Loader also can't play video).
-	// `portrait` (height >= width — square counts too, from microCMS's own
-	// image metadata) lets SP use a taller-or-square subset — its slider box
-	// is taller than it is wide (70vw × 60vh), and a landscape source
-	// cropped into that reads badly. Strictly-portrait-only left the pool
-	// too thin to feel like a real rotation.
-	const allFrames: Frame[] = (() => {
+	// video player (matches how the home Loader also can't play video). SP
+	// and PC share this same pool — SP no longer needs a portrait-only
+	// subset now that its slider is a contained 70vw/60vh box rather than a
+	// full-bleed backdrop, so a landscape crop reads fine there too.
+	const frames: Frame[] = (() => {
 		const list: Frame[] = [];
-		const push = (img: { url: string; width?: number; height?: number } | undefined, alt: string) => {
+		const push = (img: { url: string } | undefined, alt: string) => {
 			if (!img) return;
 			// Quality 85, not the site-wide default 72 — these fill their whole
 			// slider box (large even on SP: 70vw × 60vh) instead of sitting as
@@ -29,8 +26,7 @@
 			list.push({
 				src: imgOpt(img.url, 1200, 85),
 				srcset: imgSrcset(img.url, [600, 900, 1200, 1800], 85),
-				alt,
-				portrait: !!(img.width && img.height && img.height >= img.width)
+				alt
 			});
 		};
 		for (const w of data.works) {
@@ -40,49 +36,14 @@
 		return list;
 	})();
 
-	const portraitFrames = allFrames.filter((f) => f.portrait);
-	// Fall back to the full set if too few portrait sources exist to cycle
-	// through meaningfully — a static/near-static SP slider would be worse
-	// than mixing in a landscape crop.
-	const spFrames = portraitFrames.length >= 2 ? portraitFrames : allFrames;
-
-	// Always false at init (both SSR and the client's first pass — reading
-	// `window` here instead would make the client's initial value disagree
-	// with what the server rendered, and that hydration mismatch was
-	// actually corrupting the each-block: the DOM stayed on the SSR'd
-	// (unfiltered) list even after `frames` recomputed correctly). Corrected
-	// in onMount, which only ever runs client-side, after hydration has
-	// already settled — a plain reactive update from there works correctly.
-	let isMobile = $state(false);
-	const frames = $derived(isMobile ? spFrames : allFrames);
-
 	let frameEls = $state<HTMLImageElement[]>([]);
 
-	onMount(() => {
-		if (!browser) return;
-		// A one-time read would latch whatever isMobile happened to be at
-		// mount time and never correct itself again (e.g. rotating a device,
-		// or resizing a window across the breakpoint) — listen for the query
-		// to actually change instead of just reading it once.
-		const mq = window.matchMedia('(max-width: 1023px)');
-		const update = () => {
-			isMobile = mq.matches;
-		};
-		update();
-		mq.addEventListener('change', update);
-		return () => mq.removeEventListener('change', update);
-	});
-
-	// Re-runs whenever `frames` changes identity (the onMount correction
-	// above, or in principle a breakpoint crossing) — tears down the
-	// previous cycle via its cleanup and restarts against the new elements.
 	$effect(() => {
-		const currentFrames = frames;
 		if (!browser) return;
 		const prefersReducedMotion = window.matchMedia(
 			'(prefers-reduced-motion: reduce)'
 		).matches;
-		if (prefersReducedMotion || currentFrames.length < 2) return;
+		if (prefersReducedMotion || frames.length < 2) return;
 
 		let cancelled = false;
 		let timer: ReturnType<typeof setTimeout> | undefined;
