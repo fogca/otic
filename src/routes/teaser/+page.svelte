@@ -2,40 +2,54 @@
 	import { browser } from '$app/environment';
 	import Logo from '$lib/components/Logo.svelte';
 	import { typeText } from '$lib/actions/typeText';
-	import { imgOpt, imgSrcset, mainVisualImage } from '$lib/js/img';
+	import { imgOpt, imgSrcset } from '$lib/js/img';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	type Frame = { src: string; srcset: string; alt: string };
+	type Frame = { src: string; srcset: string; alt: string; isVideo: boolean };
+	type VisualSource = { pj_images?: { url: string }; pj_videos?: string } | undefined;
 
-	// Each work contributes up to 2 frames — its main visual, and (if present)
-	// the first image in `repeat` — same visuals used elsewhere on the site,
-	// no new asset work needed. Image-only: this is a static cycle, not a
-	// video player (matches how the home Loader also can't play video). SP
-	// and PC share this same pool and just render it differently — see the
-	// two $effects below.
+	// Two full laps rather than each work's 2 frames back to back: first lap
+	// is every work's main visual, second lap is every work's second frame
+	// (repeat) — so a "round" of the whole catalogue completes before any
+	// work repeats. Both visuals reused from elsewhere on the site, no new
+	// asset work needed — and now video-eligible (previously image-only),
+	// so a work whose main/repeat is video-only is no longer skipped.
 	const frames: Frame[] = (() => {
 		const list: Frame[] = [];
-		const push = (img: { url: string } | undefined, alt: string) => {
-			if (!img) return;
+		const push = (source: VisualSource, alt: string) => {
+			if (!source) return;
+			const video = source.pj_videos?.trim();
+			if (video) {
+				list.push({ src: video, srcset: '', alt, isVideo: true });
+				return;
+			}
+			const img = source.pj_images;
+			if (!img?.url) return;
 			// Quality 85, not the site-wide default 72 — these render large
 			// (PC: 900px wide; SP: up to 70vw/60vh) instead of sitting as a
 			// thumbnail, so compression artifacts read much more.
 			list.push({
 				src: imgOpt(img.url, 1200, 85),
 				srcset: imgSrcset(img.url, [600, 900, 1200, 1800], 85),
-				alt
+				alt,
+				isVideo: false
 			});
 		};
 		for (const w of data.works) {
-			push(mainVisualImage(w), w.title);
-			push(w.repeat?.find((r) => r.pj_images)?.pj_images, w.title);
+			push(w.main_visual, w.title);
+		}
+		for (const w of data.works) {
+			push(
+				w.repeat?.find((r) => r.pj_images || r.pj_videos),
+				w.title
+			);
 		}
 		return list;
 	})();
 
-	let frameEls = $state<HTMLImageElement[]>([]);
+	let frameEls = $state<(HTMLImageElement | HTMLVideoElement)[]>([]);
 
 	// PC: stacked-frame clip-path wipe (unchanged). CSS hides the whole
 	// .slider on SP, but this loop still runs regardless of viewport — it
@@ -73,16 +87,30 @@
 			// Loader's own frame reveal, just looping instead of running once.
 			gsap.set(els, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1, zIndex: 0 });
 			gsap.set(els[0], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: z });
+			if (els[0] instanceof HTMLVideoElement) els[0].play().catch(() => {});
 
 			// Each new frame gets a strictly higher z-index, so it always
 			// wipes in over everything before it — no separate step to
-			// demote older frames needed once overlap is in play.
+			// demote older frames needed once overlap is in play. Video
+			// frames aren't given the `autoplay` attribute: every stacked
+			// frame is simultaneously in the DOM here (unlike a scrolling
+			// gallery), so autoplaying all of them at once would contend for
+			// the same limited hardware decoder pool that bit the archive
+			// gallery (see lazyVideo.ts) — only the current turn's video
+			// plays, explicitly, and the one it replaces is paused.
 			const advance = () => {
 				if (cancelled) return;
+				const prevEl = els[index];
 				index = (index + 1) % els.length;
+				const nextEl = els[index];
 				z++;
-				gsap.set(els[index], { clipPath: 'inset(100% 0% 0% 0%)', scale: 1, zIndex: z });
-				gsap.to(els[index], {
+				if (prevEl instanceof HTMLVideoElement) prevEl.pause();
+				gsap.set(nextEl, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1, zIndex: z });
+				if (nextEl instanceof HTMLVideoElement) {
+					nextEl.currentTime = 0;
+					nextEl.play().catch(() => {});
+				}
+				gsap.to(nextEl, {
 					clipPath: 'inset(0% 0% 0% 0%)',
 					scale: 1.05,
 					duration: DURATION,
@@ -136,30 +164,62 @@
 	{#if frames.length > 0}
 		<div class="slider">
 			{#each frames as frame, i (frame.src)}
-				<img
-					class="frame"
-					bind:this={frameEls[i]}
-					src={frame.src}
-					srcset={frame.srcset}
-					sizes="900px"
-					alt={frame.alt}
-					loading={i === 0 ? 'eager' : 'lazy'}
-					fetchpriority={i === 0 ? 'high' : undefined}
-					decoding="async"
-				/>
+				{#if frame.isVideo}
+					<!-- preload="auto" unconditionally, unlike the image branch's
+					     i===0 split: a video only gets ~850ms between its turn
+					     starting and the next frame's turn pausing it again, so
+					     it needs to already be buffered by the time that turn
+					     arrives — metadata-only fetches from cdn.takumiisobe.com
+					     don't finish in time and the video never visibly plays. -->
+					<video
+						class="frame"
+						bind:this={frameEls[i]}
+						src={frame.src}
+						loop
+						muted
+						playsinline
+						preload="auto"
+						aria-label={frame.alt}
+					></video>
+				{:else}
+					<img
+						class="frame"
+						bind:this={frameEls[i]}
+						src={frame.src}
+						srcset={frame.srcset}
+						sizes="900px"
+						alt={frame.alt}
+						loading={i === 0 ? 'eager' : 'lazy'}
+						fetchpriority={i === 0 ? 'high' : undefined}
+						decoding="async"
+					/>
+				{/if}
 			{/each}
 		</div>
 
-		<img
-			class="frame-simple"
-			src={frames[spIndex].src}
-			srcset={frames[spIndex].srcset}
-			sizes="70vw"
-			alt={frames[spIndex].alt}
-			loading="eager"
-			fetchpriority="high"
-			decoding="async"
-		/>
+		{#if frames[spIndex].isVideo}
+			<video
+				class="frame-simple"
+				src={frames[spIndex].src}
+				autoplay
+				loop
+				muted
+				playsinline
+				preload="auto"
+				aria-label={frames[spIndex].alt}
+			></video>
+		{:else}
+			<img
+				class="frame-simple"
+				src={frames[spIndex].src}
+				srcset={frames[spIndex].srcset}
+				sizes="70vw"
+				alt={frames[spIndex].alt}
+				loading="eager"
+				fetchpriority="high"
+				decoding="async"
+			/>
+		{/if}
 	{/if}
 
 	<p class="tagline" lang="en" use:typeText>
@@ -175,8 +235,9 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		justify-content: center;
 		background: var(--color-bg);
-		padding: 20px var(--padding) 48px;
+		padding: 48px var(--padding);
 	}
 
 	.Teaser .logo {
