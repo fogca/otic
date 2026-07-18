@@ -285,10 +285,11 @@
 
 	/* SP only (hidden on PC below): no fixed box, no crop — each frame
 	   renders at its own natural aspect ratio, just capped so nothing
-	   overflows. Size varies frame to frame by design. */
+	   overflows. Size varies frame to frame by design. No margin: SP pins
+	   tagline/logo to the two edges (below) and lets this sit in whatever
+	   space that leaves between them. */
 	.Teaser .frame-simple {
 		display: block;
-		margin-top: 40px;
 		max-width: 70vw;
 		max-height: 60vh;
 		width: auto;
@@ -326,6 +327,26 @@
 	@media (max-width: 1023px) {
 		.Teaser .slider {
 			display: none;
+		}
+
+		/* PC centers logo/frame/tagline as one group (justify-content:center
+		   on the shared rule above) — SP instead pins tagline to the top edge
+		   and logo to the bottom (order flips their visual position without
+		   touching DOM order), so neither moves as frame-simple's own size
+		   varies frame to frame. space-between, not position:absolute/fixed,
+		   is what keeps them pinned. */
+		.Teaser {
+			justify-content: space-between;
+		}
+
+		.Teaser .tagline {
+			order: -1;
+			margin-top: 0;
+			font-size: var(--fs-h5);
+		}
+
+		.Teaser .logo {
+			order: 1;
 		}
 	}
 
