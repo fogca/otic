@@ -10,12 +10,13 @@
 	type Frame = { src: string; srcset: string; alt: string; isVideo: boolean };
 	type VisualSource = { pj_images?: { url: string }; pj_videos?: string } | undefined;
 
-	// Two full laps rather than each work's 2 frames back to back: first lap
-	// is every work's main visual, second lap is every work's second frame
-	// (repeat) — so a "round" of the whole catalogue completes before any
-	// work repeats. Both visuals reused from elsewhere on the site, no new
-	// asset work needed — and now video-eligible (previously image-only),
-	// so a work whose main/repeat is video-only is no longer skipped.
+	// Three full laps rather than each work's frames back to back: lap 1 is
+	// every work's main visual, lap 2 every work's 2nd frame (repeat[0] with
+	// a visual), lap 3 every work's 3rd (the next repeat entry with a visual
+	// after that) — so a "round" of the whole catalogue completes before any
+	// work repeats. Visuals reused from elsewhere on the site, no new asset
+	// work needed — and video-eligible (not image-only), so a work whose
+	// main/repeat slot is video-only is no longer skipped.
 	const frames: Frame[] = (() => {
 		const list: Frame[] = [];
 		const push = (source: VisualSource, alt: string) => {
@@ -37,14 +38,16 @@
 				isVideo: false
 			});
 		};
+		const visualRepeats = (w: (typeof data.works)[number]) =>
+			w.repeat?.filter((r) => r.pj_images || r.pj_videos) ?? [];
 		for (const w of data.works) {
 			push(w.main_visual, w.title);
 		}
 		for (const w of data.works) {
-			push(
-				w.repeat?.find((r) => r.pj_images || r.pj_videos),
-				w.title
-			);
+			push(visualRepeats(w)[0], w.title);
+		}
+		for (const w of data.works) {
+			push(visualRepeats(w)[1], w.title);
 		}
 		return list;
 	})();
@@ -163,7 +166,12 @@
 
 	{#if frames.length > 0}
 		<div class="slider">
-			{#each frames as frame, i (frame.src)}
+			<!-- Keyed by index, not frame.src: the CMS reuses some assets
+			     across works (e.g. the same file turned up as both mksk's
+			     2nd frame and 158's 3rd), so src isn't guaranteed unique —
+			     index is safe since `frames` is a static array that never
+			     reorders after mount. -->
+			{#each frames as frame, i (i)}
 				{#if frame.isVideo}
 					<!-- preload="auto" unconditionally, unlike the image branch's
 					     i===0 split: a video only gets ~850ms between its turn
