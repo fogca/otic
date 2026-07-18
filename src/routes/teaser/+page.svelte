@@ -13,16 +13,15 @@
 	// the first image in `repeat` — same visuals used elsewhere on the site,
 	// no new asset work needed. Image-only: this is a static cycle, not a
 	// video player (matches how the home Loader also can't play video). SP
-	// and PC share this same pool — SP no longer needs a portrait-only
-	// subset now that its slider is a contained 70vw/60vh box rather than a
-	// full-bleed backdrop, so a landscape crop reads fine there too.
+	// and PC share this same pool and just render it differently — see the
+	// two $effects below.
 	const frames: Frame[] = (() => {
 		const list: Frame[] = [];
 		const push = (img: { url: string } | undefined, alt: string) => {
 			if (!img) return;
-			// Quality 85, not the site-wide default 72 — these fill their whole
-			// slider box (large even on SP: 70vw × 60vh) instead of sitting as
-			// a thumbnail, so compression artifacts read much more.
+			// Quality 85, not the site-wide default 72 — these render large
+			// (PC: 900px wide; SP: up to 70vw/60vh) instead of sitting as a
+			// thumbnail, so compression artifacts read much more.
 			list.push({
 				src: imgOpt(img.url, 1200, 85),
 				srcset: imgSrcset(img.url, [600, 900, 1200, 1800], 85),
@@ -38,6 +37,12 @@
 
 	let frameEls = $state<HTMLImageElement[]>([]);
 
+	// PC: stacked-frame clip-path wipe (unchanged). CSS hides the whole
+	// .slider on SP, but this loop still runs regardless of viewport — it
+	// costs nothing while hidden, and running it unconditionally means
+	// there's no JS viewport branching (and so no risk of the SSR/client
+	// mismatch that caused an earlier bug — see the SP effect below, which
+	// keeps this same "always run, let CSS decide what's visible" shape).
 	$effect(() => {
 		if (!browser) return;
 		const prefersReducedMotion = window.matchMedia(
@@ -94,6 +99,28 @@
 			if (timer) clearTimeout(timer);
 		};
 	});
+
+	// SP: no wipe — each frame shows at its own natural size (capped by
+	// max-width/max-height in CSS, so it varies frame to frame) instead of
+	// being cover-cropped into a fixed box, so there's nothing for GSAP to
+	// animate. Just swap which one is current on the same cadence as the
+	// PC loop above (1.2s - 0.35s stagger = 850ms).
+	let spIndex = $state(0);
+
+	$effect(() => {
+		if (!browser) return;
+		const prefersReducedMotion = window.matchMedia(
+			'(prefers-reduced-motion: reduce)'
+		).matches;
+		if (prefersReducedMotion || frames.length < 2) return;
+
+		const INTERVAL = 850;
+		const iv = setInterval(() => {
+			spIndex = (spIndex + 1) % frames.length;
+		}, INTERVAL);
+
+		return () => clearInterval(iv);
+	});
 </script>
 
 <svelte:head>
@@ -114,7 +141,7 @@
 					bind:this={frameEls[i]}
 					src={frame.src}
 					srcset={frame.srcset}
-					sizes="(min-width: 1024px) 900px, 70vw"
+					sizes="900px"
 					alt={frame.alt}
 					loading={i === 0 ? 'eager' : 'lazy'}
 					fetchpriority={i === 0 ? 'high' : undefined}
@@ -122,6 +149,17 @@
 				/>
 			{/each}
 		</div>
+
+		<img
+			class="frame-simple"
+			src={frames[spIndex].src}
+			srcset={frames[spIndex].srcset}
+			sizes="70vw"
+			alt={frames[spIndex].alt}
+			loading="eager"
+			fetchpriority="high"
+			decoding="async"
+		/>
 	{/if}
 
 	<p class="tagline" lang="en" use:typeText>
@@ -155,8 +193,8 @@
 		height: auto;
 	}
 
-	/* PC default: a contained box in normal flow, 900px/16:9. SP overrides
-	   the size below (70vw/60vh) but stays the same contained-box shape. */
+	/* PC only (hidden on SP below): a contained, cover-cropped 900px/16:9
+	   box with the stacked-frame wipe. */
 	.Teaser .slider {
 		position: relative;
 		z-index: 0;
@@ -184,6 +222,18 @@
 		z-index: 1;
 	}
 
+	/* SP only (hidden on PC below): no fixed box, no crop — each frame
+	   renders at its own natural aspect ratio, just capped so nothing
+	   overflows. Size varies frame to frame by design. */
+	.Teaser .frame-simple {
+		display: block;
+		margin-top: 40px;
+		max-width: 70vw;
+		max-height: 60vh;
+		width: auto;
+		height: auto;
+	}
+
 	.Teaser .tagline {
 		position: relative;
 		z-index: 1;
@@ -208,14 +258,19 @@
 		}
 	}
 
-	/* SP: back to a contained box (not the full-bleed backdrop this used to
-	   be) — logo/slider/tagline all stay in the base rules' normal-flow,
-	   dark-on-white layout above; only the box itself needs resizing. */
+	/* Exactly one of the two frame elements is ever in the DOM's visible
+	   flow — .slider (PC wipe) or .frame-simple (SP plain swap) — both JS
+	   loops above always run; only visibility is viewport-gated, so there's
+	   no JS breakpoint branching to get wrong on hydration. */
 	@media (max-width: 1023px) {
 		.Teaser .slider {
-			width: 70vw;
-			height: 60vh;
-			aspect-ratio: auto;
+			display: none;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.Teaser .frame-simple {
+			display: none;
 		}
 	}
 </style>
