@@ -131,8 +131,8 @@
 	// SP: no wipe — each frame shows at its own natural size (capped by
 	// max-width/max-height in CSS, so it varies frame to frame) instead of
 	// being cover-cropped into a fixed box, so there's nothing for GSAP to
-	// animate. Just swap which one is current on the same cadence as the
-	// PC loop above (1.2s - 0.35s stagger = 850ms).
+	// animate. Just swap which one is current — faster than the PC loop's
+	// 850ms since a plain swap has no wipe motion to read, only the cut.
 	let spIndex = $state(0);
 
 	$effect(() => {
@@ -142,7 +142,7 @@
 		).matches;
 		if (prefersReducedMotion || frames.length < 2) return;
 
-		const INTERVAL = 850;
+		const INTERVAL = 400;
 		const iv = setInterval(() => {
 			spIndex = (spIndex + 1) % frames.length;
 		}, INTERVAL);
