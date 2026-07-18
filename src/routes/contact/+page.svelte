@@ -213,6 +213,7 @@
 	.Contact .title {
 		font-size: var(--fs-h2);
 		font-weight: var(--fw-medium);
+		line-height: var(--lh-h2);
 		margin: 0;
 	}
 
@@ -220,6 +221,7 @@
 		font-family: var(--font-ja);
 		font-size: var(--fs-h5);
 		font-weight: var(--fw-medium);
+		line-height: var(--lh-h-ja);
 		margin: 8px 0 0;
 		opacity: 0.85;
 	}
@@ -234,12 +236,12 @@
 
 	.Contact .body[lang='en'] p {
 		font-size: 12px;
-		line-height: 1.5;
+		line-height: var(--lh-en);
 	}
 
 	.Contact .body p {
 		font-size: 12px;
-		line-height: 1.7;
+		line-height: var(--lh-ja);
 	}
 
 	.Contact .form {

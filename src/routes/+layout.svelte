@@ -22,6 +22,18 @@
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
 	const officeHero = $derived(isOffice && !officeIntro.pastHero);
 
+	// Contact and the Legal pages have a dark (charcoal/black) background —
+	// same reasoning as Header's own is-dark: the corner wordmark's default
+	// var(--color-text) is black, invisible there. Mirrors Header.svelte's
+	// DARK_PAGES list — keep the two in sync.
+	const DARK_PAGES = ['/contact', '/legal/privacy', '/legal/imprint', '/legal/company'];
+	const isDarkPage = $derived(DARK_PAGES.includes(page.url.pathname));
+
+	// Teaser is a standalone pre-launch placeholder — none of the real
+	// site's chrome (nav, footer, lang toggle, corner wordmark) should show;
+	// it's meant to reveal nothing about the site underneath.
+	const isTeaser = $derived(page.url.pathname === '/teaser');
+
 	// Sync the reactive lang.current from the session (app.html's inline script
 	// already set <html data-lang> pre-paint — this just reconciles the store so
 	// UI reading lang.current, e.g. the Header's label, matches it). Runs during
@@ -343,6 +355,20 @@
 			return;
 		}
 
+		// The outgoing box (top/height) was computed from scrollY at the OLD
+		// page — SvelteKit resets scroll to 0 for a normal navigation, so by
+		// now that box sits low, document-coordinate-wise, relative to the
+		// NEW page's (reset) scroll position. If the user had scrolled down
+		// any real amount before navigating, that leaves a gap at the TOP of
+		// the new viewport where neither surface reaches — .transition-bg's
+		// own black background showed through there for the whole fade-in
+		// (briefly, since .page-wrapper starts at opacity:0), read as "the
+		// screen flashes black up top, then it's gone." Re-box both to the
+		// current scroll position — still fully opaque/covering at this
+		// instant, this only moves where that coverage actually sits.
+		const m2 = panelMetrics();
+		gsap.set(['.transition-panel', '.darken-overlay'], { top: m2.top, height: m2.height });
+
 		gsap.to('.page-wrapper', {
 			opacity: 1,
 			duration: FADE_IN_DURATION,
@@ -378,7 +404,9 @@
 <div class="transition-bg">
 	<div class="page-wrapper">
 		{@render children()}
-		<Footer />
+		{#if !isTeaser}
+			<Footer />
+		{/if}
 	</div>
 	<!-- Transition surfaces live INSIDE the scroll layer (absolute, document
 	     coordinates set per-navigation from scrollY), NOT position:fixed:
@@ -400,26 +428,31 @@
      but the same drift is present on every page once scrolled far enough.
      Header already hides itself during page transitions via its own
      opacity/transform (intro.completed), so it doesn't need to be inside
-     .page-wrapper to participate in the scale-down transition visual. -->
-<Header />
+     .page-wrapper to participate in the scale-down transition visual.
+     Teaser is a standalone pre-launch placeholder — none of this chrome
+     should show there. -->
+{#if !isTeaser}
+	<Header />
 
-<!-- Global wordmark, PC only, normally bottom-left/small. On Office it
-     starts oversized at the same bottom-left anchor (see .is-hero below)
-     and shrinks to that normal size the instant the user scrolls. Lives
-     OUTSIDE .page-wrapper so its position:fixed resolves to the viewport
-     (the wrapper's will-change transform would otherwise make it a containing
-     block). -->
-<a
-	class="corner-logo"
-	class:is-revealed={intro.completed && !footerNear.near}
-	class:is-hero={officeHero}
-	href="/"
-	aria-label="Home"
->
-	<Logo />
-</a>
+	<!-- Global wordmark, PC only, normally bottom-left/small. On Office it
+	     starts oversized at the same bottom-left anchor (see .is-hero below)
+	     and shrinks to that normal size the instant the user scrolls. Lives
+	     OUTSIDE .page-wrapper so its position:fixed resolves to the viewport
+	     (the wrapper's will-change transform would otherwise make it a containing
+	     block). -->
+	<a
+		class="corner-logo"
+		class:is-revealed={intro.completed && !footerNear.near}
+		class:is-hero={officeHero}
+		class:is-dark={isDarkPage}
+		href="/"
+		aria-label="Home"
+	>
+		<Logo />
+	</a>
 
-<LangSwitchOverlay />
+	<LangSwitchOverlay />
+{/if}
 
 <style>
 	:global(body) {
@@ -472,6 +505,11 @@
 	.corner-logo.is-revealed {
 		opacity: 1;
 		pointer-events: auto;
+	}
+	/* Contact / Legal pages: dark background — invert to white, same as
+	   Header.is-dark. */
+	.corner-logo.is-dark {
+		color: #fff;
 	}
 	@media (min-width: 1024px) {
 		.corner-logo {

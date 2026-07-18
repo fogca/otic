@@ -10,6 +10,11 @@
 	// pages (/archives/[slug]).
 	const isArchives = $derived(['/archives', '/archives/list'].includes(page.url.pathname));
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
+	// Contact and the Legal pages (Privacy/Imprint/Company) have a dark
+	// (charcoal/black) page background — the nav's default var(--color-text)
+	// is black, effectively invisible there, so invert to white on these.
+	const DARK_PAGES = ['/contact', '/legal/privacy', '/legal/imprint', '/legal/company'];
+	const isDark = $derived(DARK_PAGES.includes(page.url.pathname));
 
 	// ── Header visibility settings (adjust freely) ──
 	const HIDE_DISTANCE = 500; // px — scroll distance from resume point that triggers hide
@@ -75,6 +80,7 @@
 	class:is-revealed={intro.completed}
 	class:is-shown={headerShown}
 	class:is-office={isOffice}
+	class:is-dark={isDark}
 >
 	<nav class="nav">
 		<a
@@ -156,6 +162,14 @@
 	.Header.is-office .link,
 	.Header.is-office .logo {
 		color: var(--color-text);
+	}
+
+	/* Contact / Legal pages: dark (charcoal/black) background — invert the
+	   nav to white so it's actually visible against it. */
+	.Header.is-dark .link,
+	.Header.is-dark .lang-toggle,
+	.Header.is-dark .logo {
+		color: #fff;
 	}
 
 	/* ----- Nav (left): Archives / Office / lang toggle ----- */

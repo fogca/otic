@@ -84,10 +84,27 @@
 		display: none;
 	}
 
+	/* Full-bleed background — width constraint moved to .wrapper below so the
+	   charcoal fill spans the whole viewport, not just the reading column. */
 	.Legal {
-		padding: 100px calc(var(--padding) * 2) 80px;
+		background: var(--color-bg-charcoal);
+		color: #fff;
+		padding-block: 100px 80px;
+		min-height: 100vh;
+		min-height: 100dvh;
+	}
+
+	/* base.css sets color directly on h1/h3/p/etc (a bare-element rule, not
+	   inherited) — beats a plain .Legal{color:#fff} ancestor value regardless
+	   of source order, so force it the same way Contact does. */
+	.Legal :global(*) {
+		color: #fff;
+	}
+
+	.Legal .wrapper {
 		max-width: 720px;
 		margin-inline: auto;
+		padding-inline: calc(var(--padding) * 2);
 	}
 
 	.Legal .body {
@@ -101,7 +118,7 @@
 	.Legal .title {
 		font-size: var(--fs-h1);
 		font-weight: var(--fw-base);
-		line-height: 1.2;
+		line-height: var(--lh-h1);
 		margin: 0 0 4px;
 	}
 
@@ -109,6 +126,7 @@
 		font-family: var(--font-ja);
 		font-size: var(--fs-h5);
 		font-weight: var(--fw-medium);
+		line-height: var(--lh-h-ja);
 		margin: 6px 0 0;
 	}
 
@@ -133,12 +151,13 @@
 	.Legal .body h3 {
 		font-size: var(--fs-h4);
 		font-weight: var(--fw-medium);
-		line-height: 1.3;
+		line-height: var(--lh-h4);
 		margin: 0;
 	}
 
 	.Legal .body.body-ja h3 {
 		font-size: var(--fs-h5);
+		line-height: var(--lh-h-ja);
 	}
 
 	.Legal .body p {

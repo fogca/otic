@@ -100,6 +100,7 @@ a {
   --color-text-mute: rgba(0, 0, 0, 0.3);
   --color-bg-dark:   #121212;
   --color-bg-gray:   #f1f1f1;
+  --color-bg-charcoal: #2e2e2e;  /* dark-gray page bg (Legal pages) — distinct from bg-dark/near-black */
   --color-accent:    #b33030;
   --color-accent-yellow: #f2edcb;  /* Office text & header */
   --color-accent-blue:   #004489;  /* Office background */
