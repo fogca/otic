@@ -203,7 +203,6 @@
 		<section class="Colophon">
 			<div class="wrapper">
 				<h2 class="title" lang="en">Colophon</h2>
-				<div class="line" aria-hidden="true"></div>
 				{#if archive.colophonBase.text}
 					<div class="text" lang="en">{@html archive.colophonBase.text}</div>
 				{/if}
@@ -234,7 +233,10 @@
 	{/if}
 
 	{#if nextWorks.length > 0}
-		<hr class="divider divider--next" />
+		<!-- is-first: no Colophon above it, so this divider takes over the
+		     "gap from the gallery" role Colophon's own divider normally has
+		     (see .divider--next.is-first below). -->
+		<hr class="divider divider--next" class:is-first={!hasColophon} />
 		<section class="Next">
 			<div class="wrapper">
 				<h2 class="title" lang="en">Next</h2>
@@ -431,7 +433,7 @@
 		   the TOP of the page instead of after the gallery. */
 		.divider--colophon {
 			order: 5;
-			margin-top: 48px;
+			margin-top: 80px;
 		}
 		.Colophon {
 			order: 6;
@@ -439,6 +441,12 @@
 		.divider--next {
 			order: 7;
 			margin-top: 48px;
+		}
+		/* No Colophon above it — this divider is the first thing after the
+		   gallery instead, so it takes over Colophon's own gap value rather
+		   than the (different) gap it'd normally have between two sections. */
+		.divider--next.is-first {
+			margin-top: 80px;
 		}
 		.Next {
 			order: 8;
@@ -498,30 +506,26 @@
 
 	/* ── Colophon ── */
 	.Colophon {
-		padding-top: 80px;
-	}
-	.Colophon .wrapper {
-		padding-inline: 30px;
+		padding-top: 40px;
+		padding-bottom: 80px;
 	}
 	.Colophon .title,
 	.Next .title {
-		font-size: var(--fs-h0);
+		font-size: var(--fs-h1);
 		font-weight: var(--fw-medium);
 		margin-bottom: 28px;
-	}
-	.Colophon .line {
-		height: 1px;
-		background: var(--color-text);
-		margin-bottom: 12px;
 	}
 	.Colophon .rows {
 		display: flex;
 		flex-direction: column;
 	}
+	/* Label above value, not side-by-side — every row (and the free-form
+	   .text above, its own " / " separators swapped for <br> server-side)
+	   now reads as one item per line. */
 	.Colophon .row {
-		display: grid;
-		grid-template-columns: 90px 1fr;
-		gap: 8px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
 		padding-block: 4px;
 	}
 	.Colophon .row dt,
@@ -563,12 +567,11 @@
 	}
 
 	/* ── Next (a few related works, ranked by shared `scope` — see
-	   +page.server.ts) ── */
+	   +page.server.ts) — same padding-top/bottom + no wrapper padding as
+	   Colophon above (only its own divider's margin-top differs). ── */
 	.Next {
-		padding-top: 80px;
-	}
-	.Next .wrapper {
-		padding-inline: 30px;
+		padding-top: 40px;
+		padding-bottom: 80px;
 	}
 	.next-grid {
 		display: flex;
@@ -661,18 +664,14 @@
 			object-position: left top;
 		}
 
-		/* Colophon — tight info block, left-aligned under the lead */
+		/* Colophon — tight info block, left-aligned under the lead. Same
+		   padding-top/bottom as SP (base rule) — no PC-specific bump. */
 		.Colophon {
 			grid-area: colophon;
-			padding-top: 160px;
 		}
 		.Colophon .wrapper {
 			max-width: 720px;
 			margin-inline: 0;
-			padding-inline: var(--padding);
-		}
-		.Colophon .row {
-			grid-template-columns: 140px 1fr;
 		}
 
 		/* No row-gap set on .Archive's grid — without an explicit margin
@@ -681,23 +680,24 @@
 		   values above. */
 		.divider--colophon {
 			grid-area: divider-colophon;
-			margin-top: 48px;
+			margin-top: 80px;
 		}
 		.divider--next {
 			grid-area: divider-next;
 			margin-top: 48px;
+		}
+		.divider--next.is-first {
+			margin-top: 80px;
 		}
 
 		/* Next — same left-aligned width as Colophon above it, cards run in
 		   a row instead of SP's stack. */
 		.Next {
 			grid-area: next;
-			padding-top: 160px;
 		}
 		.Next .wrapper {
 			max-width: 720px;
 			margin-inline: 0;
-			padding-inline: var(--padding);
 		}
 		.next-grid {
 			flex-direction: row;

@@ -81,8 +81,11 @@ export const load: PageServerLoad = async ({ params }) => {
 					url: r.url?.trim() || undefined
 				})),
 			// Alternative free-form rich text version, tried alongside the
-			// structured rows above rather than replacing them.
-			text: work.colophon_text ?? ''
+			// structured rows above rather than replacing them. Editors write
+			// credit lines " / "-separated on one line (e.g. "Direction: X /
+			// Design: Y") — break each onto its own line rather than leaving
+			// them run together.
+			text: (work.colophon_text ?? '').replace(/ \/ /g, '<br>')
 		}
 	};
 
