@@ -288,38 +288,61 @@
 		margin-top: 48px;
 	}
 
-	/* SP: hero leads, ahead of the title/body text (was lead -> hero ->
-	   gallery). display:contents drops .media's own box so its children
-	   (.media__hero + each .media__item) join .Archive's flex flow
-	   directly as siblings of .lead — only then can .media__hero's `order`
-	   reach across into .lead's position; a plain child-vs-sibling
-	   reorder couldn't cross that container boundary. PC is untouched:
-	   this whole block is SP-only, and .lead there is portaled to <body>
-	   with its own inline layout regardless.
-	   .media's own gap/margin-top go inert with display:contents, so the
-	   rhythm they provided is rebuilt here on the now-flattened items —
-	   reusing the same three values (120/48/80) in their new positions,
-	   not new numbers: 120 was .lead's old fixed-Header clearance (hero
-	   carries that now), 48 was .media's old gap from .lead (now hero ->
-	   lead), 80 was the old item-to-item gap (kept, between gallery
-	   items only — the first item's gap from .lead uses 48 instead, for
-	   the same closer text -> first-image rhythm as hero -> lead). */
+	/* SP: hero sits between the title/tag intro and the body copy (was:
+	   hero ahead of all of .lead; before that, no reorder at all). Hero
+	   (inside .media) has to interleave between two of .lead's OWN
+	   children, which is only reachable once BOTH .lead and .media drop
+	   their own boxes via display:contents — then everything (title, tag,
+	   hero, body, stack, gallery items) becomes a flat set of siblings in
+	   .Archive's flex flow that `order` can freely resequence. PC is
+	   untouched: this whole block is SP-only, and .lead there is portaled
+	   to <body> with its own inline layout regardless of source order.
+	   Losing .lead's box also loses the padding-inline/max-width it gave
+	   its children for free — restored directly on each of them below.
+	   .media's own gap/margin-top go inert the same way; margin-top values
+	   here rebuild that rhythm on the flattened items, reusing the same
+	   three values (120/48/80) from the previous version in their new
+	   roles rather than inventing new ones: 120 is the fixed-Header
+	   clearance (back on the title, first again), 48 covers both
+	   text-to-hero transitions (tag -> hero, and stack -> first gallery
+	   item), 80 is the unchanged item-to-item gallery gap. */
 	@media (max-width: 1023px) {
+		.lead {
+			display: contents;
+		}
+
+		.lead__title,
+		.lead__tag,
+		.lead__body,
+		.lead__stack {
+			padding-inline: var(--padding);
+			max-width: 560px;
+		}
+
+		.lead__title {
+			margin-top: 120px;
+		}
+
 		.media {
 			display: contents;
 		}
 
 		.media__hero {
-			order: -1;
-			margin-top: 120px;
-		}
-
-		.lead {
-			padding-top: 0;
+			order: 1;
 			margin-top: 48px;
 		}
 
+		.lead__body,
+		.lead__body--ja {
+			order: 2;
+		}
+
+		.lead__stack {
+			order: 3;
+		}
+
 		.media__item {
+			order: 4;
 			margin-top: 48px;
 		}
 
