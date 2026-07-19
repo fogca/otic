@@ -55,9 +55,12 @@
 	}
 
 	.switch-option {
-		padding: 8px 16px;
+		padding: 8px 28px;
 		border-radius: 999px;
-		font-size: var(--fs-h6);
+		/* Smaller than any named token has a step for (h6 is already the
+		   scale's floor) — scale it down from h6 instead of a raw px value,
+		   so it still tracks the type scale's own breakpoints. */
+		font-size: calc(var(--fs-h6) * 0.85);
 		font-weight: var(--fw-base);
 		color: var(--color-text);
 		opacity: 0.5;
@@ -84,7 +87,7 @@
 		}
 
 		.switch-option {
-			font-size: var(--fs-h5);
+			font-size: calc(var(--fs-h5) * 0.85);
 		}
 	}
 </style>
