@@ -51,6 +51,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		descriptionEn: work.body_en ?? '',
 		headlineJa: tag.ja,
 		headlineEn: tag.en,
+		// Selected values from the `scope` multi-select (V.I. / Product /
+		// Web / ...), same field + " / " join the archives list page uses,
+		// just showing every value instead of list's space-constrained
+		// first-2 truncation.
+		scope: work.scope ?? [],
 		// Short "built with" line, shown right under the body copy — separate
 		// from Colophon further down the page.
 		stack: work.stack ?? '',

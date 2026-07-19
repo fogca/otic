@@ -110,6 +110,9 @@
 		{#if archive.headlineJa}
 			<p class="lead__tag lead__tag--ja" lang="ja">{archive.headlineJa}</p>
 		{/if}
+		{#if archive.scope.length > 0}
+			<p class="lead__scope" lang="en">{archive.scope.join(' / ')}</p>
+		{/if}
 		{#if archive.descriptionEn}
 			<p class="lead__body" lang="en">{archive.descriptionEn}</p>
 		{/if}
@@ -264,9 +267,16 @@
 		margin: 0;
 	}
 	.lead__tag {
+		font-size: var(--fs-h4);
+		margin: 8px 0 0;
+		opacity: 1;
+	}
+	/* Selected `scope` values (V.I. / Product / ...) — same small, muted
+	   treatment as .lead__stack below, not the tag's own opacity:1. */
+	.lead__scope {
 		font-size: var(--fs-h6);
 		margin: 8px 0 0;
-		opacity: 0.6;
+		opacity: 0.5;
 	}
 	.lead__body {
 		/* Typography (size/line-height) comes from the base.css p:lang(en|ja)
@@ -318,6 +328,7 @@
 
 		.lead__title,
 		.lead__tag,
+		.lead__scope,
 		.lead__stack {
 			padding-inline: var(--padding);
 			max-width: 560px;
