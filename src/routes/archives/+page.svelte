@@ -283,10 +283,11 @@
 		padding-inline: 0;
 	}
 
-	/* SP: Gallery's left/right edges align with the Header's own
-	   var(--padding) inset, not a near-edge-to-edge custom value. */
+	/* SP: left/right inset matches the gap between items (10px), not the
+	   Header's own var(--padding) — tried that, read as misaligned with the
+	   grid's own rhythm. */
 	.Archives .Gallery {
-		padding-inline: var(--padding);
+		padding-inline: 10px;
 	}
 
 	/* Masonry */
