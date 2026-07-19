@@ -20,79 +20,118 @@ type GalleryImage = {
 	workId: string;
 	workTitle: string;
 	isThumbnail: boolean;
-	/** -1 = boosted thumbnail (see BOOSTED_THUMBNAIL_IDS), 0 = thumbnail,
-	    1/2 = the first couple of extra images per work, undefined =
-	    everything else. Drives the upward bias in patternShuffle —
-	    thumbnails lean up the most (boosted ones even more so), the next
-	    couple of images per work lean up a bit too (tapering), everything
-	    else is unbiased. */
-	priorityTier?: number;
 	/** Cloudflare-hosted video row (pj_videos). Dimensions are 0 — the client
 	    reads them from the <video> metadata to size the masonry cell. */
 	isVideo?: boolean;
 };
 
 // Flagship work(s) whose thumbnail should lead the grid even more reliably
-// than other thumbnails — gets its own tier (-1) above the regular tier 0.
-const BOOSTED_THUMBNAIL_IDS = new Set(['steiner']);
+// than the rest — pinned to the very front of the work order (round 1,
+// position 1) rather than score-biased the way the old patternShuffle did.
+const BOOSTED_IDS = new Set(['steiner']);
 
-// Bias strength per tier — [floor, high, low]. `floor` is a guaranteed
-// minimum bonus that alone already outscores every lower tier's best case
-// (hash maxes out at 999_999, and no lower tier's own floor+ratio bonus
-// reaches into the next tier's floor) — without one, a tier's bonus can
-// collapse toward 0 on an unlucky hash (ratio near 1), so "higher tier"
-// only ever meant "usually higher", not reliably so. `high`/`low` are the
-// existing ratio-scaled top-up layered on top of the floor, which is what
-// keeps things feeling sprinkled/random rather than rigidly ordered.
-// Regular tiers (0/1/2) keep floor:0 — same probabilistic feel as before.
-// Boosted (-1) gets a real floor so it reliably leads regardless of hash.
-const PRIORITY_BIAS: Record<number, [number, number, number]> = {
-	'-1': [4_500_000, 1_000_000, 250_000],
-	0: [0, 5_000_000, 1_200_000],
-	1: [0, 1_000_000, 250_000],
-	2: [0, 500_000, 125_000]
-};
-
-// Fixed-seed shuffle that biases thumbnails (and the first couple of extra
-// images per work) toward the upper half so they dominate the top of the
-// masonry while remaining sprinkled below. Same order on every load
-// (deterministic) — this is the current default.
-function patternShuffle(items: GalleryImage[], seed: number): GalleryImage[] {
-	return [...items].sort((a, b) => {
-		const hashA = (hashString(a.url + a.workId) + seed) % 1_000_000;
-		const hashB = (hashString(b.url + b.workId) + seed) % 1_000_000;
-
-		const priority = (hash: number, tier?: number): number => {
-			const bias = tier !== undefined ? PRIORITY_BIAS[tier] : undefined;
-			if (!bias) return 0;
-			const [floor, high, low] = bias;
-			const ratio = (hash % 100) / 100;
-			return floor + (ratio < 0.5 ? (0.5 - ratio) * high : (1.0 - ratio) * low);
-		};
-
-		const scoreA = priority(hashA, a.priorityTier) + hashA;
-		const scoreB = priority(hashB, b.priorityTier) + hashB;
-		return scoreB - scoreA;
+// Fixed-seed shuffle of the *work order* (not the images themselves) — same
+// order every load. Boosted work(s) are pinned to the front regardless of
+// hash.
+function patternWorkOrder(workIds: string[], seed: number): string[] {
+	const boosted = workIds.filter((id) => BOOSTED_IDS.has(id));
+	const rest = workIds.filter((id) => !BOOSTED_IDS.has(id));
+	const shuffled = [...rest].sort((a, b) => {
+		const hashA = (hashString(a) + seed) % 1_000_000;
+		const hashB = (hashString(b) + seed) % 1_000_000;
+		return hashA - hashB;
 	});
+	return [...boosted, ...shuffled];
 }
 
-// True random shuffle (Fisher–Yates) — a genuinely fresh, unpredictable
-// order on every single page load/reload. No thumbnail bias: every image
-// has equal odds at every position. Alternate to patternShuffle above;
-// toggle which one runs via SHUFFLE_MODE below.
-function trueRandomShuffle(items: GalleryImage[]): GalleryImage[] {
-	const arr = [...items];
-	for (let i = arr.length - 1; i > 0; i--) {
+// True random shuffle (Fisher–Yates) of the work order — a genuinely fresh,
+// unpredictable order on every single page load/reload, still pinning
+// boosted work(s) to the front. Alternate to patternWorkOrder above; toggle
+// which one runs via SHUFFLE_MODE below.
+function randomWorkOrder(workIds: string[]): string[] {
+	const boosted = workIds.filter((id) => BOOSTED_IDS.has(id));
+	const rest = workIds.filter((id) => !BOOSTED_IDS.has(id));
+	for (let i = rest.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
-		[arr[i], arr[j]] = [arr[j], arr[i]];
+		[rest[i], rest[j]] = [rest[j], rest[i]];
 	}
-	return arr;
+	return [...boosted, ...rest];
+}
+
+// Round-robin interleave across works: round 1 = each work's own 1st image
+// (visited in workOrder), round 2 = each work's 2nd image, etc. Guarantees
+// two images from the same work are always separated by every other
+// still-active work, instead of just "usually" via a random/hash shuffle —
+// each work's own images stay in their natural (CMS-authored) order, only
+// the *order works are visited in* is shuffled.
+function interleaveByWork(
+	imagesByWork: Map<string, GalleryImage[]>,
+	workOrder: string[]
+): GalleryImage[] {
+	const result: GalleryImage[] = [];
+	for (let round = 0; ; round++) {
+		let pushedAny = false;
+		for (const id of workOrder) {
+			const list = imagesByWork.get(id);
+			if (list && round < list.length) {
+				result.push(list[round]);
+				pushedAny = true;
+			}
+		}
+		if (!pushedAny) break;
+	}
+	return result;
+}
+
+// Round-robin's one structural blind spot: once every other work has run
+// out of images, whichever work still has the most left gets stuck alone in
+// several trailing rounds — and those land adjacent (sometimes 3+ in a row)
+// right at the END of the flat result, since there's nothing left after
+// them to interleave with. Repair pass, two steps:
+//  1. Walk through once, only keeping an image if it differs from the
+//     result-so-far's last — anything that would clash gets set aside
+//     instead of appended. `result` can never have an adjacent dupe by
+//     construction, since every append is checked against the immediately
+//     preceding one.
+//  2. Slot each set-aside image into the first EARLIER gap where both its
+//     new neighbors differ from it (scanning from the front). A forward-only
+//     swap can't fix a clash with nothing after it, but re-inserting works
+//     regardless of where the clash originally landed.
+// Falls back to appending at the very end (accepting the occasional
+// unavoidable clash) only if literally no safe gap exists anywhere — e.g.
+// one work outnumbers every other work combined.
+function deClumpAdjacent(images: GalleryImage[]): GalleryImage[] {
+	const result: GalleryImage[] = [];
+	const deferred: GalleryImage[] = [];
+
+	for (const img of images) {
+		const last = result[result.length - 1];
+		if (last && last.workId === img.workId) {
+			deferred.push(img);
+		} else {
+			result.push(img);
+		}
+	}
+
+	for (const img of deferred) {
+		let inserted = false;
+		for (let i = 1; i < result.length; i++) {
+			if (result[i - 1].workId !== img.workId && result[i].workId !== img.workId) {
+				result.splice(i, 0, img);
+				inserted = true;
+				break;
+			}
+		}
+		if (!inserted) result.push(img);
+	}
+
+	return result;
 }
 
 // ── Shuffle mode ──────────────────────────────────────────────────────
-// 'pattern' (default, current behaviour): fixed-seed, same order every
-//   load, thumbnails biased toward the top of the masonry.
-// 'random': genuinely reshuffles on every request via trueRandomShuffle.
+// 'pattern' (default, current behaviour): fixed-seed, same work order every
+//   load.
+// 'random': genuinely reshuffles the work order on every request.
 // Flip the return value here to switch — both implementations stay intact
 // so either is a one-line revert away. (Returned from a function, not a
 // literal-typed const, so TS doesn't narrow it to a single literal and flag
@@ -114,7 +153,13 @@ export const load: PageServerLoad = async () => {
 	// still want represented in the grid via specific image picks.
 	const TAIL_REPEAT_ONLY: Record<string, number> = {};
 
-	const images: GalleryImage[] = [];
+	// Works that should always sit at the very back of the grid, regardless
+	// of shuffle order. Useful for archived / low-emphasis works.
+	const TRAILING_IDS = new Set<string>();
+
+	// Each work's own images, kept in their natural order — that order IS
+	// the round order interleaveByWork() consumes below.
+	const imagesByWork = new Map<string, GalleryImage[]>();
 
 	for (const work of data.contents) {
 		const workImages: GalleryImage[] = [];
@@ -138,92 +183,105 @@ export const load: PageServerLoad = async () => {
 				}
 			}
 		} else {
-			// Normal rule: main_visual (video/image, falls back to thumbnail)
-			// + all repeat + repeatImg
+			// Normal rule: main_visual (video/image, falls back to thumbnail) leads,
+			// followed by repeat + repeatImg in their natural CMS order.
 			const mv = mainVisual(work);
-			if (mv) {
-				workImages.push({
-					url: mv.src,
-					width: mv.width ?? 0,
-					height: mv.height ?? 0,
-					workId: work.id,
-					workTitle: work.title,
-					isThumbnail: true,
-					priorityTier: BOOSTED_THUMBNAIL_IDS.has(work.id) ? -1 : 0,
-					isVideo: mv.isVideo
-				});
-			}
+			const thumbnail: GalleryImage | null = mv
+				? {
+						url: mv.src,
+						width: mv.width ?? 0,
+						height: mv.height ?? 0,
+						workId: work.id,
+						workTitle: work.title,
+						isThumbnail: true,
+						isVideo: mv.isVideo
+					}
+				: null;
 
-			// Tags the first couple of extra (non-thumbnail) images per work
-			// with a tapering priority tier — see PRIORITY_BIAS above.
-			let extraCount = 0;
-			const nextExtraTier = (): number | undefined => {
-				const tier = extraCount < 2 ? extraCount + 1 : undefined;
-				extraCount++;
-				return tier;
-			};
+			// `pj_images_priority` (CMS: "優先表示") lets an editor promote a
+			// specific repeat image ahead of the thumbnail for round 1 — e.g. a
+			// stronger shot than the official thumbnail. Only the first flagged
+			// row wins that slot; the thumbnail isn't dropped, just demoted to
+			// join the rest of the extras. Any further flagged rows are treated
+			// as regular extras (the field is a toggle, not a rank).
+			let priorityImage: GalleryImage | null = null;
+			const extras: GalleryImage[] = [];
 
 			if (work.repeat) {
 				for (const row of work.repeat) {
 					const videoUrl = row.pj_videos?.trim();
-					if (videoUrl) {
-						// Mix Cloudflare videos into the grid alongside images.
-						workImages.push({
-							url: videoUrl,
-							width: 0,
-							height: 0,
-							workId: work.id,
-							workTitle: work.title,
-							isThumbnail: false,
-							priorityTier: nextExtraTier(),
-							isVideo: true
-						});
-					} else if (row.pj_images?.url) {
-						workImages.push({
-							url: row.pj_images.url,
-							width: row.pj_images.width ?? 0,
-							height: row.pj_images.height ?? 0,
-							workId: work.id,
-							workTitle: work.title,
-							isThumbnail: false,
-							priorityTier: nextExtraTier()
-						});
+					const img: GalleryImage | null = videoUrl
+						? {
+								url: videoUrl,
+								width: 0,
+								height: 0,
+								workId: work.id,
+								workTitle: work.title,
+								isThumbnail: false,
+								isVideo: true
+							}
+						: row.pj_images?.url
+							? {
+									url: row.pj_images.url,
+									width: row.pj_images.width ?? 0,
+									height: row.pj_images.height ?? 0,
+									workId: work.id,
+									workTitle: work.title,
+									isThumbnail: false
+								}
+							: null;
+					if (!img) continue;
+					if (row.pj_images_priority && !priorityImage) {
+						priorityImage = img;
+					} else {
+						extras.push(img);
 					}
 				}
 			}
 
 			if (work.repeatImg) {
-				const list = Array.isArray(work.repeatImg)
-					? work.repeatImg
-					: [work.repeatImg];
+				const list = Array.isArray(work.repeatImg) ? work.repeatImg : [work.repeatImg];
 				for (const row of list) {
 					if (row && 'images' in row && row.images?.url) {
-						workImages.push({
+						extras.push({
 							url: row.images.url,
 							width: row.images.width ?? 0,
 							height: row.images.height ?? 0,
 							workId: work.id,
 							workTitle: work.title,
-							isThumbnail: false,
-							priorityTier: nextExtraTier()
+							isThumbnail: false
 						});
 					}
 				}
 			}
+
+			if (priorityImage) {
+				workImages.push(priorityImage);
+				if (thumbnail) extras.unshift(thumbnail);
+			} else if (thumbnail) {
+				workImages.push(thumbnail);
+			}
+			workImages.push(...extras);
 		}
 
-		images.push(...workImages);
+		if (workImages.length > 0) {
+			imagesByWork.set(work.id, workImages);
+		}
 	}
 
-	// Trailing IDs: PJs that should always appear at the back of the grid,
-	// regardless of shuffle priority. Useful for archived / low-emphasis works.
-	const TRAILING_IDS = new Set<string>();
+	const allWorkIds = [...imagesByWork.keys()];
+	const mainWorkIds = allWorkIds.filter((id) => !TRAILING_IDS.has(id));
+	const trailingWorkIds = allWorkIds.filter((id) => TRAILING_IDS.has(id));
 
-	const main = images.filter((img) => !TRAILING_IDS.has(img.workId));
-	const trailing = images.filter((img) => TRAILING_IDS.has(img.workId));
+	const workOrder =
+		SHUFFLE_MODE === 'random'
+			? randomWorkOrder(mainWorkIds)
+			: patternWorkOrder(mainWorkIds, 23456);
 
-	const shuffledMain =
-		SHUFFLE_MODE === 'random' ? trueRandomShuffle(main) : patternShuffle(main, 23456);
+	const images = deClumpAdjacent([
+		...interleaveByWork(imagesByWork, workOrder),
+		...interleaveByWork(imagesByWork, trailingWorkIds)
+	]);
 
-	return { images: [...shuffledMain, ...trailing], works: data.contents };
+	return { images, works: data.contents };
 };

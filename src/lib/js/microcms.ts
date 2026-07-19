@@ -48,6 +48,10 @@ export type Work = {
 		pj_images?: MicroCMSImage;
 		pj_videos?: string;
 		pj_images_title: string;
+		/** CMS boolean ("優先表示"). Marks this row's image/video as the one to
+		    lead the archives grid's round-robin for this work, ahead of the
+		    thumbnail — see archives/+page.server.ts. */
+		pj_images_priority?: boolean;
 	}>;
 	repeatImg?:
 		| Array<{
