@@ -609,6 +609,29 @@
 		height: auto;
 		display: block;
 	}
+
+	/* SP: capped height instead of natural-everything (PC still gets that) —
+	   an unusually tall/portrait pick could otherwise run the section on
+	   forever. Placed after the base rule above so this width:auto wins over
+	   its width:100% at equal specificity (source-order cascade) — without
+	   that ordering, width stays forced to 100% while max-height clips it,
+	   squishing the image instead of narrowing it. width/height:auto (not
+	   object-fit) is what actually does the work: bounded only by
+	   max-height, the image's own box narrows to whatever its intrinsic
+	   ratio needs, so there's no crop and no letterboxing to ask object-fit
+	   to resolve — it'd be inert with no fixed box to fit against.
+	   margin-inline:auto centers the now-narrower-than-100% image within
+	   the card. */
+	@media (max-width: 1023px) {
+		.next-item img,
+		.next-item video {
+			width: auto;
+			max-width: 100%;
+			height: auto;
+			max-height: 50vh;
+			margin-inline: auto;
+		}
+	}
 	.next-item__title {
 		display: block;
 		margin-top: 8px;

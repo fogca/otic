@@ -191,6 +191,10 @@
 		   put), so this is a hit-area-only change. WCAG 2.5.8. */
 		padding: 12px 4px;
 		margin: -12px -4px;
+		/* Mobile's default tap-highlight flash is clipped to the element's own
+		   border-box, so this also rounds that flash — not just a resting-state
+		   style (there's no visible background/border normally). */
+		border-radius: 6px;
 		transition: opacity var(--duration-fast) var(--ease-default);
 		/* base.css sets font-feature-settings:"palt" directly on `a` (a bare
 		   type-selector rule applied straight to the element), which
@@ -228,6 +232,8 @@
 		/* Same hit-area-only enlargement as .link above (WCAG 2.5.8). */
 		padding: 12px 4px;
 		margin: -12px -4px;
+		/* Rounds the mobile tap-highlight flash, same reasoning as .link. */
+		border-radius: 6px;
 		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 
