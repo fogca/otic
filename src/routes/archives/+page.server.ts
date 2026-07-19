@@ -25,53 +25,65 @@ type GalleryImage = {
 	isVideo?: boolean;
 };
 
-// Flagship work(s) whose thumbnail should lead the grid even more reliably
-// than the rest — pinned to the very front of the work order (round 1,
-// position 1) rather than score-biased the way the old patternShuffle did.
-const BOOSTED_IDS = new Set(['steiner']);
+// ── Shuffle mode ──────────────────────────────────────────────────────
+// 'pattern' (default, current behaviour): fixed-seed, same order every load.
+// 'random': genuinely reshuffles on every request.
+// Flip the return value here to switch — both implementations stay intact
+// so either is a one-line revert away. (Returned from a function, not a
+// literal-typed const, so TS doesn't narrow it to a single literal and flag
+// the SHUFFLE_MODE === 'random' check below as unreachable.)
+function getShuffleMode(): 'pattern' | 'random' {
+	return 'pattern';
+}
+const SHUFFLE_MODE = getShuffleMode();
 
-// Fixed-seed shuffle of the *work order* (not the images themselves) — same
-// order every load. Boosted work(s) are pinned to the front regardless of
-// hash.
-function patternWorkOrder(workIds: string[], seed: number): string[] {
-	const boosted = workIds.filter((id) => BOOSTED_IDS.has(id));
-	const rest = workIds.filter((id) => !BOOSTED_IDS.has(id));
-	const shuffled = [...rest].sort((a, b) => {
-		const hashA = (hashString(a) + seed) % 1_000_000;
-		const hashB = (hashString(b) + seed) % 1_000_000;
+// Fixed-seed shuffle — same order every load. `keyOf` extracts the string
+// each item is hashed by (combined with `seed`) — kept generic so the same
+// function drives both the work-order shuffle and each work's own
+// extra-images shuffle below without their patterns correlating.
+function patternShuffle<T>(items: T[], keyOf: (item: T) => string, seed: number): T[] {
+	return [...items].sort((a, b) => {
+		const hashA = (hashString(keyOf(a)) + seed) % 1_000_000;
+		const hashB = (hashString(keyOf(b)) + seed) % 1_000_000;
 		return hashA - hashB;
 	});
-	return [...boosted, ...shuffled];
 }
 
-// True random shuffle (Fisher–Yates) of the work order — a genuinely fresh,
-// unpredictable order on every single page load/reload, still pinning
-// boosted work(s) to the front. Alternate to patternWorkOrder above; toggle
-// which one runs via SHUFFLE_MODE below.
-function randomWorkOrder(workIds: string[]): string[] {
-	const boosted = workIds.filter((id) => BOOSTED_IDS.has(id));
-	const rest = workIds.filter((id) => !BOOSTED_IDS.has(id));
-	for (let i = rest.length - 1; i > 0; i--) {
+// True random shuffle (Fisher–Yates) — a genuinely fresh, unpredictable
+// order on every single page load/reload.
+function trueRandomShuffle<T>(items: T[]): T[] {
+	const arr = [...items];
+	for (let i = arr.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
-		[rest[i], rest[j]] = [rest[j], rest[i]];
+		[arr[i], arr[j]] = [arr[j], arr[i]];
 	}
-	return [...boosted, ...rest];
+	return arr;
 }
 
-// Round-robin interleave across works: round 1 = each work's own 1st image
-// (visited in workOrder), round 2 = each work's 2nd image, etc. Guarantees
-// two images from the same work are always separated by every other
-// still-active work, instead of just "usually" via a random/hash shuffle —
-// each work's own images stay in their natural (CMS-authored) order, only
-// the *order works are visited in* is shuffled.
+function shuffle<T>(items: T[], keyOf: (item: T) => string, seed: number): T[] {
+	return SHUFFLE_MODE === 'random' ? trueRandomShuffle(items) : patternShuffle(items, keyOf, seed);
+}
+
+const WORK_ORDER_SEED = 23456;
+const EXTRAS_SEED = 91011;
+
+// Round-robin interleave across works: round 0 = each work's own 1st image,
+// round 1 = each work's 2nd image, etc. Guarantees two images from the same
+// work are always separated by every other still-active work, instead of
+// just "usually" via a random/hash shuffle. Round 0 and every later round
+// can use DIFFERENT work orders — see the two callers below: round 0 stays
+// in the Top page's own curated order for a clean first impression, later
+// rounds shuffle so the grid doesn't just repeat that same sequence.
 function interleaveByWork(
 	imagesByWork: Map<string, GalleryImage[]>,
-	workOrder: string[]
+	round0Order: string[],
+	laterOrder: string[]
 ): GalleryImage[] {
 	const result: GalleryImage[] = [];
 	for (let round = 0; ; round++) {
+		const order = round === 0 ? round0Order : laterOrder;
 		let pushedAny = false;
-		for (const id of workOrder) {
+		for (const id of order) {
 			const list = imagesByWork.get(id);
 			if (list && round < list.length) {
 				result.push(list[round]);
@@ -140,19 +152,6 @@ function deClumpAdjacent(images: GalleryImage[]): GalleryImage[] {
 	return result;
 }
 
-// ── Shuffle mode ──────────────────────────────────────────────────────
-// 'pattern' (default, current behaviour): fixed-seed, same work order every
-//   load.
-// 'random': genuinely reshuffles the work order on every request.
-// Flip the return value here to switch — both implementations stay intact
-// so either is a one-line revert away. (Returned from a function, not a
-// literal-typed const, so TS doesn't narrow it to a single literal and flag
-// the SHUFFLE_MODE === 'random' check below as unreachable.)
-function getShuffleMode(): 'pattern' | 'random' {
-	return 'pattern';
-}
-const SHUFFLE_MODE = getShuffleMode();
-
 export const load: PageServerLoad = async () => {
 	const data = await getVisibleWorks({
 		limit: 100,
@@ -169,8 +168,10 @@ export const load: PageServerLoad = async () => {
 	// of shuffle order. Useful for archived / low-emphasis works.
 	const TRAILING_IDS = new Set<string>();
 
-	// Each work's own images, kept in their natural order — that order IS
-	// the round order interleaveByWork() consumes below.
+	// Each work's own images. workImages[0] is round 0's pick (thumbnail, or
+	// the pj_images_priority row if one's flagged); everything after it is
+	// shuffled — see the push below — since round 1+ visits index 1, 2, 3...
+	// across every work.
 	const imagesByWork = new Map<string, GalleryImage[]>();
 
 	for (const work of data.contents) {
@@ -195,8 +196,7 @@ export const load: PageServerLoad = async () => {
 				}
 			}
 		} else {
-			// Normal rule: main_visual (video/image, falls back to thumbnail) leads,
-			// followed by repeat + repeatImg in their natural CMS order.
+			// Normal rule: main_visual (video/image, falls back to thumbnail) leads.
 			const mv = mainVisual(work);
 			const thumbnail: GalleryImage | null = mv
 				? {
@@ -211,7 +211,7 @@ export const load: PageServerLoad = async () => {
 				: null;
 
 			// `pj_images_priority` (CMS: "優先表示") lets an editor promote a
-			// specific repeat image ahead of the thumbnail for round 1 — e.g. a
+			// specific repeat image ahead of the thumbnail for round 0 — e.g. a
 			// stronger shot than the official thumbnail. Only the first flagged
 			// row wins that slot; the thumbnail isn't dropped, just demoted to
 			// join the rest of the extras. Any further flagged rows are treated
@@ -273,7 +273,14 @@ export const load: PageServerLoad = async () => {
 			} else if (thumbnail) {
 				workImages.push(thumbnail);
 			}
-			workImages.push(...extras);
+
+			// Round 1+: shuffle each work's own remaining images. Left in their
+			// natural CMS order, every work's 2nd/3rd/4th... image would tend to
+			// share the same "role" (logo, then print, then web, say — a common
+			// case-study narrative) — so round 1 across the WHOLE grid would read
+			// as all-logos, round 2 all-print, etc. Shuffling per work breaks
+			// that alignment without touching round 0 (still thumbnail-led).
+			workImages.push(...shuffle(extras, (img) => img.url + img.workId, EXTRAS_SEED));
 		}
 
 		if (workImages.length > 0) {
@@ -281,18 +288,25 @@ export const load: PageServerLoad = async () => {
 		}
 	}
 
-	const allWorkIds = [...imagesByWork.keys()];
-	const mainWorkIds = allWorkIds.filter((id) => !TRAILING_IDS.has(id));
-	const trailingWorkIds = allWorkIds.filter((id) => TRAILING_IDS.has(id));
+	// Round 0's work order mirrors the Top page's own curated order — data
+	// already comes back from getVisibleWorks sorted that way (orders:
+	// 'order', same field the Top page uses), so this is just data.contents'
+	// own order filtered to works that made it into imagesByWork (a work with
+	// zero usable images is naturally absent). Keeps the grid's very first
+	// pass reading as deliberately arranged (e.g. RC1 → August → ...) instead
+	// of shuffled from the start.
+	const topOrder = data.contents.map((w) => w.id).filter((id) => imagesByWork.has(id));
+	const mainTopOrder = topOrder.filter((id) => !TRAILING_IDS.has(id));
+	const trailingTopOrder = topOrder.filter((id) => TRAILING_IDS.has(id));
 
-	const workOrder =
-		SHUFFLE_MODE === 'random'
-			? randomWorkOrder(mainWorkIds)
-			: patternWorkOrder(mainWorkIds, 23456);
+	// Round 1+: a shuffled work order, independent of round 0's Top order —
+	// otherwise the same sequence would just repeat every round.
+	const laterOrder = shuffle(mainTopOrder, (id) => id, WORK_ORDER_SEED);
+	const laterTrailingOrder = shuffle(trailingTopOrder, (id) => id, WORK_ORDER_SEED);
 
 	const images = deClumpAdjacent([
-		...interleaveByWork(imagesByWork, workOrder),
-		...interleaveByWork(imagesByWork, trailingWorkIds)
+		...interleaveByWork(imagesByWork, mainTopOrder, laterOrder),
+		...interleaveByWork(imagesByWork, trailingTopOrder, laterTrailingOrder)
 	]);
 
 	return { images, works: data.contents };
