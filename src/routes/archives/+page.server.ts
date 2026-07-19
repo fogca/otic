@@ -93,36 +93,48 @@ function interleaveByWork(
 //     instead of appended. `result` can never have an adjacent dupe by
 //     construction, since every append is checked against the immediately
 //     preceding one.
-//  2. Slot each set-aside image into the first EARLIER gap where both its
-//     new neighbors differ from it (scanning from the front). A forward-only
-//     swap can't fix a clash with nothing after it, but re-inserting works
-//     regardless of where the clash originally landed.
+//  2. Slot each set-aside image back in near where it originally sat
+//     (searching outward from that position for the nearest safe gap) — NOT
+//     just the first safe gap scanning from the front. The clash is almost
+//     always near the tail (see above), so a front-scan would splice it all
+//     the way up to the top of the grid instead, badly over-representing
+//     that work early on.
 // Falls back to appending at the very end (accepting the occasional
 // unavoidable clash) only if literally no safe gap exists anywhere — e.g.
 // one work outnumbers every other work combined.
 function deClumpAdjacent(images: GalleryImage[]): GalleryImage[] {
 	const result: GalleryImage[] = [];
-	const deferred: GalleryImage[] = [];
+	const deferred: Array<{ img: GalleryImage; originalIndex: number }> = [];
 
-	for (const img of images) {
+	images.forEach((img, originalIndex) => {
 		const last = result[result.length - 1];
 		if (last && last.workId === img.workId) {
-			deferred.push(img);
+			deferred.push({ img, originalIndex });
 		} else {
 			result.push(img);
 		}
-	}
+	});
 
-	for (const img of deferred) {
-		let inserted = false;
-		for (let i = 1; i < result.length; i++) {
-			if (result[i - 1].workId !== img.workId && result[i].workId !== img.workId) {
-				result.splice(i, 0, img);
-				inserted = true;
+	const isSafe = (pos: number, workId: string): boolean => {
+		const before = result[pos - 1];
+		const after = result[pos];
+		return (!before || before.workId !== workId) && (!after || after.workId !== workId);
+	};
+
+	for (const { img, originalIndex } of deferred) {
+		const target = Math.round((originalIndex / images.length) * result.length);
+		let insertAt = -1;
+		for (let d = 0; d <= result.length; d++) {
+			if (target + d <= result.length && isSafe(target + d, img.workId)) {
+				insertAt = target + d;
+				break;
+			}
+			if (d > 0 && target - d >= 0 && isSafe(target - d, img.workId)) {
+				insertAt = target - d;
 				break;
 			}
 		}
-		if (!inserted) result.push(img);
+		result.splice(insertAt === -1 ? result.length : insertAt, 0, img);
 	}
 
 	return result;
