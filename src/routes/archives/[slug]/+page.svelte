@@ -343,9 +343,10 @@
 		.lead__body--ja {
 			order: 2;
 			margin-top: 50px;
-			width: 95%;
+			width: 85%;
 			margin-left: auto;
 			margin-right: auto;
+			text-align: justify;
 		}
 
 		.lead__stack {
