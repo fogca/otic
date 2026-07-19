@@ -152,6 +152,13 @@
 				<p class="intro-text intro-text--ja" lang="ja">
 					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学、デザインを掛け合わせながら、わたしたちを人間たらしめるもの——身体性と情緒に語りかける戦略をつくっています。日々学びを重ねながら、より良い創作を目指しています。
 				</p>
+				<a
+					class="intro-instagram"
+					href="https://www.instagram.com/takumiisobe_/"
+					target="_blank"
+					rel="noopener noreferrer"
+					lang="en">@takumiisobe_</a
+				>
 			</div>
 		</div>
 	</section>
@@ -363,7 +370,7 @@
 	   (see min-width:1024px block), matching the archives/[slug] page's
 	   lead/media split. */
 	.panel-inner {
-		padding: 40px var(--padding) 40px;
+		padding: 50px var(--padding) 50px;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
@@ -436,6 +443,22 @@
 	.intro-text {
 		max-width: 560px;
 		margin: 0;
+	}
+	/* Language-agnostic (just a handle/link), so it sits outside the
+	   intro-text/--ja toggle pair — always visible regardless of
+	   [data-lang]. Explicit margin-top rather than relying on
+	   .panel-content's own 10px gap, which still applies on top of it. */
+	.intro-instagram {
+		display: inline-block;
+		margin-top: 20px;
+		font-size: var(--fs-h6);
+		color: var(--color-text);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		transition: opacity var(--duration-fast) var(--ease-default);
+	}
+	.intro-instagram:hover {
+		opacity: 0.6;
 	}
 
 	/* ── Services: single-column stack, generous vertical rhythm between
