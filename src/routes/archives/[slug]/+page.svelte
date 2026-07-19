@@ -520,8 +520,8 @@
 		font-weight: var(--fw-medium);
 		margin-bottom: 28px;
 	}
-	/* Colophon only, not Next — asked for specifically on this one. */
-	.Colophon .title {
+	.Colophon .title,
+	.Next .title {
 		text-transform: uppercase;
 	}
 	.Colophon .rows {
