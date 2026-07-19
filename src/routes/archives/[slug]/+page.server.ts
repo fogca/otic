@@ -37,13 +37,16 @@ export const load: PageServerLoad = async ({ params }) => {
 	// Each `repeat` row can carry either an image (pj_images) or a video URL
 	// (pj_videos). When pj_videos is set we treat that row as a looping
 	// video slide; otherwise the image is used. Rows with neither are dropped.
-	type GalleryItem = { src: string; isVideo: boolean };
+	// `caption` is the row's own pj_images_title (admin-labeled "PJ imaegs
+	// description") — optional, most rows don't have one set yet.
+	type GalleryItem = { src: string; isVideo: boolean; caption: string };
 	const gallery: GalleryItem[] = (work.repeat ?? [])
 		.map((r): GalleryItem | null => {
+			const caption = r.pj_images_title ?? '';
 			const videoUrl = r.pj_videos?.trim();
-			if (videoUrl) return { src: videoUrl, isVideo: true };
+			if (videoUrl) return { src: videoUrl, isVideo: true, caption };
 			const imgUrl = r.pj_images?.url;
-			if (imgUrl) return { src: imgUrl, isVideo: false };
+			if (imgUrl) return { src: imgUrl, isVideo: false, caption };
 			return null;
 		})
 		.filter((x): x is GalleryItem => x !== null);

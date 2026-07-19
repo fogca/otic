@@ -182,17 +182,20 @@
 						muted
 						playsinline
 						preload="metadata"
-						aria-label={`${archive.title} ${i + 1}`}
+						aria-label={item.caption || `${archive.title} ${i + 1}`}
 					></video>
 				{:else}
 					<img
 						src={imgOpt(item.src, 1600)}
 						srcset={imgSrcset(item.src, [800, 1200, 1600, 2000])}
 						sizes="(min-width: 1024px) 50vw, 100vw"
-						alt={`${archive.title} ${i + 1}`}
+						alt={item.caption || `${archive.title} ${i + 1}`}
 						loading="lazy"
 						decoding="async"
 					/>
+				{/if}
+				{#if item.caption}
+					<p class="media__caption">{item.caption}</p>
 				{/if}
 			</div>
 		{/each}
@@ -478,6 +481,13 @@
 	.media__item {
 		width: 90%;
 		margin-inline: auto;
+	}
+	/* Per-image caption (pj_images_title) — only when the CMS row actually
+	   has one set, small and unobtrusive rather than a full credit line. */
+	.media__caption {
+		margin: 8px 0 0;
+		font-size: var(--fs-h6);
+		opacity: 0.5;
 	}
 	/* Video items carry an inline LQIP background (a ~1KB first-frame
 	   capture, set in the template) — visible whenever the <video> above it
