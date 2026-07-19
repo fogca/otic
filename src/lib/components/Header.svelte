@@ -247,9 +247,14 @@
 		opacity: 1;
 	}
 
-	/* ----- Logo (right) ----- */
+	/* ----- Logo (right on desktop layout order; SP flips this — see below) ----- */
 	.Header .logo {
-		width: 200px;
+		/* Fluid, not a flat 200px: at a fixed px the logo reads noticeably
+		   bigger relative to the screen on an iPhone mini (~375px) than a
+		   Pro Max (~430px) — scale with viewport width instead, clamped so
+		   it neither shrinks too far on the smallest phones nor keeps
+		   growing past a comfortable size on larger SP/tablet widths. */
+		width: clamp(160px, 50vw, 220px);
 		color: var(--color-text);
 	}
 
@@ -257,6 +262,14 @@
 		display: block;
 		width: 100%;
 		height: auto;
+	}
+
+	/* SP: logo left, nav right — order flips visual position without
+	   touching DOM order (nav stays first for tab/reading order). */
+	@media (max-width: 1023px) {
+		.Header .head-end {
+			order: -1;
+		}
 	}
 
 	@media (min-width: 1024px) {
