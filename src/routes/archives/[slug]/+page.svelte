@@ -104,8 +104,11 @@
 	     vertically-centred left rail; SP: normal flow) -->
 	<div class="lead" use:leadPortal>
 		<h1 class="lead__title" lang="en">{archive.title}</h1>
-		{#if archive.headline}
-			<p class="lead__tag" lang="ja">{archive.headline}</p>
+		{#if archive.headlineEn}
+			<p class="lead__tag" lang="en">{archive.headlineEn}</p>
+		{/if}
+		{#if archive.headlineJa}
+			<p class="lead__tag lead__tag--ja" lang="ja">{archive.headlineJa}</p>
 		{/if}
 		{#if archive.descriptionEn}
 			<p class="lead__body" lang="en">{archive.descriptionEn}</p>
@@ -227,12 +230,14 @@
 </main>
 
 <style>
-	/* Language toggle: show only the active language's description body. The EN
-	   project title + tagline stay in both. [data-lang] is on <html> (an
-	   ancestor of both the in-flow and portaled lead). */
+	/* Language toggle: show only the active language's tag + description body
+	   (the EN project title always stays as-is). [data-lang] is on <html>
+	   (an ancestor of both the in-flow and portaled lead). */
+	:global([data-lang='en']) .lead__tag--ja,
 	:global([data-lang='en']) .lead__body--ja {
 		display: none;
 	}
+	:global([data-lang='ja']) .lead__tag:not(.lead__tag--ja),
 	:global([data-lang='ja']) .lead__body:not(.lead__body--ja) {
 		display: none;
 	}

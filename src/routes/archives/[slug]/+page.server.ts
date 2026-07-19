@@ -11,6 +11,20 @@ export const load: PageServerLoad = async ({ params }) => {
 		throw error(404, `Work "${params.slug}" not found`);
 	}
 
+	// The tag/theme line under the title: `description` holds JA and EN in
+	// one field, "ja!en" (a literal "!" between them, JA first) — editors
+	// write both languages there instead of separate fields. No "!" at all
+	// means the field is JA-only. Falls back to the older single-language
+	// `headline` field for works not yet migrated to this format.
+	function splitTag(description: string): { ja: string; en: string } {
+		const i = description.indexOf('!');
+		if (i === -1) return { ja: description.trim(), en: '' };
+		return { ja: description.slice(0, i).trim(), en: description.slice(i + 1).trim() };
+	}
+	const tag = work.description
+		? splitTag(work.description)
+		: { ja: work.headline ?? '', en: '' };
+
 	// Adapt microCMS Work → the legacy `archive` shape used by +page.svelte.
 	// Each `repeat` row can carry either an image (pj_images) or a video URL
 	// (pj_videos). When pj_videos is set we treat that row as a looping
@@ -33,9 +47,10 @@ export const load: PageServerLoad = async ({ params }) => {
 		// Hero = main_visual (Cloudflare video or image), falling back to thumbnail.
 		hero: mainVisual(work),
 		heroImageSp: work.sp_thumbnail?.url ?? '',
-		descriptionJa: work.body_jp ?? work.description ?? '',
+		descriptionJa: work.body_jp ?? '',
 		descriptionEn: work.body_en ?? '',
-		headline: work.headline ?? '',
+		headlineJa: tag.ja,
+		headlineEn: tag.en,
 		// Short "built with" line, shown right under the body copy — separate
 		// from Colophon further down the page.
 		stack: work.stack ?? '',
