@@ -112,12 +112,15 @@
 	/* Shared sliding pill behind whichever option is active — .switch-option
 	   itself no longer carries its own active background (see below), so
 	   there's exactly one black pill to animate between positions instead of
-	   two independently-toggling ones. */
+	   two independently-toggling ones. Inset 2px top/bottom (SP only — see
+	   the PC override below) rather than a flush height:100% — reads as a
+	   deliberately offset shape sitting inside the track, not a rigid exact
+	   fill. */
 	.switch-highlight {
 		position: absolute;
-		top: 0;
+		top: 2px;
 		left: 0;
-		height: 100%;
+		height: calc(100% - 4px);
 		border-radius: 999px;
 		background: var(--color-text);
 	}
@@ -131,7 +134,7 @@
 	.switch-option {
 		position: relative;
 		z-index: 1;
-		padding: 8px 18px;
+		padding: 5px 15px;
 		font-size: calc(var(--fs-h6) * 0.85);
 		font-weight: var(--fw-base);
 		color: var(--color-text);
@@ -159,6 +162,13 @@
 		.switch-option {
 			padding: 8px 28px;
 			font-size: calc(var(--fs-h5) * 0.85);
+		}
+
+		/* PC keeps the flush, exact-fill highlight — the inset is an SP-only
+		   request. */
+		.switch-highlight {
+			top: 0;
+			height: 100%;
 		}
 	}
 </style>
