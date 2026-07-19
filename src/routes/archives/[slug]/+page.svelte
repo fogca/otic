@@ -8,6 +8,7 @@
 
 	let { data }: { data: PageData } = $props();
 	const archive = $derived(data.archive);
+	const nextWorks = $derived(data.nextWorks);
 
 	// Fade the portaled (fixed) lead out while the page-shrink transition runs.
 	let leaving = $state(false);
@@ -198,6 +199,7 @@
 	</div>
 
 	{#if hasColophon}
+		<hr class="divider divider--colophon" />
 		<section class="Colophon">
 			<div class="wrapper">
 				<h2 class="title" lang="en">Colophon</h2>
@@ -230,6 +232,41 @@
 			</div>
 		</section>
 	{/if}
+
+	{#if nextWorks.length > 0}
+		<hr class="divider divider--next" />
+		<section class="Next">
+			<div class="wrapper">
+				<h2 class="title" lang="en">Next</h2>
+				<div class="next-grid">
+					{#each nextWorks as item (item.slug)}
+						<a class="next-item" href="/archives/{item.slug}">
+							{#if item.visual?.isVideo}
+								<video
+									src={item.visual.src}
+									autoplay
+									loop
+									muted
+									playsinline
+									aria-label={item.title}
+								></video>
+							{:else if item.visual}
+								<img
+									src={imgOpt(item.visual.src, 800)}
+									srcset={imgSrcset(item.visual.src, [400, 600, 800, 1200])}
+									sizes="(min-width: 1024px) 20vw, 90vw"
+									alt={item.title}
+									loading="lazy"
+									decoding="async"
+								/>
+							{/if}
+							<span class="next-item__title" lang="en">{item.title}</span>
+						</a>
+					{/each}
+				</div>
+			</div>
+		</section>
+	{/if}
 </main>
 
 <style>
@@ -253,6 +290,20 @@
 	/* base.css sets color directly on text elements — override to black here. */
 	.Archive :global(*) {
 		color: #000;
+	}
+
+	/* Plain horizontal rule marking a section break (before Colophon, and
+	   before Next) — literal px height rather than a border, so it renders
+	   at exactly 0.5px instead of snapping to the nearest 1px some browsers
+	   apply to hairline borders. No margin here — both breakpoints set their
+	   own margin-top explicitly below (this rule must stay ahead of those in
+	   the cascade, or an equal-specificity margin:0 here would win instead). */
+	.divider {
+		width: 100%;
+		height: 0.5px;
+		background: #ccc;
+		border: none;
+		margin: 0;
 	}
 
 	/* ── Lead (title + descriptions) ── */
@@ -372,6 +423,26 @@
 		.media__item + .media__item {
 			margin-top: 80px;
 		}
+
+		/* Colophon/Next are separate top-level sections (not flattened into
+		   .Archive like .lead/.media above), but they're still direct flex
+		   children of the same .Archive flex column — without an explicit
+		   order they default to 0, same as title/tag, and render up near
+		   the TOP of the page instead of after the gallery. */
+		.divider--colophon {
+			order: 5;
+			margin-top: 48px;
+		}
+		.Colophon {
+			order: 6;
+		}
+		.divider--next {
+			order: 7;
+			margin-top: 48px;
+		}
+		.Next {
+			order: 8;
+		}
 	}
 	.media__hero img,
 	.media__hero video,
@@ -432,8 +503,9 @@
 	.Colophon .wrapper {
 		padding-inline: 30px;
 	}
-	.Colophon .title {
-		font-size: var(--fs-h4);
+	.Colophon .title,
+	.Next .title {
+		font-size: var(--fs-h0);
 		font-weight: var(--fw-medium);
 		margin-bottom: 28px;
 	}
@@ -490,6 +562,37 @@
 		opacity: 0.6;
 	}
 
+	/* ── Next (a few related works, ranked by shared `scope` — see
+	   +page.server.ts) ── */
+	.Next {
+		padding-top: 80px;
+	}
+	.Next .wrapper {
+		padding-inline: 30px;
+	}
+	.next-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+	}
+	.next-item {
+		display: block;
+		text-decoration: none;
+	}
+	.next-item img,
+	.next-item video {
+		width: 100%;
+		aspect-ratio: 4 / 3;
+		object-fit: cover;
+		display: block;
+	}
+	.next-item__title {
+		display: block;
+		margin-top: 8px;
+		font-size: var(--fs-h5);
+		font-weight: var(--fw-base);
+	}
+
 	/* ──────────────────────────────────────────────────────────────
 	   Desktop: left lead rail + right editorial media column
 	   ────────────────────────────────────────────────────────────── */
@@ -499,7 +602,10 @@
 			grid-template-columns: 38% 62%;
 			grid-template-areas:
 				'info media'
-				'colophon colophon';
+				'divider-colophon divider-colophon'
+				'colophon colophon'
+				'divider-next divider-next'
+				'next next';
 			column-gap: 2vw;
 		}
 
@@ -567,6 +673,34 @@
 		}
 		.Colophon .row {
 			grid-template-columns: 140px 1fr;
+		}
+
+		/* No row-gap set on .Archive's grid — without an explicit margin
+		   these would sit flush against the row above (e.g. the media
+		   column's bottom edge), same underlying issue as the SP margin-top
+		   values above. */
+		.divider--colophon {
+			grid-area: divider-colophon;
+			margin-top: 48px;
+		}
+		.divider--next {
+			grid-area: divider-next;
+			margin-top: 48px;
+		}
+
+		/* Next — same left-aligned width as Colophon above it, cards run in
+		   a row instead of SP's stack. */
+		.Next {
+			grid-area: next;
+			padding-top: 160px;
+		}
+		.Next .wrapper {
+			max-width: 720px;
+			margin-inline: 0;
+			padding-inline: var(--padding);
+		}
+		.next-grid {
+			flex-direction: row;
 		}
 	}
 </style>

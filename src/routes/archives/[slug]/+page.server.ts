@@ -1,7 +1,15 @@
 import { error } from '@sveltejs/kit';
-import { getDetail } from '$lib/js/microcms';
+import { getDetail, getVisibleWorks } from '$lib/js/microcms';
 import { mainVisual } from '$lib/js/img';
 import type { PageServerLoad } from './$types';
+
+// Count of shared `scope` values — the more overlap with the current work,
+// the more likely two projects read as related (e.g. two typeface/V.I.
+// works vs. a typeface work next to a pure web-dev one).
+function scopeOverlap(a: string[], b: string[]): number {
+	const setA = new Set(a);
+	return b.reduce((count, s) => count + (setA.has(s) ? 1 : 0), 0);
+}
 
 export const load: PageServerLoad = async ({ params }) => {
 	let work;
@@ -78,5 +86,30 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 	};
 
-	return { archive };
+	// "Next" — a few other works to surface below Colophon. Ranked by shared
+	// `scope` values with the current work first (a typeface/V.I. piece
+	// leads with other typeface/V.I. work, not a random pick); ties (incl.
+	// works with no scope overlap at all) keep the catalogue's own `order`
+	// via a stable sort, so it degrades to "next few in the catalogue"
+	// rather than reshuffling on every visit.
+	const otherWorksData = await getVisibleWorks({
+		limit: 100,
+		orders: 'order',
+		fields: ['id', 'title', 'main_visual', 'scope']
+	});
+	const currentScope = work.scope ?? [];
+	const nextWorks = otherWorksData.contents
+		.filter((w) => w.id !== work.id)
+		.sort(
+			(a, b) =>
+				scopeOverlap(currentScope, b.scope ?? []) - scopeOverlap(currentScope, a.scope ?? [])
+		)
+		.slice(0, 3)
+		.map((w) => ({
+			slug: w.id,
+			title: w.title,
+			visual: mainVisual(w)
+		}));
+
+	return { archive, nextWorks };
 };
