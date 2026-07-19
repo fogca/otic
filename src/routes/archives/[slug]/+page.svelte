@@ -313,7 +313,6 @@
 
 		.lead__title,
 		.lead__tag,
-		.lead__body,
 		.lead__stack {
 			padding-inline: var(--padding);
 			max-width: 560px;
@@ -332,9 +331,16 @@
 			margin-top: 48px;
 		}
 
+		/* Own width/centering instead of the padding-inline/max-width the
+		   other lead children get above — a narrower, auto-centered column
+		   rather than an edge-padded full-width one. */
 		.lead__body,
 		.lead__body--ja {
 			order: 2;
+			margin-top: 50px;
+			width: 95%;
+			margin-left: auto;
+			margin-right: auto;
 		}
 
 		.lead__stack {
