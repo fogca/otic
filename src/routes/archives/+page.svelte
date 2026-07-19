@@ -57,9 +57,10 @@
 		return window.matchMedia('(min-width: 1024px)').matches ? 5 : 2;
 	}
 
-	// Grid gap: PC = 15px, SP = 15px
+	// Grid gap: PC = 15px, SP = 10px
 	function getGap(): number {
-		return 15;
+		if (!browser) return 15;
+		return window.matchMedia('(min-width: 1024px)').matches ? 15 : 10;
 	}
 
 	function layoutMasonry() {
@@ -70,7 +71,14 @@
 
 		const columnCount = getColumnCount();
 		const gap = getGap();
-		const containerWidth = container.offsetWidth;
+		// Absolutely-positioned children ignore their containing block's own
+		// padding entirely (a `left`/`top` of 0 lands at the padding edge,
+		// not the content edge) — .Gallery's padding-inline would otherwise
+		// be invisible, items rendering flush against the viewport instead
+		// of inset like every other section. Read it directly and apply it
+		// as a manual left offset / width reduction below.
+		const padLeft = parseFloat(getComputedStyle(container).paddingLeft) || 0;
+		const containerWidth = container.offsetWidth - padLeft * 2;
 		// A transient collapsed measurement (mid page-transition / rotation /
 		// browser-chrome resize) would lay every item out at ~2px wide and pin
 		// the container height to ~200px — a fully broken grid that sticks
@@ -93,7 +101,7 @@
 			for (let c = 1; c < columnCount; c++) {
 				if (columnHeights[c] < columnHeights[column]) column = c;
 			}
-			const x = column * (columnWidth + gap);
+			const x = padLeft + column * (columnWidth + gap);
 			const y = columnHeights[column];
 			const itemHeight = item.offsetHeight;
 			item.style.left = `${x}px`;
@@ -275,10 +283,10 @@
 		padding-inline: 0;
 	}
 
-	/* SP: Gallery hugs closer to the edge for the masonry rhythm
-	   (ArchivesTitleBar handles its own padding). */
+	/* SP: Gallery's left/right edges align with the Header's own
+	   var(--padding) inset, not a near-edge-to-edge custom value. */
 	.Archives .Gallery {
-		padding-inline: 5px;
+		padding-inline: var(--padding);
 	}
 
 	/* Masonry */
