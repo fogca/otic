@@ -57,10 +57,10 @@
 		return window.matchMedia('(min-width: 1024px)').matches ? 5 : 2;
 	}
 
-	// Grid gap: PC = 15px, SP = 10px
+	// Grid gap: PC = 15px, SP = 8px
 	function getGap(): number {
 		if (!browser) return 15;
-		return window.matchMedia('(min-width: 1024px)').matches ? 15 : 10;
+		return window.matchMedia('(min-width: 1024px)').matches ? 15 : 8;
 	}
 
 	function layoutMasonry() {
@@ -283,11 +283,11 @@
 		padding-inline: 0;
 	}
 
-	/* SP: left/right inset matches the gap between items (10px), not the
+	/* SP: left/right inset matches the gap between items (8px), not the
 	   Header's own var(--padding) — tried that, read as misaligned with the
 	   grid's own rhythm. */
 	.Archives .Gallery {
-		padding-inline: 10px;
+		padding-inline: 8px;
 	}
 
 	/* Masonry */
