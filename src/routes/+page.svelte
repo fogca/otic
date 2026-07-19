@@ -3,7 +3,8 @@
 	import { browser } from '$app/environment';
 	import Loader from '$lib/components/Loader.svelte';
 	import { intro } from '$lib/state/intro.svelte';
-	import { imgOpt, imgSrcset, mainVisualImage } from '$lib/js/img';
+	import { imgOpt, imgSrcset, mainVisual, mainVisualImage } from '$lib/js/img';
+	import { lazyVideo } from '$lib/actions/lazyVideo';
 	import { padNumber } from '$lib/js/format';
 	import type { PageData } from './$types';
 
@@ -114,15 +115,26 @@
 	<section class="Archives">
 		<div class="wrapper">
 			{#if firstWork}
-				{@const fwImg = mainVisualImage(firstWork)}
+				{@const fwVisual = mainVisual(firstWork)}
 				<a class="card card-01" href="/archives/{firstWork.id}">
 					<div class="image">
-						{#if fwImg}
+						{#if fwVisual?.isVideo}
+							<!-- Hero is already in view on load — play directly, no
+							     lazy-load gate needed. -->
+							<video
+								src={fwVisual.src}
+								autoplay
+								loop
+								muted
+								playsinline
+								aria-label={firstWork.title}
+							></video>
+						{:else if fwVisual}
 							<!-- Fixed 257px (320px @768, 380px @1024) — size the srcset to
 							     that, not 100vw, and prioritise it as the LCP. -->
 							<img
-								src={imgOpt(fwImg.url, 640)}
-								srcset={imgSrcset(fwImg.url, [400, 640, 800, 1200])}
+								src={imgOpt(fwVisual.src, 640)}
+								srcset={imgSrcset(fwVisual.src, [400, 640, 800, 1200])}
 								sizes="(min-width: 768px) 320px, 257px"
 								alt={firstWork.title}
 								loading="eager"
@@ -145,18 +157,27 @@
 			     shrinks the card for portrait images so the meta below aligns
 			     with the rendered image width. -->
 			{#each restWorks as work, i (work.id)}
-				{@const wImg = mainVisualImage(work)}
-				{@const aspect = wImg && wImg.width && wImg.height ? wImg.width / wImg.height : 1}
+				{@const wVisual = mainVisual(work)}
+				{@const aspect = wVisual && wVisual.width && wVisual.height ? wVisual.width / wVisual.height : 1}
 				<a
 					class="card card-{padNumber(i + 1)}"
 					href="/archives/{work.id}"
 					style="--aspect: {aspect}"
 				>
 					<div class="image">
-						{#if wImg}
+						{#if wVisual?.isVideo}
+							<video
+								use:lazyVideo
+								src={wVisual.src}
+								loop
+								muted
+								playsinline
+								aria-label={work.title}
+							></video>
+						{:else if wVisual}
 							<img
-								src={imgOpt(wImg.url, 1200)}
-								srcset={imgSrcset(wImg.url, [600, 900, 1200, 1800])}
+								src={imgOpt(wVisual.src, 1200)}
+								srcset={imgSrcset(wVisual.src, [600, 900, 1200, 1800])}
 								sizes="(min-width: 1024px) 45vw, 90vw"
 								alt={work.title}
 								loading="lazy"
@@ -203,7 +224,8 @@
 		background: var(--color-bg-gray);
 	}
 
-	.Home .Archives .card .image img {
+	.Home .Archives .card .image img,
+	.Home .Archives .card .image video {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
@@ -211,7 +233,8 @@
 	}
 
 	/* Cards 02–10: natural height (aspect-ratio temporarily disabled) */
-	.Home .Archives .card:not(.card-01) .image img {
+	.Home .Archives .card:not(.card-01) .image img,
+	.Home .Archives .card:not(.card-01) .image video {
 		height: auto;
 		object-fit: initial;
 	}
@@ -356,7 +379,8 @@
 			background: transparent;
 		}
 
-		.Home .Archives .card:not(.card-01) .image img {
+		.Home .Archives .card:not(.card-01) .image img,
+		.Home .Archives .card:not(.card-01) .image video {
 			/* The card is already capped to the image's real width at 90vh via
 			   max-width: min(px, calc(90vh * aspect)), so width:100% makes
 			   image width == card width == meta width (no centering gap). The
