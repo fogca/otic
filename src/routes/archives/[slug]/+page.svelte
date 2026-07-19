@@ -253,7 +253,7 @@
 		max-width: 560px;
 	}
 	.lead__title {
-		font-size: var(--fs-h1);
+		font-size: var(--fs-h0);
 		line-height: 1.25;
 		font-weight: var(--fw-base);
 		margin: 0;
@@ -286,6 +286,46 @@
 		flex-direction: column;
 		gap: 80px;
 		margin-top: 48px;
+	}
+
+	/* SP: hero leads, ahead of the title/body text (was lead -> hero ->
+	   gallery). display:contents drops .media's own box so its children
+	   (.media__hero + each .media__item) join .Archive's flex flow
+	   directly as siblings of .lead — only then can .media__hero's `order`
+	   reach across into .lead's position; a plain child-vs-sibling
+	   reorder couldn't cross that container boundary. PC is untouched:
+	   this whole block is SP-only, and .lead there is portaled to <body>
+	   with its own inline layout regardless.
+	   .media's own gap/margin-top go inert with display:contents, so the
+	   rhythm they provided is rebuilt here on the now-flattened items —
+	   reusing the same three values (120/48/80) in their new positions,
+	   not new numbers: 120 was .lead's old fixed-Header clearance (hero
+	   carries that now), 48 was .media's old gap from .lead (now hero ->
+	   lead), 80 was the old item-to-item gap (kept, between gallery
+	   items only — the first item's gap from .lead uses 48 instead, for
+	   the same closer text -> first-image rhythm as hero -> lead). */
+	@media (max-width: 1023px) {
+		.media {
+			display: contents;
+		}
+
+		.media__hero {
+			order: -1;
+			margin-top: 120px;
+		}
+
+		.lead {
+			padding-top: 0;
+			margin-top: 48px;
+		}
+
+		.media__item {
+			margin-top: 48px;
+		}
+
+		.media__item + .media__item {
+			margin-top: 80px;
+		}
 	}
 	.media__hero img,
 	.media__hero video,
