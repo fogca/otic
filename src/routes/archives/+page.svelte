@@ -57,10 +57,9 @@
 		return window.matchMedia('(min-width: 1024px)').matches ? 5 : 2;
 	}
 
-	// Grid gap: PC = 15px, SP = 5px
+	// Grid gap: PC = 15px, SP = 15px
 	function getGap(): number {
-		if (!browser) return 15;
-		return window.matchMedia('(min-width: 1024px)').matches ? 15 : 5;
+		return 15;
 	}
 
 	function layoutMasonry() {
