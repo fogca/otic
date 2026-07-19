@@ -77,7 +77,7 @@
 <style>
 	.TitleBar {
 		display: flex;
-		align-items: baseline;
+		align-items: flex-end;
 		justify-content: space-between;
 		gap: 16px;
 		padding-inline: var(--padding);
@@ -112,15 +112,15 @@
 	/* Shared sliding pill behind whichever option is active — .switch-option
 	   itself no longer carries its own active background (see below), so
 	   there's exactly one black pill to animate between positions instead of
-	   two independently-toggling ones. Inset 2px top/bottom (SP only — see
+	   two independently-toggling ones. Inset 4px top/bottom (SP only — see
 	   the PC override below) rather than a flush height:100% — reads as a
 	   deliberately offset shape sitting inside the track, not a rigid exact
 	   fill. */
 	.switch-highlight {
 		position: absolute;
-		top: 2px;
+		top: 4px;
 		left: 0;
-		height: calc(100% - 4px);
+		height: calc(100% - 8px);
 		border-radius: 999px;
 		background: var(--color-text);
 	}
