@@ -95,6 +95,9 @@ export const load: PageServerLoad = async ({ params }) => {
 	// works with no scope overlap at all) keep the catalogue's own `order`
 	// via a stable sort, so it degrades to "next few in the catalogue"
 	// rather than reshuffling on every visit.
+	// Fetch up to 4 (PC's target range is 2-4) — the template renders all of
+	// them and SP hides the 3rd/4th via CSS rather than fetching fewer, so
+	// there's one shared list instead of two separate viewport-specific ones.
 	const otherWorksData = await getVisibleWorks({
 		limit: 100,
 		orders: 'order',
@@ -107,7 +110,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			(a, b) =>
 				scopeOverlap(currentScope, b.scope ?? []) - scopeOverlap(currentScope, a.scope ?? [])
 		)
-		.slice(0, 3)
+		.slice(0, 4)
 		.map((w) => ({
 			slug: w.id,
 			title: w.title,

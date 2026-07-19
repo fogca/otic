@@ -451,6 +451,11 @@
 		.Next {
 			order: 8;
 		}
+		/* Server fetches up to 4 (PC's range); SP only wants 2 — hide rather
+		   than fetch a separate shorter list for the same page. */
+		.next-item:nth-child(n + 3) {
+			display: none;
+		}
 	}
 	.media__hero img,
 	.media__hero video,
@@ -506,14 +511,18 @@
 
 	/* ── Colophon ── */
 	.Colophon {
-		padding-top: 40px;
-		padding-bottom: 80px;
+		padding-top: 60px;
+		padding-bottom: 40px;
 	}
 	.Colophon .title,
 	.Next .title {
 		font-size: var(--fs-h1);
 		font-weight: var(--fw-medium);
 		margin-bottom: 28px;
+	}
+	/* Colophon only, not Next — asked for specifically on this one. */
+	.Colophon .title {
+		text-transform: uppercase;
 	}
 	.Colophon .rows {
 		display: flex;
@@ -582,11 +591,12 @@
 		display: block;
 		text-decoration: none;
 	}
+	/* Natural aspect ratio, not force-cropped to a fixed box — each card's
+	   height varies with its own image/video. */
 	.next-item img,
 	.next-item video {
 		width: 100%;
-		aspect-ratio: 4 / 3;
-		object-fit: cover;
+		height: auto;
 		display: block;
 	}
 	.next-item__title {
