@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
+	import { goto } from '$app/navigation';
+
 	// Shared by archives/+page.svelte (Image = grid) and archives/list/+page.svelte
 	// (Text = list) so the title/switch row is identical on both — previously
 	// the list page had no title at all, and the two pages' switch markup had
@@ -6,6 +9,51 @@
 	type Props = { active: 'image' | 'text' };
 	let { active }: Props = $props();
 	const isText = $derived(active === 'text');
+
+	let imageEl: HTMLElement | null = $state(null);
+	let textEl: HTMLElement | null = $state(null);
+	let highlightEl: HTMLElement | null = $state(null);
+
+	// Which option the highlight/text-color should show as active RIGHT NOW —
+	// starts in sync with the prop (this component remounts fresh on every
+	// navigation between /archives and /archives/list, so that's always
+	// correct on mount) but a click flips it immediately, ahead of the prop,
+	// so the highlight visibly slides to the clicked target before the page
+	// actually changes underneath it.
+	let activeIsText = $state(untrack(() => isText));
+	let highlightReady = $state(false);
+
+	// Position (and, after the first paint, animate) the highlight to match
+	// whichever option is current. No transition on that very first
+	// positioning — otherwise it'd visibly slide in from (0,0) on every
+	// fresh mount instead of just appearing already in place.
+	$effect(() => {
+		const target = activeIsText ? textEl : imageEl;
+		if (!target || !highlightEl) return;
+		highlightEl.style.width = `${target.offsetWidth}px`;
+		highlightEl.style.transform = `translateX(${target.offsetLeft}px)`;
+		if (!highlightReady) {
+			requestAnimationFrame(() => {
+				highlightReady = true;
+			});
+		}
+	});
+
+	function handleClick(event: MouseEvent) {
+		// Modified/non-primary clicks (open in new tab, etc.) keep the
+		// browser's normal link behavior — only a plain left click runs the
+		// slide-then-navigate sequence.
+		if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+			return;
+		}
+		event.preventDefault();
+		const href = isText ? '/archives' : '/archives/list';
+		activeIsText = !isText;
+		// Matches --duration-fast (200ms), the highlight's own transition
+		// length, plus a small margin so it's visibly settled before the
+		// page transition starts covering it.
+		setTimeout(() => goto(href), 250);
+	}
 </script>
 
 <section class="TitleBar">
@@ -14,9 +62,15 @@
 		href={isText ? '/archives' : '/archives/list'}
 		class="view-switch"
 		aria-label={isText ? 'Switch to Image view' : 'Switch to Text view'}
+		onclick={handleClick}
 	>
-		<span class="switch-option" class:is-active={!isText} lang="en">Image</span>
-		<span class="switch-option" class:is-active={isText} lang="en">Text</span>
+		<div class="switch-highlight" class:is-ready={highlightReady} bind:this={highlightEl}></div>
+		<span class="switch-option" class:is-active={!activeIsText} lang="en" bind:this={imageEl}
+			>Image</span
+		>
+		<span class="switch-option" class:is-active={activeIsText} lang="en" bind:this={textEl}
+			>Text</span
+		>
 	</a>
 </section>
 
@@ -45,6 +99,7 @@
 	   segmented control reads (not the previous small ON/OFF track+thumb).
 	   Whole row is one link — clicking anywhere toggles to the other view. */
 	.view-switch {
+		position: relative;
 		display: flex;
 		align-items: center;
 		flex: none;
@@ -54,24 +109,39 @@
 		text-decoration: none;
 	}
 
-	.switch-option {
-		padding: 8px 28px;
+	/* Shared sliding pill behind whichever option is active — .switch-option
+	   itself no longer carries its own active background (see below), so
+	   there's exactly one black pill to animate between positions instead of
+	   two independently-toggling ones. */
+	.switch-highlight {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
 		border-radius: 999px;
-		/* Smaller than any named token has a step for (h6 is already the
-		   scale's floor) — scale it down from h6 instead of a raw px value,
-		   so it still tracks the type scale's own breakpoints. */
+		background: var(--color-text);
+	}
+
+	.switch-highlight.is-ready {
+		transition:
+			transform var(--duration-fast) var(--ease-default),
+			width var(--duration-fast) var(--ease-default);
+	}
+
+	.switch-option {
+		position: relative;
+		z-index: 1;
+		padding: 8px 18px;
 		font-size: calc(var(--fs-h6) * 0.85);
 		font-weight: var(--fw-base);
 		color: var(--color-text);
 		opacity: 0.5;
 		transition:
-			background var(--duration-fast) var(--ease-default),
 			color var(--duration-fast) var(--ease-default),
 			opacity var(--duration-fast) var(--ease-default);
 	}
 
 	.switch-option.is-active {
-		background: var(--color-text);
 		color: #fff;
 		opacity: 1;
 	}
@@ -87,6 +157,7 @@
 		}
 
 		.switch-option {
+			padding: 8px 28px;
 			font-size: calc(var(--fs-h5) * 0.85);
 		}
 	}
