@@ -35,6 +35,9 @@
 		{#if archive.scope.length > 0}
 			<p class="lead__scope" lang="en">{archive.scope.join(' / ')}</p>
 		{/if}
+		{#if archive.year}
+			<p class="lead__year" lang="en">{archive.year}</p>
+		{/if}
 		{#if archive.descriptionEn}
 			<p class="lead__body" lang="en">{archive.descriptionEn}</p>
 		{/if}
@@ -46,7 +49,7 @@
 		{/if}
 	</div>
 
-	<!-- RIGHT: media — hero + gallery, editorial vertical flow -->
+	<!-- media — hero + gallery, editorial vertical flow -->
 	<div class="media">
 		{#if archive.hero?.isVideo}
 			<!-- Hero starts above the fold, so it loads/plays immediately —
@@ -262,6 +265,13 @@
 		margin: 8px 0 0;
 		opacity: 0.5;
 	}
+	/* Free-form year/status (e.g. "2026", "on-going") — same small, muted
+	   treatment as .lead__scope directly above it. */
+	.lead__year {
+		font-size: var(--fs-h6);
+		margin: 8px 0 0;
+		opacity: 0.5;
+	}
 	.lead__body {
 		/* Typography (size/line-height) comes from the base.css p:lang(en|ja)
 		   presets — no per-element overrides. */
@@ -310,6 +320,7 @@
 	.lead__title,
 	.lead__tag,
 	.lead__scope,
+	.lead__year,
 	.lead__stack {
 		padding-inline: var(--padding);
 		max-width: 560px;
@@ -578,6 +589,7 @@
 		.lead__title,
 		.lead__tag,
 		.lead__scope,
+		.lead__year,
 		.lead__stack {
 			max-width: 720px;
 		}

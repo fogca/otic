@@ -68,6 +68,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		// just showing every value instead of list's space-constrained
 		// first-2 truncation.
 		scope: work.scope ?? [],
+		// Year/status line shown right under scope (e.g. "2026" or "on-going").
+		year: work.year ?? '',
 		// Short "built with" line, shown right under the body copy — separate
 		// from Colophon further down the page.
 		stack: work.stack ?? '',

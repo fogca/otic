@@ -26,6 +26,10 @@ export type Work = {
 	body_jp: string;
 	body_en: string;
 	headline?: string;
+	/** Free-form year/status line shown under scope on the work detail page
+	    (e.g. "2026" or "on-going") — plain text, not a date, so either reads
+	    naturally. Not yet a live CMS field; optional until added. */
+	year?: string;
 	/** Short "built with" line shown right under the body copy on the work
 	    detail page (e.g. "SvelteKit / Cloudflare / microCMS") — separate
 	    from the Colophon section further down. Not yet a live CMS field;
