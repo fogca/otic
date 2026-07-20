@@ -35,6 +35,10 @@ export type Work = {
 	thumbnail?: MicroCMSImage;
 	/** Optional SP-specific thumbnail; falls back to `thumbnail` when absent. */
 	sp_thumbnail?: MicroCMSImage;
+	/** Optional PC-specific hero image (e.g. a horizontal crop for works whose
+	    main_visual is portrait) — falls back to main_visual when absent. Not
+	    yet a live CMS field; optional until added. */
+	pc_thumbnail?: MicroCMSImage;
 	/** Primary visual (custom field) — supports a Cloudflare video (`pj_videos`)
 	    or an image (`pj_images`). Migrated from `thumbnail`. */
 	main_visual?: {

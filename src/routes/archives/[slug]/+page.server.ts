@@ -58,6 +58,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		// Hero = main_visual (Cloudflare video or image), falling back to thumbnail.
 		hero: mainVisual(work),
 		heroImageSp: work.sp_thumbnail?.url ?? '',
+		heroImagePc: work.pc_thumbnail?.url ?? '',
 		descriptionJa: work.body_jp ?? '',
 		descriptionEn: work.body_en ?? '',
 		headlineJa: tag.ja,

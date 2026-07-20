@@ -1,91 +1,11 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { onNavigate, afterNavigate } from '$app/navigation';
 	import type { PageData } from './$types';
 	import { imgOpt, imgSrcset, videoFrame } from '$lib/js/img';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
-	import { footerNear } from '$lib/state/footerNear.svelte';
 
 	let { data }: { data: PageData } = $props();
 	const archive = $derived(data.archive);
 	const nextWorks = $derived(data.nextWorks);
-
-	// Fade the portaled (fixed) lead out while the page-shrink transition runs.
-	let leaving = $state(false);
-	let leadNode: HTMLElement | null = $state(null);
-	onNavigate(() => {
-		leaving = true;
-	});
-	afterNavigate(() => {
-		leaving = false;
-	});
-
-	// Drive the fade via inline opacity (scoped CSS is unreliable once the node
-	// is portaled to <body>). Only applies when actually portaled (PC). Also
-	// fades once the Footer is about to scroll into view — the fixed lead
-	// would otherwise sit on top of it as it scrolls up underneath.
-	$effect(() => {
-		if (leadNode && leadNode.parentElement === document.body) {
-			leadNode.style.opacity = leaving || footerNear.near ? '0' : '1';
-		}
-	});
-
-	// The layout's .page-wrapper has will-change:transform → it's a containing
-	// block, which breaks position:fixed/sticky for any descendant. On PC we
-	// portal the lead out to <body> so it can be truly viewport-fixed (pinned +
-	// vertically centred). SP keeps it in normal flow.
-	const FIXED_STYLE: Record<string, string> = {
-		position: 'fixed',
-		top: '0',
-		left: 'var(--padding)',
-		width: '34vw',
-		height: '100dvh',
-		// PC keeps padding at 0: the block is vertically centred on the true
-		// screen centre (an explicit earlier requirement) via justify-content:
-		// center over the full 100dvh box — adding top padding here would
-		// pull that centre down off-screen-centre. The 120px padding-top in
-		// the .lead CSS rule below is therefore SP-only in practice (PC is
-		// portaled out to <body> with this inline style, which wins).
-		padding: '0',
-		margin: '0',
-		display: 'flex',
-		flexDirection: 'column',
-		justifyContent: 'center',
-		zIndex: '5',
-		// Non-interactive text — let clicks fall through to the header nav it overlaps.
-		pointerEvents: 'none',
-		// Fade out during the page-shrink transition (it lives outside the scaled
-		// .page-wrapper, so it can't shrink with the rest of the page).
-		transition: 'opacity 0.5s var(--ease-default)'
-	};
-	function leadPortal(node: HTMLElement) {
-		if (!browser) return;
-		leadNode = node;
-		const mq = window.matchMedia('(min-width: 1024px)');
-		const anchor = document.createComment('lead');
-		let out = false;
-		const sync = () => {
-			if (mq.matches && !out) {
-				node.replaceWith(anchor);
-				document.body.appendChild(node);
-				Object.assign(node.style, FIXED_STYLE);
-				out = true;
-			} else if (!mq.matches && out) {
-				node.removeAttribute('style');
-				anchor.replaceWith(node);
-				out = false;
-			}
-		};
-		sync();
-		mq.addEventListener('change', sync);
-		return {
-			destroy() {
-				leadNode = null;
-				mq.removeEventListener('change', sync);
-				if (out) node.remove();
-			}
-		};
-	}
 
 	// Show Colophon section if there's at least one structured row or any
 	// rich-text content. Brand alone doesn't count (it's auto-populated from
@@ -101,9 +21,10 @@
 </svelte:head>
 
 <main class="Archive">
-	<!-- LEFT: project title + descriptions (PC: portaled to a fixed,
-	     vertically-centred left rail; SP: normal flow) -->
-	<div class="lead" use:leadPortal>
+	<!-- title + descriptions — same linear flow on every viewport (see the
+	     display:contents + order block in <style> below for how this
+	     interleaves with .media's hero/gallery). -->
+	<div class="lead">
 		<h1 class="lead__title" lang="en">{archive.title}</h1>
 		{#if archive.headlineEn}
 			<p class="lead__tag" lang="en">{archive.headlineEn}</p>
@@ -157,10 +78,21 @@
 							sizes="100vw"
 						/>
 					{/if}
+					{#if archive.heroImagePc}
+						<!-- Optional horizontal PC-specific crop — for works whose
+						     main_visual is portrait, which reads too narrow now that
+						     PC runs the same full-width flow as SP. Falls back to the
+						     regular hero below when unset. -->
+						<source
+							media="(min-width: 1024px)"
+							srcset={imgSrcset(archive.heroImagePc, [900, 1400, 2000])}
+							sizes="100vw"
+						/>
+					{/if}
 					<img
 						src={imgOpt(archive.hero.src, 1600)}
 						srcset={imgSrcset(archive.hero.src, [900, 1400, 2000])}
-						sizes="(min-width: 1024px) 60vw, 100vw"
+						sizes="100vw"
 						alt={archive.title}
 						fetchpriority="high"
 						decoding="async"
@@ -188,7 +120,7 @@
 					<img
 						src={imgOpt(item.src, 1600)}
 						srcset={imgSrcset(item.src, [800, 1200, 1600, 2000])}
-						sizes="(min-width: 1024px) 50vw, 100vw"
+						sizes="100vw"
 						alt={item.caption || `${archive.title} ${i + 1}`}
 						loading="lazy"
 						decoding="async"
@@ -312,10 +244,6 @@
 	}
 
 	/* ── Lead (title + descriptions) ── */
-	.lead {
-		padding: 120px var(--padding) 0;
-		max-width: 560px;
-	}
 	.lead__title {
 		font-size: var(--fs-h0);
 		line-height: 1.25;
@@ -359,103 +287,102 @@
 		margin-top: 48px;
 	}
 
-	/* SP: hero sits between the title/tag intro and the body copy (was:
-	   hero ahead of all of .lead; before that, no reorder at all). Hero
-	   (inside .media) has to interleave between two of .lead's OWN
-	   children, which is only reachable once BOTH .lead and .media drop
-	   their own boxes via display:contents — then everything (title, tag,
-	   hero, body, stack, gallery items) becomes a flat set of siblings in
-	   .Archive's flex flow that `order` can freely resequence. PC is
-	   untouched: this whole block is SP-only, and .lead there is portaled
-	   to <body> with its own inline layout regardless of source order.
-	   Losing .lead's box also loses the padding-inline/max-width it gave
-	   its children for free — restored directly on each of them below.
-	   .media's own gap/margin-top go inert the same way; margin-top values
-	   here rebuild that rhythm on the flattened items, reusing the same
-	   three values (120/48/80) from the previous version in their new
-	   roles rather than inventing new ones: 120 is the fixed-Header
-	   clearance (back on the title, first again), 48 covers both
-	   text-to-hero transitions (tag -> hero, and stack -> first gallery
-	   item), 80 is the unchanged item-to-item gallery gap. */
+	/* Hero sits between the title/tag intro and the body copy, same order on
+	   every viewport (was SP-only; PC used to portal .lead out to a fixed
+	   sidebar instead — see git history). Hero (inside .media) has to
+	   interleave between two of .lead's OWN children, which is only
+	   reachable once BOTH .lead and .media drop their own boxes via
+	   display:contents — then everything (title, tag, hero, body, stack,
+	   gallery items) becomes a flat set of siblings in .Archive's flex flow
+	   that `order` can freely resequence. Losing .lead's box also loses the
+	   padding-inline/max-width it gave its children for free — restored
+	   directly on each of them below. .media's own gap/margin-top go inert
+	   the same way; margin-top values here rebuild that rhythm on the
+	   flattened items: 120 is the fixed-Header clearance (on the title,
+	   first again), 48 covers both text-to-hero transitions (tag -> hero,
+	   and stack -> first gallery item), 80 is the item-to-item gallery gap.
+	   PC-specific sizing (wider max-widths, taller image cap) lives in the
+	   min-width:1024px block further down — this block only owns order. */
+	.lead {
+		display: contents;
+	}
+
+	.lead__title,
+	.lead__tag,
+	.lead__scope,
+	.lead__stack {
+		padding-inline: var(--padding);
+		max-width: 560px;
+	}
+
+	.lead__title {
+		margin-top: 120px;
+	}
+
+	.media {
+		display: contents;
+	}
+
+	.media__hero {
+		order: 1;
+		margin-top: 48px;
+	}
+
+	/* Own width/centering instead of the padding-inline/max-width the
+	   other lead children get above — a narrower, auto-centered column
+	   rather than an edge-padded full-width one. */
+	.lead__body,
+	.lead__body--ja {
+		order: 2;
+		margin-top: 50px;
+		width: 85%;
+		margin-left: auto;
+		margin-right: auto;
+		text-align: justify;
+	}
+
+	.lead__stack {
+		order: 3;
+	}
+
+	.media__item {
+		order: 4;
+		margin-top: 48px;
+	}
+
+	.media__item + .media__item {
+		margin-top: 80px;
+	}
+
+	/* Colophon/Next are separate top-level sections (not flattened into
+	   .Archive like .lead/.media above), but they're still direct flex
+	   children of the same .Archive flex column — without an explicit
+	   order they default to 0, same as title/tag, and render up near
+	   the TOP of the page instead of after the gallery. */
+	.divider--colophon {
+		order: 5;
+		margin-top: 80px;
+	}
+	.Colophon {
+		order: 6;
+	}
+	.divider--next {
+		order: 7;
+		margin-top: 48px;
+	}
+	/* No Colophon above it — this divider is the first thing after the
+	   gallery instead, so it takes over Colophon's own gap value rather
+	   than the (different) gap it'd normally have between two sections. */
+	.divider--next.is-first {
+		margin-top: 80px;
+	}
+	.Next {
+		order: 8;
+	}
+	/* Server fetches up to 4 (PC's range); SP only wants 2 — hide rather
+	   than fetch a separate shorter list for the same page. PC still shows
+	   everything fetched (see next-grid flex-direction in the PC block). */
 	@media (max-width: 1023px) {
-		.lead {
-			display: contents;
-		}
-
-		.lead__title,
-		.lead__tag,
-		.lead__scope,
-		.lead__stack {
-			padding-inline: var(--padding);
-			max-width: 560px;
-		}
-
-		.lead__title {
-			margin-top: 120px;
-		}
-
-		.media {
-			display: contents;
-		}
-
-		.media__hero {
-			order: 1;
-			margin-top: 48px;
-		}
-
-		/* Own width/centering instead of the padding-inline/max-width the
-		   other lead children get above — a narrower, auto-centered column
-		   rather than an edge-padded full-width one. */
-		.lead__body,
-		.lead__body--ja {
-			order: 2;
-			margin-top: 50px;
-			width: 85%;
-			margin-left: auto;
-			margin-right: auto;
-			text-align: justify;
-		}
-
-		.lead__stack {
-			order: 3;
-		}
-
-		.media__item {
-			order: 4;
-			margin-top: 48px;
-		}
-
-		.media__item + .media__item {
-			margin-top: 80px;
-		}
-
-		/* Colophon/Next are separate top-level sections (not flattened into
-		   .Archive like .lead/.media above), but they're still direct flex
-		   children of the same .Archive flex column — without an explicit
-		   order they default to 0, same as title/tag, and render up near
-		   the TOP of the page instead of after the gallery. */
-		.divider--colophon {
-			order: 5;
-			margin-top: 80px;
-		}
-		.Colophon {
-			order: 6;
-		}
-		.divider--next {
-			order: 7;
-			margin-top: 48px;
-		}
-		/* No Colophon above it — this divider is the first thing after the
-		   gallery instead, so it takes over Colophon's own gap value rather
-		   than the (different) gap it'd normally have between two sections. */
-		.divider--next.is-first {
-			margin-top: 80px;
-		}
-		.Next {
-			order: 8;
-		}
-		/* Server fetches up to 4 (PC's range); SP only wants 2 — hide rather
-		   than fetch a separate shorter list for the same page. */
 		.next-item:nth-child(n + 3) {
 			display: none;
 		}
@@ -470,10 +397,12 @@
 		display: block;
 	}
 
-	/* SP: hero full-width; gallery thumbnails keep their centred-narrow /
+	/* Hero full-width; gallery thumbnails keep their centred-narrow /
 	   full-bleed rhythm (mp-1..mp-6, cycling per item — see the template's
-	   class="media__item mp-{(i % 6) + 1}"). mp-4/mp-6 have no override
-	   here, so they fall through to the 90% base. */
+	   class="media__item mp-{(i % 6) + 1}"), same on every viewport now —
+	   this used to be SP-only, PC forced everything to a uniform 100% (see
+	   git history). mp-4/mp-6 have no override here, so they fall through
+	   to the 90% base. */
 	.media__hero {
 		width: 100%;
 		margin-inline: 0;
@@ -640,108 +569,48 @@
 	}
 
 	/* ──────────────────────────────────────────────────────────────
-	   Desktop: left lead rail + right editorial media column
+	   Desktop: same linear flow as SP (see the order block above) — this
+	   block only widens the text columns and raises the gallery's height
+	   cap for the larger canvas. No grid, no fixed sidebar (see git history
+	   for the old portaled-left-rail layout).
 	   ────────────────────────────────────────────────────────────── */
 	@media (min-width: 1024px) {
-		.Archive {
-			display: grid;
-			grid-template-columns: 38% 62%;
-			grid-template-areas:
-				'info media'
-				'divider-colophon divider-colophon'
-				'colophon colophon'
-				'divider-next divider-next'
-				'next next';
-			column-gap: 2vw;
+		.lead__title,
+		.lead__tag,
+		.lead__scope,
+		.lead__stack {
+			max-width: 720px;
 		}
 
-		/* Lead is portaled to <body> and positioned fixed by leadPortal()
-		   (see the action — .page-wrapper's transform blocks fixed otherwise).
-		   The 38% info column is left empty as its visual slot. Smaller +
-		   narrower than the base/SP rule (per request — PC only). */
-		.lead {
-			max-width: 440px;
-		}
-		.lead__title {
-			font-size: var(--fs-h2);
-		}
-		.lead__body {
-			margin-top: 24px;
+		.lead__body,
+		.lead__body--ja {
+			max-width: 640px;
 		}
 
-		/* Media: uniform-width column, tight gap (was editorial-scatter
-		   varied widths/offsets + a large 12vh gap). Top padding matches the
-		   12px item gap for a consistent vertical rhythm; right padding
-		   stays the page's standard var(--padding) edge. */
-		.media {
-			grid-area: media;
-			margin-top: 0;
-			padding: 12px var(--padding) 0 0;
-			gap: 12px;
-		}
-		.media__hero,
-		.media__item {
-			width: 100%;
-			margin-left: 0;
-			margin-right: 0;
-		}
-		/* Re-assert the uniform width against the SP mp-1/2/3/5 rules above —
-		   those use two classes (higher specificity) so they'd otherwise still
-		   win here even though this block comes later in the cascade. */
-		.media__item.mp-1,
-		.media__item.mp-2,
-		.media__item.mp-3,
-		.media__item.mp-4,
-		.media__item.mp-5,
-		.media__item.mp-6 {
-			width: 100%;
-			margin-left: 0;
-			margin-right: 0;
-		}
 		.media__hero img,
-		.media__hero video,
-		.media__item img,
-		.media__item video {
+		.media__hero video {
 			max-height: 88vh;
 			object-fit: contain;
 			object-position: left top;
 		}
-
-		/* Colophon — tight info block, left-aligned under the lead. Same
-		   padding-top/bottom as SP (base rule) — no PC-specific bump. */
-		.Colophon {
-			grid-area: colophon;
-		}
-		.Colophon .wrapper {
-			max-width: 720px;
-			margin-inline: 0;
-		}
-
-		/* No row-gap set on .Archive's grid — without an explicit margin
-		   these would sit flush against the row above (e.g. the media
-		   column's bottom edge), same underlying issue as the SP margin-top
-		   values above. */
-		.divider--colophon {
-			grid-area: divider-colophon;
-			margin-top: 80px;
-		}
-		.divider--next {
-			grid-area: divider-next;
-			margin-top: 48px;
-		}
-		.divider--next.is-first {
-			margin-top: 80px;
+		/* Gallery gets a taller cap than the hero — an unusually tall/portrait
+		   pick can run closer to the viewport height before it starts looking
+		   cropped-feeling against its neighbours. */
+		.media__item img,
+		.media__item video {
+			max-height: 110vh;
+			object-fit: contain;
+			object-position: left top;
 		}
 
-		/* Next — same left-aligned width as Colophon above it, cards run in
-		   a row instead of SP's stack. */
-		.Next {
-			grid-area: next;
-		}
+		/* Colophon/Next — same left-aligned width, no wrapper padding. */
+		.Colophon .wrapper,
 		.Next .wrapper {
 			max-width: 720px;
 			margin-inline: 0;
 		}
+
+		/* Next — cards run in a row instead of SP's stack. */
 		.next-grid {
 			flex-direction: row;
 		}
