@@ -29,9 +29,12 @@
 	];
 
 	// Deterministic string hash → number (same technique already used in
-	// archives/+page.server.ts for its shuffle) — drives each tile's own
-	// line count/angle/speed from its id, so one shared animation system
-	// produces visually distinct marks per item with no hand-authored asset.
+	// archives/+page.server.ts for its shuffle) — drives which cube
+	// arrangement/orientation each tile gets, so one shared drawing system
+	// produces visually distinct isometric marks per item with no
+	// hand-authored asset per item (see reference: CMS/pjs/@ref/
+	// obj_motion_graphics.mp4 — small isometric block clusters, line art,
+	// staggered build-in).
 	function hashString(str: string): number {
 		let hash = 0;
 		for (let i = 0; i < str.length; i++) {
@@ -41,14 +44,97 @@
 		return Math.abs(hash);
 	}
 
-	type Line = { angle: number; duration: number };
-	function markFor(id: string): Line[] {
+	// Grid positions ([x, y, z], z = up) for a small library of block
+	// clusters — deliberately simple/recognisable shapes rather than
+	// procedurally-generated arbitrary ones (real geometry, no asset files).
+	const CUBE_TEMPLATES: [number, number, number][][] = [
+		[[0, 0, 0]],
+		[
+			[0, 0, 0],
+			[0, 0, 1]
+		],
+		[
+			[0, 0, 0],
+			[1, 0, 0]
+		],
+		[
+			[0, 0, 0],
+			[1, 0, 0],
+			[1, 0, 1]
+		],
+		[
+			[0, 0, 0],
+			[1, 0, 0],
+			[-1, 0, 0],
+			[0, 1, 0],
+			[0, -1, 0]
+		],
+		[
+			[0, 0, 0],
+			[0, 0, 1],
+			[0, 0, 2]
+		]
+	];
+
+	// 2:1 pixel-isometric projection — the standard lightweight technique
+	// for isometric block art (no real 3D/WebGL needed).
+	const CUBE_W = 34;
+	const CUBE_H = 22;
+	function isoPoint(gx: number, gy: number, gz: number): [number, number] {
+		return [(gx - gy) * (CUBE_W / 2), (gx + gy) * (CUBE_W / 4) - gz * CUBE_H];
+	}
+	function polygon(points: [number, number][]): string {
+		return points.map(([x, y]) => `${x},${y}`).join(' ');
+	}
+
+	type Cube = { top: string; left: string; right: string; delay: number };
+	type Mark = { cubes: Cube[]; viewBox: string };
+
+	function markFor(id: string): Mark {
 		const h = hashString(id);
-		const lineCount = 2 + (h % 3);
-		return Array.from({ length: lineCount }, (_, i) => ({
-			angle: (h * (i + 7)) % 360,
-			duration: 0.9 + (((h >> (i + 2)) % 6) / 10)
-		}));
+		let template = CUBE_TEMPLATES[h % CUBE_TEMPLATES.length];
+		// Swap x/y for roughly half of items landing on the same template,
+		// so they don't read as identical.
+		if ((h >> 4) % 2 === 0) {
+			template = template.map(([x, y, z]) => [y, x, z]);
+		}
+
+		const allX: number[] = [];
+		const allY: number[] = [];
+		const cubes: Cube[] = template.map(([gx, gy, gz], i) => {
+			const [ox, oy] = isoPoint(gx, gy, gz);
+			allX.push(ox - CUBE_W / 2, ox + CUBE_W / 2);
+			allY.push(oy, oy + CUBE_W / 2 + CUBE_H);
+			return {
+				top: polygon([
+					[ox, oy],
+					[ox + CUBE_W / 2, oy + CUBE_W / 4],
+					[ox, oy + CUBE_W / 2],
+					[ox - CUBE_W / 2, oy + CUBE_W / 4]
+				]),
+				left: polygon([
+					[ox - CUBE_W / 2, oy + CUBE_W / 4],
+					[ox, oy + CUBE_W / 2],
+					[ox, oy + CUBE_W / 2 + CUBE_H],
+					[ox - CUBE_W / 2, oy + CUBE_W / 4 + CUBE_H]
+				]),
+				right: polygon([
+					[ox + CUBE_W / 2, oy + CUBE_W / 4],
+					[ox, oy + CUBE_W / 2],
+					[ox, oy + CUBE_W / 2 + CUBE_H],
+					[ox + CUBE_W / 2, oy + CUBE_W / 4 + CUBE_H]
+				]),
+				delay: i * 0.1
+			};
+		});
+
+		const pad = 6;
+		const minX = Math.min(...allX) - pad;
+		const minY = Math.min(...allY) - pad;
+		const w = Math.max(...allX) - Math.min(...allX) + pad * 2;
+		const hgt = Math.max(...allY) - Math.min(...allY) + pad * 2;
+
+		return { cubes, viewBox: `${minX} ${minY} ${w} ${hgt}` };
 	}
 
 	let selected = $state<Set<string>>(new Set());
@@ -159,15 +245,15 @@
 					onclick={() => toggle(item.id)}
 					aria-pressed={selected.has(item.id)}
 				>
-					<span class="tile__mark" aria-hidden="true">
-						{#each mark as line, i (i)}
-							<span
-								class="tile__line"
-								style:--line-angle={`${line.angle}deg`}
-								style:animation-duration={`${line.duration}s`}
-							></span>
+					<svg class="tile__mark" viewBox={mark.viewBox} aria-hidden="true">
+						{#each mark.cubes as cube, i (i)}
+							<g class="tile__cube" style:animation-delay={`${cube.delay}s`}>
+								<polygon class="face" points={cube.top} />
+								<polygon class="face" points={cube.left} />
+								<polygon class="face" points={cube.right} />
+							</g>
 						{/each}
-					</span>
+					</svg>
 					<span class="tile__label" lang="en">{item.en}</span>
 				</button>
 			{/each}
@@ -277,39 +363,52 @@
 	.tile__mark {
 		position: absolute;
 		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		width: 60%;
+		height: 60%;
+		margin: auto;
+		overflow: visible;
 	}
-	.tile__line {
-		position: absolute;
-		width: 42%;
-		height: 1px;
-		background: var(--color-text);
-		transform: rotate(var(--line-angle, 0deg));
-		opacity: 0.2;
-		animation-name: tile-pulse;
-		animation-timing-function: ease-in-out;
-		animation-iteration-count: infinite;
-		animation-play-state: paused;
+	.face {
+		fill: #fff;
+		stroke: var(--color-text);
+		stroke-width: 1;
+		stroke-linejoin: round;
 	}
-	.tile.is-on .tile__line {
-		background: #fff;
-	}
-	.tile:hover .tile__line,
-	.tile.was-tapped .tile__line {
-		animation-play-state: running;
+	.tile.is-on .face {
+		fill: var(--color-text);
+		stroke: #fff;
 	}
 
-	@keyframes tile-pulse {
-		0%,
-		100% {
-			transform: rotate(var(--line-angle, 0deg)) scaleX(1);
-			opacity: 0.2;
+	/* Resting state: fully assembled, static (no animation cost until
+	   interacted with). Hover/tap replays the build-in, staggered per cube
+	   via animation-delay (set inline per cube above) — :hover re-triggers
+	   on every entry since re-applying the animation property restarts it;
+	   was-tapped (JS-toggled, see toggle()) gives touch the same guaranteed
+	   pulse :hover can't reliably provide on tap. Leaving the hover/tap
+	   state simply drops the animation rule, reverting instantly to the
+	   plain opacity:1 rule below rather than freezing mid-fade. */
+	.tile__cube {
+		opacity: 1;
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+	.tile:hover .tile__cube,
+	.tile.was-tapped .tile__cube {
+		/* animation-delay itself comes from the inline style set per cube in
+		   the template (staggers the build) — inline specificity wins over
+		   this shorthand's own implicit animation-delay:0s regardless of
+		   rule order. */
+		animation: cube-build 0.5s ease-out both;
+	}
+
+	@keyframes cube-build {
+		0% {
+			opacity: 0;
+			transform: scale(0.4);
 		}
-		50% {
-			transform: rotate(calc(var(--line-angle, 0deg) + 15deg)) scaleX(1.4);
-			opacity: 0.5;
+		100% {
+			opacity: 1;
+			transform: scale(1);
 		}
 	}
 
