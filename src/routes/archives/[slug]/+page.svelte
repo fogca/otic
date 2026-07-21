@@ -262,6 +262,14 @@
 		   .lead__body already uses for body_jp/body_en. */
 		white-space: pre-line;
 	}
+	/* base.css's generic p:lang(ja) rule falls back to --lh-ja (1.8, tuned
+	   for body copy) — too loose now that .lead__tag sits at heading size
+	   (fs-h3). --lh-h-ja (1.6) is the existing "JP heading/lead" token,
+	   already used by office/+page.svelte's .panel-lead--ja for the same
+	   reason, so this reuses it rather than hardcoding a new value. */
+	.lead__tag--ja {
+		line-height: var(--lh-h-ja);
+	}
 	/* Selected `scope` values (V.I. / Product / ...) — same small, muted
 	   treatment as .lead__stack below, not the tag's own opacity:1. */
 	.lead__scope {
