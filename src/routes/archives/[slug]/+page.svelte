@@ -446,15 +446,16 @@
 	   has no frame to paint: before first buffer, and after lazyVideo
 	   releases a scrolled-away video's src. A 128px source upscaled to the
 	   box is naturally soft — reads as a blurred preview, not a gray box.
-	   contain + left top mirrors the PC media rules' object-fit/-position,
+	   contain + center top mirrors the PC media rules' object-fit/-position,
 	   so the placeholder sits exactly where the video frame will paint
 	   (with cover, an 88vh-clamped video would show placeholder bleeding
 	   beside the contained frame). On SP the box ratio equals the frame
-	   ratio, where contain fills the box edge-to-edge anyway. */
+	   ratio, where contain fills the box edge-to-edge anyway, so the exact
+	   position doesn't matter there. */
 	.media__hero,
 	.media__item {
 		background-size: contain;
-		background-position: left top;
+		background-position: center top;
 		background-repeat: no-repeat;
 	}
 	.media__item.mp-1 {
@@ -615,11 +616,17 @@
 			max-width: 640px;
 		}
 
+		/* object-position:center (not left) — a portrait image capped by
+		   max-height shrinks narrower than its box, and center keeps that
+		   narrower render on the same centre axis as everything else. left
+		   was a leftover from the old lead-rail/right-column layout, where
+		   media sat in its own right-hand strip and flush-left made sense
+		   there — stale since the whole page unified onto one centre axis. */
 		.media__hero img,
 		.media__hero video {
 			max-height: 88vh;
 			object-fit: contain;
-			object-position: left top;
+			object-position: center top;
 		}
 		/* Gallery gets a taller cap than the hero — an unusually tall/portrait
 		   pick can run closer to the viewport height before it starts looking
@@ -628,7 +635,7 @@
 		.media__item video {
 			max-height: 110vh;
 			object-fit: contain;
-			object-position: left top;
+			object-position: center top;
 		}
 
 		/* Every media box shares one centre axis, on every viewport — only
