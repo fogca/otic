@@ -10,6 +10,7 @@
 	// pages (/archives/[slug]).
 	const isArchives = $derived(['/archives', '/archives/list'].includes(page.url.pathname));
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
+	const isServices = $derived(page.url.pathname.startsWith('/services'));
 	// Contact and the Legal pages (Privacy/Imprint/Company) have a dark
 	// (charcoal/black) page background — the nav's default var(--color-text)
 	// is black, effectively invisible there, so invert to white on these.
@@ -98,6 +99,14 @@
 			lang="en"
 		>
 			Office
+		</a>
+		<a
+			href="/services"
+			class="link"
+			class:is-current={isServices}
+			lang="en"
+		>
+			Services
 		</a>
 		<!-- Language toggle: shows the CURRENT language only; click switches to
 		     the other (site-wide bilingual body copy) and fires the confirmation

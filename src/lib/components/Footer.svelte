@@ -7,6 +7,7 @@
 	const SITE_NAV: LinkItem[] = [
 		{ label: 'Archives', href: '/archives' },
 		{ label: 'Office', href: '/office' },
+		{ label: 'Services', href: '/services' },
 		{ label: 'Contact', href: '/contact' }
 	];
 
