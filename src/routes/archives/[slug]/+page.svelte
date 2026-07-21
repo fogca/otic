@@ -615,6 +615,25 @@
 			object-position: left top;
 		}
 
+		/* Every media box shares one centre axis on PC — only its WIDTH
+		   varies (70/80/90/100%, cycling via mp-1..mp-6). mp-2/mp-5 are
+		   100vw + margin-inline:0 in the base/SP rules (a deliberate
+		   edge-to-edge break on mobile) — on PC that reads as the gallery
+		   swaying left/right between flush-left and centred items instead of
+		   a consistent rhythm, so both are re-centred here to 100% width
+		   (same as the hero) with auto margins. hero itself already centres
+		   trivially at width:100% (no leftover space for auto margins to
+		   distribute either way) but margin-inline:auto is set explicitly
+		   anyway so it stays correct if that width ever changes. */
+		.media__hero {
+			margin-inline: auto;
+		}
+		.media__item.mp-2,
+		.media__item.mp-5 {
+			width: 100%;
+			margin-inline: auto;
+		}
+
 		/* Colophon/Next — same left-aligned width, no wrapper padding. */
 		.Colophon .wrapper,
 		.Next .wrapper {
