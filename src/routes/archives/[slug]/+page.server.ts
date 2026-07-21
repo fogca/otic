@@ -22,12 +22,18 @@ export const load: PageServerLoad = async ({ params }) => {
 	// The tag/theme line under the title: `description` holds JA and EN in
 	// one field, "ja!en" (a literal "!" between them, JA first) — editors
 	// write both languages there instead of separate fields. No "!" at all
-	// means the field is JA-only. Falls back to the older single-language
-	// `headline` field for works not yet migrated to this format.
+	// means the field is JA-only. A literal "?" within either half is a
+	// manual line break (rendered via .lead__tag's white-space:pre-line, the
+	// same technique .lead__body already uses for body_jp/body_en) — taglines
+	// are short/declarative, so a real "?" as punctuation is unlikely, but
+	// note the tradeoff if one's ever needed. Falls back to the older
+	// single-language `headline` field for works not yet migrated to this
+	// format.
 	function splitTag(description: string): { ja: string; en: string } {
+		const breakify = (s: string) => s.trim().replace(/\?/g, '\n');
 		const i = description.indexOf('!');
-		if (i === -1) return { ja: description.trim(), en: '' };
-		return { ja: description.slice(0, i).trim(), en: description.slice(i + 1).trim() };
+		if (i === -1) return { ja: breakify(description), en: '' };
+		return { ja: breakify(description.slice(0, i)), en: breakify(description.slice(i + 1)) };
 	}
 	const tag = work.description
 		? splitTag(work.description)

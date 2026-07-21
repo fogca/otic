@@ -254,9 +254,13 @@
 		margin: 0;
 	}
 	.lead__tag {
-		font-size: var(--fs-h4);
+		font-size: var(--fs-h3);
 		margin: 8px 0 0;
 		opacity: 1;
+		/* Lets a literal "?" in the description field (see splitTag in
+		   +page.server.ts) act as a manual line break, same technique
+		   .lead__body already uses for body_jp/body_en. */
+		white-space: pre-line;
 	}
 	/* Selected `scope` values (V.I. / Product / ...) — same small, muted
 	   treatment as .lead__stack below, not the tag's own opacity:1. */
