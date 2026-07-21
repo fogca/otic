@@ -448,12 +448,16 @@
 	.media__item.mp-1 {
 		width: 80%;
 	}
-	.media__item.mp-2 {
-		width: 100vw;
-	}
+	/* 100% (of .Archive, which itself has no inline padding to subtract),
+	   not 100vw — width:100vw is wider than the visible viewport by
+	   whatever scrollbar gutter the browser reserves, and margin:auto can't
+	   symmetrically centre an element that's already wider than its own
+	   container. 100% reaches the same true edge-to-edge look without that
+	   overflow, and still centres correctly via .media__item's own base
+	   margin-inline:auto. */
+	.media__item.mp-2,
 	.media__item.mp-5 {
-		width: 100vw;
-		margin-inline: 0;
+		width: 100%;
 	}
 	.media__item.mp-3 {
 		width: 70%;
@@ -615,22 +619,14 @@
 			object-position: left top;
 		}
 
-		/* Every media box shares one centre axis on PC — only its WIDTH
-		   varies (70/80/90/100%, cycling via mp-1..mp-6). mp-2/mp-5 are
-		   100vw + margin-inline:0 in the base/SP rules (a deliberate
-		   edge-to-edge break on mobile) — on PC that reads as the gallery
-		   swaying left/right between flush-left and centred items instead of
-		   a consistent rhythm, so both are re-centred here to 100% width
-		   (same as the hero) with auto margins. hero itself already centres
-		   trivially at width:100% (no leftover space for auto margins to
-		   distribute either way) but margin-inline:auto is set explicitly
-		   anyway so it stays correct if that width ever changes. */
+		/* Every media box shares one centre axis, on every viewport — only
+		   its WIDTH varies (70/80/90/100%, cycling via mp-1..mp-6; see the
+		   base .media__item/.mp-* rules — mp-2/mp-5 use 100%, not 100vw, for
+		   exactly this reason). hero centres trivially at width:100% (no
+		   leftover space for auto margins to distribute either way) but
+		   margin-inline:auto is set explicitly anyway so it stays correct if
+		   that width ever changes. */
 		.media__hero {
-			margin-inline: auto;
-		}
-		.media__item.mp-2,
-		.media__item.mp-5 {
-			width: 100%;
 			margin-inline: auto;
 		}
 		/* A bit more breathing room between gallery items than SP's 80px —
