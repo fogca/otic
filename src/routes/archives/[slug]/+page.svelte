@@ -603,17 +603,37 @@
 	   for the old portaled-left-rail layout).
 	   ────────────────────────────────────────────────────────────── */
 	@media (min-width: 1024px) {
+		/* Slug-specific wider side margin (var(--padding) is the shared
+		   site-wide token — doubling it locally here, not the token itself,
+		   keeps every other page's padding untouched). */
 		.lead__title,
 		.lead__tag,
 		.lead__scope,
 		.lead__year,
 		.lead__stack {
+			padding-inline: calc(var(--padding) * 2);
 			max-width: 720px;
+		}
+
+		/* --fs-h0 has no PC-tier bump of its own (every other h1–h6 token
+		   does) — it's shared with the archives grid title, Services hero,
+		   and the home intro headline, so bumping the token itself would
+		   resize all of those too. A local override keeps this to just the
+		   slug title, roughly proportional to how the other tiers step up
+		   from SP to PC (~1.4×). */
+		.lead__title {
+			font-size: 44px;
+		}
+		.lead__tag {
+			font-size: var(--fs-h4);
 		}
 
 		.lead__body,
 		.lead__body--ja {
 			max-width: 640px;
+			/* Explicit literal px per request — none of the PC-tier tokens
+			   land on exactly 14px (h4:20/h5:16/h6:13.5). */
+			font-size: 14px;
 		}
 
 		/* object-position:center (not left) — a portrait image capped by
@@ -624,7 +644,7 @@
 		   there — stale since the whole page unified onto one centre axis. */
 		.media__hero img,
 		.media__hero video {
-			max-height: 88vh;
+			max-height: 125vh;
 			object-fit: contain;
 			object-position: center top;
 		}
