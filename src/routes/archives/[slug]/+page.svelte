@@ -633,6 +633,11 @@
 			width: 100%;
 			margin-inline: auto;
 		}
+		/* A bit more breathing room between gallery items than SP's 80px —
+		   the larger canvas can take it. */
+		.media__item + .media__item {
+			margin-top: 120px;
+		}
 
 		/* Colophon/Next — same left-aligned width, no wrapper padding. */
 		.Colophon .wrapper,
