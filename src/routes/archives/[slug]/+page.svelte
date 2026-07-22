@@ -604,14 +604,14 @@
 	   ────────────────────────────────────────────────────────────── */
 	@media (min-width: 1024px) {
 		/* Slug-specific wider side margin (var(--padding) is the shared
-		   site-wide token — doubling it locally here, not the token itself,
+		   site-wide token — tripling it locally here, not the token itself,
 		   keeps every other page's padding untouched). */
 		.lead__title,
 		.lead__tag,
 		.lead__scope,
 		.lead__year,
 		.lead__stack {
-			padding-inline: calc(var(--padding) * 2);
+			padding-inline: calc(var(--padding) * 3);
 			max-width: 720px;
 		}
 
@@ -625,10 +625,12 @@
 			font-size: 44px;
 			/* Viewport-relative (not the base rule's fixed 120px fixed-header
 			   clearance) — scales the hero gap with the taller PC canvas. */
-			margin-top: 25vh;
+			margin-top: 20vh;
 		}
 		.lead__tag {
-			font-size: var(--fs-h4);
+			/* Between h4 (20px, too big) and h5 (16px, too small) — no token
+			   lands on the midpoint, so an explicit literal here. */
+			font-size: 18px;
 		}
 
 		.lead__body,
@@ -672,10 +674,21 @@
 		.media__hero {
 			margin-inline: auto;
 		}
-		/* Clearance above the first gallery item (below the hero/body)  —
-		   separate from the item-to-item rule just below. */
+		/* PC-only: 10 points narrower across the board than the SP/base cycle
+		   above, except the 100% (mp-2/mp-5) ones — the wider PC canvas made
+		   the random-width rhythm read a bit too big. .media__item itself is
+		   also the mp-4/mp-6 fallback, so this covers those two as well.
+		   margin-top is the clearance above the first gallery item (below the
+		   hero/body) — separate from the item-to-item rule just below. */
 		.media__item {
+			width: 80%;
 			margin-top: 100px;
+		}
+		.media__item.mp-1 {
+			width: 70%;
+		}
+		.media__item.mp-3 {
+			width: 60%;
 		}
 		/* A bit more breathing room between gallery items than SP's 80px —
 		   the larger canvas can take it. */
@@ -690,9 +703,15 @@
 			margin-inline: 0;
 		}
 
-		/* Next — cards run in a row instead of SP's stack. */
+		/* Next — cards run in a row instead of SP's stack. Fixed 1/3-width
+		   basis (not flex-grow-to-fill) means 3 cards land at ~100% of the
+		   wrapper and a 4th (flex-shrink:0) overflows past it rather than
+		   all four squeezing down to fit — a peek that hints there's more. */
 		.next-grid {
 			flex-direction: row;
+		}
+		.next-item {
+			flex: 0 0 calc((100% - 48px) / 3);
 		}
 	}
 </style>
