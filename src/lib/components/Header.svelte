@@ -119,8 +119,7 @@
 	</nav>
 
 	<div class="head-end">
-		<!-- SP keeps the top-right wordmark. On PC it's hidden and the wordmark is
-		     pinned bottom-left globally by CornerLogo in the layout. -->
+		<!-- Top-right wordmark, shown at every breakpoint. -->
 		<a href="/" class="logo" aria-label="Home">
 			<Logo />
 		</a>
@@ -293,12 +292,6 @@
 
 		.lang-toggle {
 			font-size: var(--fs-h6);
-		}
-
-		/* PC: hide the top-right wordmark site-wide — the wordmark is pinned
-		   bottom-left globally by CornerLogo in the layout. */
-		.Header .logo {
-			display: none;
 		}
 	}
 </style>

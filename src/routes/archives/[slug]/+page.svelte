@@ -623,6 +623,9 @@
 		   from SP to PC (~1.4×). */
 		.lead__title {
 			font-size: 44px;
+			/* Viewport-relative (not the base rule's fixed 120px fixed-header
+			   clearance) — scales the hero gap with the taller PC canvas. */
+			margin-top: 25vh;
 		}
 		.lead__tag {
 			font-size: var(--fs-h4);
@@ -631,6 +634,7 @@
 		.lead__body,
 		.lead__body--ja {
 			max-width: 640px;
+			margin-top: 100px;
 			/* Explicit literal px per request — none of the PC-tier tokens
 			   land on exactly 14px (h4:20/h5:16/h6:13.5). */
 			font-size: 14px;
@@ -667,6 +671,11 @@
 		   that width ever changes. */
 		.media__hero {
 			margin-inline: auto;
+		}
+		/* Clearance above the first gallery item (below the hero/body)  —
+		   separate from the item-to-item rule just below. */
+		.media__item {
+			margin-top: 100px;
 		}
 		/* A bit more breathing room between gallery items than SP's 80px —
 		   the larger canvas can take it. */

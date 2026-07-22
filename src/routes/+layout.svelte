@@ -512,9 +512,10 @@
 		color: #fff;
 	}
 	@media (min-width: 1024px) {
-		.corner-logo {
-			display: block;
-		}
+		/* display stays none (inherited from the base rule above) at PC too —
+		   Header's own top-right logo is the PC wordmark again. This also
+		   means .is-hero below can no longer paint (nothing triggers display)
+		   until corner-logo is given its own PC trigger again. */
 		/* Hero state: 100% of the page's own padded content width, not the
 		   raw 100vw — left stays at the same var(--padding) as the resting
 		   state, and width subtracts that same padding again on the right,

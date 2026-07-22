@@ -366,7 +366,7 @@
 		}
 
 		.Home .Archives .card .meta {
-			font-size: var(--fs-h5);
+			font-size: var(--fs-h7);
 		}
 
 		/* PC: cap tall (portrait) images at 90vh without cropping.

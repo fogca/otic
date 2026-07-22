@@ -137,6 +137,7 @@ a {
   --fs-h4:   14px;   /* "Colophon" heading */
   --fs-h5:   12px;   /* Numbering "01", labels, nav PC */
   --fs-h6:   10.5px;   /* Body copy / meta / caption — SP (PC: 13.5) */
+  --fs-h7:   9px;   /* Smallest — Home Archives card meta on PC (PC: 11.5) */
   --fs-body: var(--fs-h6);
   --fs-p:    11.5px;
 
@@ -228,6 +229,7 @@ a {
     --fs-h4: 20px;   /* was 14px */
     --fs-h5: 16px;   /* was 12px */
     --fs-h6: 13.5px;
+    --fs-h7: 11.5px;
     --fs-body: 12px;
     --fs-p:    14px;
     --fs-p-en: 12.5px;   /* Body copy (Latin) — PC */
