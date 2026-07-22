@@ -615,14 +615,9 @@
 			max-width: 720px;
 		}
 
-		/* --fs-h0 has no PC-tier bump of its own (every other h1–h6 token
-		   does) — it's shared with the archives grid title, Services hero,
-		   and the home intro headline, so bumping the token itself would
-		   resize all of those too. A local override keeps this to just the
-		   slug title, roughly proportional to how the other tiers step up
-		   from SP to PC (~1.4×). */
 		.lead__title {
-			font-size: 44px;
+			/* font-size intentionally not overridden here — matches SP's
+			   --fs-h0 (32px) again instead of the previous 44px PC bump. */
 			/* Viewport-relative (not the base rule's fixed 120px fixed-header
 			   clearance) — scales the hero gap with the taller PC canvas. */
 			margin-top: 20vh;
