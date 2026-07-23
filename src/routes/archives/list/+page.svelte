@@ -102,11 +102,21 @@
 			padding-inline: 0;
 		}
 
+		/* Narrower column, pinned to the right edge (flush with the
+		   TitleBar's switch above) instead of spanning the full inset. */
+		.Archives .List .wrapper {
+			width: 65%;
+			margin-left: auto;
+		}
+
 		.Archives .List .archive-row {
 			/* One step down from the previous var(--fs-h5) — read a bit large
 			   at PC. */
 			font-size: var(--fs-h6);
-			grid-template-columns: 48px 1fr auto auto;
+			/* fr, not %, 10/40/40/10 by ratio (1:4:4:1) — fr divides the space
+			   left over AFTER the row's 3 gaps are subtracted, while raw %
+			   tracks ignore gap and overflow the row by the gap total. */
+			grid-template-columns: 1fr 4fr 4fr 1fr;
 			padding-block: 28px;
 		}
 
