@@ -110,6 +110,12 @@
 			padding-block: 28px;
 		}
 
+		/* One step further down than the row — de-emphasizes the index
+		   relative to title/scope/count. */
+		.Archives .List .archive-row .num {
+			font-size: var(--fs-h7);
+		}
+
 		.Archives .List .archive-row .count {
 			display: block;
 			text-align: right;
