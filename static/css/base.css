@@ -223,6 +223,7 @@ a {
 
 @media (min-width: 1024px) {
   :root {
+    --fs-h0: 42px;
     --fs-h1: 40px;
     --fs-h2: 28px;
     --fs-h3: 24px;   /* was 16px — keep the step under h2 on PC (no 2× jump) */
