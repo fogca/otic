@@ -259,7 +259,7 @@
 		   Pro Max (~430px) — scale with viewport width instead, clamped so
 		   it neither shrinks too far on the smallest phones nor keeps
 		   growing past a comfortable size on larger SP/tablet widths. */
-		width: clamp(160px, 50vw, 220px);
+		width: clamp(160px, 50vw, 300px);
 		color: var(--color-text);
 	}
 
