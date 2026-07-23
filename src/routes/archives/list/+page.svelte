@@ -126,6 +126,13 @@
 			font-size: var(--fs-h7);
 		}
 
+		/* PC only: num/title/scope read left-to-right; only the trailing
+		   count column stays right-aligned (base rule right-aligns scope
+		   for SP's 3-column row, where it's the last one). */
+		.Archives .List .archive-row .scope {
+			text-align: left;
+		}
+
 		.Archives .List .archive-row .count {
 			display: block;
 			text-align: right;
