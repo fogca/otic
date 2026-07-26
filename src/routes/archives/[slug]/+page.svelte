@@ -182,12 +182,19 @@
 					{#each nextWorks as item (item.slug)}
 						<a class="next-item" href="/archives/{item.slug}">
 							{#if item.visual?.isVideo}
+								<!-- lazyVideo (not autoplay): plays only near the viewport and
+								     fully releases (src detach) when scrolled away — same as the
+								     gallery above. Also inert for SP's display:none 3rd/4th items:
+								     a display:none element never intersects, so those never load
+								     past the initial metadata fetch (autoplay used to fully load
+								     and play them invisibly). -->
 								<video
 									src={item.visual.src}
-									autoplay
+									use:lazyVideo
 									loop
 									muted
 									playsinline
+									preload="metadata"
 									aria-label={item.title}
 								></video>
 							{:else if item.visual}

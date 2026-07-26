@@ -119,14 +119,18 @@
 				<a class="card card-01" href="/archives/{firstWork.id}">
 					<div class="image">
 						{#if fwVisual?.isVideo}
-							<!-- Hero is already in view on load — play directly, no
-							     lazy-load gate needed. -->
+							<!-- autoplay + lazyVideo (same pairing as slug's hero): in view
+							     at load so it starts immediately, but scrolling down the long
+							     stream now releases its decoder/buffer instead of holding
+							     them for the whole page. -->
 							<video
 								src={fwVisual.src}
+								use:lazyVideo
 								autoplay
 								loop
 								muted
 								playsinline
+								preload="auto"
 								aria-label={firstWork.title}
 							></video>
 						{:else if fwVisual}
