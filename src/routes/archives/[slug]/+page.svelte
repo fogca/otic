@@ -471,6 +471,21 @@
 		background-repeat: no-repeat;
 	}
 
+	/* ...and the same guard on the WRAPPER, because the two engines fill that
+	   sliver from different places (measured, same page, same clip):
+	     WebKit  — paints the <video> element's own background under the frame,
+	               so the rule above is what covers it.
+	     Blink   — does NOT; the video layer replaces the element box, so the
+	               sliver falls through to whatever ANCESTOR painted last.
+	   Relying on a distant ancestor is fragile: on this page that is
+	   .page-wrapper (white), but it fades during a route change and exposes
+	   .transition-bg, which is black. Painting the immediate wrapper keeps a
+	   light surface directly behind the video at all times, in both engines. */
+	.media__hero,
+	.media__item {
+		background-color: var(--color-bg);
+	}
+
 	/* Hero full-width; gallery thumbnails keep their centred-narrow /
 	   full-bleed rhythm (mp-1..mp-6, cycling per item — see the template's
 	   class="media__item mp-{(i % 6) + 1}"), same on every viewport now —
