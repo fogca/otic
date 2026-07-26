@@ -226,6 +226,18 @@
 		width: 100%;
 		overflow: hidden;
 		background: var(--color-bg-gray);
+		/* Stacking context — belt-and-braces for reliably rect-clipping the
+		   overscanned (scaled) video layer below on iOS. */
+		isolation: isolate;
+	}
+
+	/* On-device iOS hairline (rdar://35158514, see base.css): the media layer
+	   draws a ~1px dark edge of its own — overscan the video ~2% so the
+	   wrapper's overflow:hidden crops that edge off. Cards 02-10 keep natural
+	   height (the wrapper hugs the video box exactly), so the same rule
+	   covers both card families. */
+	.Home .Archives .card .image video {
+		transform: scale(1.02);
 	}
 
 	.Home .Archives .card .image img,

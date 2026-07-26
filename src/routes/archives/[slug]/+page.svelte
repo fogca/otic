@@ -135,16 +135,22 @@
 				style:--ar={item.aspect ?? videoAspects[i]}
 			>
 				{#if item.isVideo}
-					<video
-						src={item.src}
-						use:lazyVideo
-						loop
-						muted
-						playsinline
-						preload="metadata"
-						aria-label={item.caption || `${archive.title} ${i + 1}`}
-						use:videoAspect={(ar) => (videoAspects[i] = ar)}
-					></video>
+					<!-- .vclip: overscan crop against the iOS media-layer edge line —
+					     the caption shares .media__item, so the item box can't be the
+					     clipper (a scaled video would leak past its own bottom edge
+					     into the caption gap unclipped). This box hugs the video. -->
+					<div class="vclip">
+						<video
+							src={item.src}
+							use:lazyVideo
+							loop
+							muted
+							playsinline
+							preload="metadata"
+							aria-label={item.caption || `${archive.title} ${i + 1}`}
+							use:videoAspect={(ar) => (videoAspects[i] = ar)}
+						></video>
+					</div>
 				{:else}
 					<img
 						src={imgOpt(item.src, 1600)}
@@ -214,15 +220,17 @@
 								     a display:none element never intersects, so those never load
 								     past the initial metadata fetch (autoplay used to fully load
 								     and play them invisibly). -->
-								<video
-									src={item.visual.src}
-									use:lazyVideo
-									loop
-									muted
-									playsinline
-									preload="metadata"
-									aria-label={item.title}
-								></video>
+								<div class="vclip">
+									<video
+										src={item.visual.src}
+										use:lazyVideo
+										loop
+										muted
+										playsinline
+										preload="metadata"
+										aria-label={item.title}
+									></video>
+								</div>
 							{:else if item.visual}
 								<img
 									src={imgOpt(item.visual.src, 800)}
@@ -484,6 +492,48 @@
 	.media__hero,
 	.media__item {
 		background-color: var(--color-bg);
+	}
+
+	/* On-device iOS hairline (rdar://35158514, see base.css): the media layer
+	   draws its own ~1px dark edge — behind-the-element backgrounds (the two
+	   guards above) can't cover it. Countermeasure: overscan the video ~2%
+	   inside a rectangular overflow-clipped box, so the poisoned edge sits
+	   outside the visible rect and the crop lands on artwork-margin pixels
+	   (both reference clips measure >=6% background margin — nothing lost).
+	   The hero box holds only the video, so it clips itself; gallery/Next
+	   videos get a dedicated .vclip (their boxes also hold captions/titles).
+	   isolation: rect clips of composited video layers are reliable in
+	   WebKit, but a stacking context on the clipper is the documented
+	   belt-and-braces for clipping hosted layers. */
+	.media__hero {
+		overflow: clip;
+		isolation: isolate;
+	}
+	.media__hero video {
+		transform: scale(1.02);
+	}
+	.vclip {
+		overflow: clip;
+		isolation: isolate;
+		/* Keep the LQIP inheritance chain intact: .media__item (inline LQIP)
+		   -> .vclip -> video's own background-image: inherit. */
+		background-image: inherit;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+	.vclip video {
+		transform: scale(1.02);
+	}
+	/* SP Next cards shrink-wrap their video (width:auto + max-height cap,
+	   centered) — the clip box must hug the video, not span the card, or the
+	   overscanned edges would escape the clip on both sides. */
+	@media (max-width: 1023px) {
+		.next-item .vclip {
+			width: fit-content;
+			max-width: 100%;
+			margin-inline: auto;
+		}
 	}
 
 	/* Hero full-width; gallery thumbnails keep their centred-narrow /

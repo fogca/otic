@@ -253,6 +253,9 @@
 		display: block;
 		width: 100%;
 		overflow: hidden;
+		/* Stacking context — belt-and-braces for reliably rect-clipping the
+		   overscanned (scaled) video layer below on iOS. */
+		isolation: isolate;
 		/* Video tiles carry an inline LQIP background (tiny first-frame
 		   capture) — shows while the video buffers and after lazyVideo
 		   releases a scrolled-away tile, instead of a flat gray flash.
@@ -267,6 +270,9 @@
 		height: 100%;
 		object-fit: cover;
 		display: block;
+		/* On-device iOS hairline (rdar://35158514, see base.css): overscan ~2%
+		   so the tile's overflow:hidden crops the media layer's own dark edge. */
+		transform: scale(1.02);
 		/* Edge sliver guard — the tile already carries the first-frame LQIP
 		   (videoFrame(), see the template); inherit it onto the element so the
 		   sub-pixel gap along a fractional-height video box matches that clip's

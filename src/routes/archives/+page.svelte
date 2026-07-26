@@ -316,6 +316,9 @@
 		position: relative;
 		width: 100%;
 		overflow: hidden;
+		/* Stacking context — belt-and-braces for reliably rect-clipping the
+		   overscanned (scaled) video layer below on iOS. */
+		isolation: isolate;
 		/* LQIP placeholder: the inline background-image (a ~1KB capture of the
 		   tile's own media, set in the template) stretched to fill — a 64px
 		   source upscaled by cover is naturally soft, no CSS filter needed
@@ -345,6 +348,15 @@
 		   every element with a filter — ~100 grid items' worth of GPU
 		   textures on a page that already fights iOS memory limits. */
 		opacity: 0;
+	}
+
+	/* On-device iOS hairline (rdar://35158514, see base.css): the media layer
+	   draws a ~1px dark edge of its own — overscan the video ~2% so the
+	   wrapper's overflow:hidden crops that edge off and the tile boundary
+	   lands on artwork pixels. Paint-level only: offsetHeight (masonry
+	   measurement) is untouched by transform. */
+	.Archives .image-wrapper video {
+		transform: scale(1.02);
 	}
 
 	.Archives .image-wrapper img:global(.loaded),

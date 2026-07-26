@@ -74,6 +74,23 @@ video {
   background-color: var(--color-bg);
 }
 
+/* Device-only iOS hairline (rdar://35158514): the AVPlayerLayer that renders
+   <video> on iOS generates its own ~1px dark edge around the frame at the
+   display-output stage — visible on the physical panel only. It never appears
+   in device screenshots (those capture the logical-resolution composite,
+   BEFORE the panel resample that creates the line) and never on desktop
+   (in-process, integer-scale compositing). No background rule can cover it:
+   the black is produced inside the media layer, on top of anything the page
+   paints. The only countermeasure is geometric — shave the outer 2px of the
+   media layer off. Pages add a ~2% overscan inside an overflow-clipped box on
+   top of this (see per-page video rules), so the visible edge always lands on
+   artwork pixels. Exported videos keep >=1% background margin (Dev/CLAUDE.md
+   §4-0; the two reference clips measure >=6%), so no artwork is ever lost. */
+video {
+  -webkit-clip-path: inset(2px);
+  clip-path: inset(2px);
+}
+
 button,
 input,
 textarea,
