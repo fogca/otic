@@ -746,11 +746,14 @@
 		.media__item.mp-3 {
 			width: min(60%, calc(110vh * var(--ar, 9999)));
 		}
-		/* mp-2/mp-5 keep base's 100% as the % term, but still need the same
-		   rendered-width cap so their captions align too. */
+		/* mp-2/mp-5 — PC drops base's true edge-to-edge 100%: the "full
+		   bleed" step of the cycle still reads full-width, but inset by the
+		   standard page padding on each side (margin-inline:auto centres the
+		   narrower box). Same rendered-width cap as the others so their
+		   captions align too. SP keeps the real edge-to-edge look. */
 		.media__item.mp-2,
 		.media__item.mp-5 {
-			width: min(100%, calc(110vh * var(--ar, 9999)));
+			width: min(calc(100% - var(--padding) * 2), calc(110vh * var(--ar, 9999)));
 		}
 		/* A bit more breathing room between gallery items than SP's 80px —
 		   the larger canvas can take it. */
