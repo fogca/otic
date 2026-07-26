@@ -45,14 +45,22 @@ export const load: PageServerLoad = async ({ params }) => {
 	// video slide; otherwise the image is used. Rows with neither are dropped.
 	// `caption` is the row's own pj_images_title (admin-labeled "PJ imaegs
 	// description") — optional, most rows don't have one set yet.
-	type GalleryItem = { src: string; isVideo: boolean; caption: string };
+	type GalleryItem = { src: string; isVideo: boolean; caption: string; aspect?: number };
 	const gallery: GalleryItem[] = (work.repeat ?? [])
 		.map((r): GalleryItem | null => {
 			const caption = r.pj_images_title ?? '';
 			const videoUrl = r.pj_videos?.trim();
 			if (videoUrl) return { src: videoUrl, isVideo: true, caption };
-			const imgUrl = r.pj_images?.url;
-			if (imgUrl) return { src: imgUrl, isVideo: false, caption };
+			const img = r.pj_images;
+			if (img?.url) {
+				// aspect (w/h) feeds the PC gallery's --ar so the ITEM BOX can
+				// shrink to the exact width a max-height-capped portrait image
+				// renders at — keeping in-box content (the caption) aligned to
+				// the visible image edge. Video rows have no dimensions
+				// server-side, so they stay on the plain % width.
+				const aspect = img.width && img.height ? img.width / img.height : undefined;
+				return { src: img.url, isVideo: false, caption, aspect };
+			}
 			return null;
 		})
 		.filter((x): x is GalleryItem => x !== null);

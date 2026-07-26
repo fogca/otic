@@ -14,6 +14,30 @@
 	const hasColophon = $derived(
 		archive.colophonBase.rows.length > 0 || !!archive.colophonBase.text
 	);
+
+	// Video rows' w/h for the gallery's --ar (see the .media__item width
+	// rules): images get it server-side from CMS dims, but videos only
+	// reveal theirs from their own metadata. Keyed by gallery index.
+	let videoAspects = $state<Record<number, number>>({});
+
+	// Action, not a plain onloadedmetadata prop: markup ships src +
+	// preload="metadata", so the browser often has the metadata BEFORE
+	// hydration attaches any listener — the event is already gone by then
+	// (confirmed live: a bare handler never fired). An action can check the
+	// current readyState at mount and only fall back to the event when the
+	// metadata genuinely hasn't arrived yet.
+	function videoAspect(node: HTMLVideoElement, report: (ar: number) => void) {
+		const send = () => {
+			if (node.videoWidth && node.videoHeight) report(node.videoWidth / node.videoHeight);
+		};
+		if (node.readyState >= HTMLMediaElement.HAVE_METADATA) send();
+		else node.addEventListener('loadedmetadata', send, { once: true });
+		return {
+			destroy() {
+				node.removeEventListener('loadedmetadata', send);
+			}
+		};
+	}
 </script>
 
 <svelte:head>
@@ -108,6 +132,7 @@
 			<div
 				class="media__item mp-{(i % 6) + 1}"
 				style:background-image={item.isVideo ? `url(${videoFrame(item.src, 128)})` : undefined}
+				style:--ar={item.aspect ?? videoAspects[i]}
 			>
 				{#if item.isVideo}
 					<video
@@ -118,6 +143,7 @@
 						playsinline
 						preload="metadata"
 						aria-label={item.caption || `${archive.title} ${i + 1}`}
+						use:videoAspect={(ar) => (videoAspects[i] = ar)}
 					></video>
 				{:else}
 					<img
@@ -699,16 +725,32 @@
 		   the random-width rhythm read a bit too big. .media__item itself is
 		   also the mp-4/mp-6 fallback, so this covers those two as well.
 		   margin-top is the clearance above the first gallery item (below the
-		   hero/body) — separate from the item-to-item rule just below. */
+		   hero/body) — separate from the item-to-item rule just below.
+
+		   Each width is min(the cycle's %, the width the image actually
+		   renders at under the img rule's max-height:110vh cap below —
+		   110vh × the row's own w/h ratio, --ar, set inline from the CMS
+		   dims). Without the min(), a capped portrait image renders narrower
+		   than its box and in-box content (.media__caption) sits at the BOX
+		   edge, visibly left of the image itself. Shrinking the box to the
+		   rendered width keeps caption and image on the same left edge.
+		   Video rows carry no --ar (no server-side dims) — the 9999
+		   fallback makes the vh term huge so min() picks the % as before. */
 		.media__item {
-			width: 80%;
+			width: min(80%, calc(110vh * var(--ar, 9999)));
 			margin-top: 100px;
 		}
 		.media__item.mp-1 {
-			width: 70%;
+			width: min(70%, calc(110vh * var(--ar, 9999)));
 		}
 		.media__item.mp-3 {
-			width: 60%;
+			width: min(60%, calc(110vh * var(--ar, 9999)));
+		}
+		/* mp-2/mp-5 keep base's 100% as the % term, but still need the same
+		   rendered-width cap so their captions align too. */
+		.media__item.mp-2,
+		.media__item.mp-5 {
+			width: min(100%, calc(110vh * var(--ar, 9999)));
 		}
 		/* A bit more breathing room between gallery items than SP's 80px —
 		   the larger canvas can take it. */
