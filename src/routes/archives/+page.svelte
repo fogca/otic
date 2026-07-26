@@ -332,6 +332,13 @@
 		height: 100%;
 		object-fit: cover;
 		display: block;
+		/* Edge sliver guard — the wrapper carries this clip's first-frame LQIP;
+		   inherit it so the sub-pixel gap along a fractional-height video box
+		   matches the clip's own artwork. See base.css for the full note. */
+		background-image: inherit;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
 		/* Hidden until bytes arrive — the gray wrapper background is the
 		   placeholder. No static filter here: an invisible element doesn't
 		   need the blur, and WebKit can keep a compositing layer alive for

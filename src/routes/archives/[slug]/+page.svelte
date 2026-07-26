@@ -427,6 +427,24 @@
 		display: block;
 	}
 
+	/* Edge sliver guard. A <video> box is sized width x (videoHeight/videoWidth),
+	   which is essentially never a whole number of device pixels, while the
+	   decoded frame is rasterised to whole pixels — so a ~1px line of whatever
+	   is painted BEHIND the element can show along an edge (measured here:
+	   414 x 109.4375px boxes). base.css gives every video a light
+	   background-color as a floor; these two carry a first-frame LQIP on the
+	   wrapper (videoFrame(), see the template), so inherit it onto the element
+	   itself. The sliver then matches that video's own artwork instead of just
+	   being "light" — which is what makes it work for dark or saturated pieces
+	   (e.g. the red August clips) as well as the near-white one/etc ones. */
+	.media__hero video,
+	.media__item video {
+		background-image: inherit;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+
 	/* Hero full-width; gallery thumbnails keep their centred-narrow /
 	   full-bleed rhythm (mp-1..mp-6, cycling per item — see the template's
 	   class="media__item mp-{(i % 6) + 1}"), same on every viewport now —

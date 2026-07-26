@@ -55,6 +55,25 @@ video {
   height: auto;
 }
 
+/* A <video> is laid out at a fractional height (width x videoHeight/videoWidth
+   is almost never an integer), but the decoded frame is rasterised to whole
+   device pixels — so a 1px sliver of whatever sits BEHIND the element shows
+   through along an edge, at some viewport widths and not others. Measured on
+   this site: a video box of 414 x 109.4375px, i.e. the exact condition.
+   It reads as a thin dark line on a light video, and it is not in the file:
+   the video's own edge pixels are clean (checked at the pixel level).
+   The element itself painted no background (rgba(0,0,0,0)), so what showed
+   was whichever ancestor happened to paint first — white here, but the
+   page-transition backdrop (.transition-bg) is BLACK and is exposed while
+   .page-wrapper fades during a route change.
+   Giving the element its own light background removes that dependency
+   entirely. Components that have a first-frame LQIP (see videoFrame() in
+   $lib/js/img) additionally inherit it onto the element so the sliver matches
+   the video's own artwork rather than merely being light. */
+video {
+  background-color: var(--color-bg);
+}
+
 button,
 input,
 textarea,

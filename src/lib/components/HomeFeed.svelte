@@ -267,6 +267,14 @@
 		height: 100%;
 		object-fit: cover;
 		display: block;
+		/* Edge sliver guard — the tile already carries the first-frame LQIP
+		   (videoFrame(), see the template); inherit it onto the element so the
+		   sub-pixel gap along a fractional-height video box matches that clip's
+		   own artwork. See base.css for the full explanation. */
+		background-image: inherit;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
 	}
 
 	/* ── SP: simple stacked feed (ethos on top, full-bleed-ish tiles) ── */
