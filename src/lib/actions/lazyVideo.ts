@@ -22,6 +22,8 @@
 // support the browser effectively has to fetch the whole file before
 // playback can start, which read as "stuck loading, still blurred" —
 // worse than the problem it was meant to solve.
+import { acquireVideoSlot, releaseVideoSlot } from './videoBudget';
+
 export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } = {}) {
 	// 200px (not 400px) — slug's gallery items run close to full-viewport
 	// height stacked in a single column (unlike the grid's multi-column
@@ -32,6 +34,10 @@ export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } 
 	// slow and fast/stress scrolling, all loaded fine); this narrows the
 	// concurrent-decoder window as a targeted, low-risk mitigation rather
 	// than a confirmed fix. Flag it again if it recurs.
+	// Full activation is additionally gated by the global videoBudget cap
+	// (shared with the archives grid) — see videoBudget.ts for the memory
+	// story. Dormant state (src + preload=metadata) holds no decoder and
+	// stays outside the budget.
 	const { rootMargin = '200px' } = opts;
 	const src = node.getAttribute('src') ?? '';
 	let active = false;
@@ -76,8 +82,9 @@ export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } 
 		(entries) => {
 			for (const entry of entries) {
 				if (entry.isIntersecting) {
-					activate();
+					acquireVideoSlot(node, activate);
 				} else {
+					releaseVideoSlot(node);
 					release();
 				}
 			}
@@ -89,6 +96,7 @@ export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } 
 	return {
 		destroy() {
 			io.disconnect();
+			releaseVideoSlot(node);
 		}
 	};
 }

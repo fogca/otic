@@ -23,6 +23,8 @@
 // support the browser effectively has to fetch the whole file before
 // playback can start, which read as "stuck loading, still blurred" —
 // worse than the problem it was meant to solve.
+import { acquireVideoSlot, releaseVideoSlot } from './videoBudget';
+
 type Opts = {
 	src: string;
 	onMeta: (node: HTMLVideoElement, width: number, height: number) => void;
@@ -30,10 +32,13 @@ type Opts = {
 };
 
 export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
-	// 400px (not the old 800px) halves the "active window" of simultaneously
-	// loaded/decoding videos — the largest single memory lever here — while
-	// still starting buffering roughly a screen ahead of visibility.
-	const { src, onMeta, rootMargin = '400px' } = opts;
+	// 150px (was 400, before that 800): the grid is dense enough that a
+	// 400px margin kept up to 8 videos active at once on SP (15 on PC,
+	// measured live) — and with mostly-4K sources that concurrency alone
+	// was enough to jetsam the tab. A slimmer margin plus the global
+	// videoBudget cap below bounds the working set; tiles outside it show
+	// their designed LQIP placeholder until a slot frees.
+	const { src, onMeta, rootMargin = '150px' } = opts;
 	let loaded = false;
 	let metaReported = false;
 
@@ -80,9 +85,15 @@ export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 		(entries) => {
 			for (const entry of entries) {
 				if (entry.isIntersecting) {
-					startLoad();
-					node.play?.().catch(() => {});
+					// Gated by the global decoder budget — may start now, later
+					// (when a slot frees, nearest-first), or not at all if the
+					// tile scrolls away again while still waiting.
+					acquireVideoSlot(node, () => {
+						startLoad();
+						node.play?.().catch(() => {});
+					});
 				} else {
+					releaseVideoSlot(node);
 					unload();
 				}
 			}
@@ -95,6 +106,7 @@ export function lazyGridVideo(node: HTMLVideoElement, opts: Opts) {
 		destroy() {
 			io.disconnect();
 			node.removeEventListener('loadedmetadata', onLoadedMeta);
+			releaseVideoSlot(node);
 			unload();
 		}
 	};
