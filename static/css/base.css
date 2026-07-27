@@ -150,11 +150,9 @@ a {
 
   /* --- Typography stacks --- */
   --font-en:     'Steiner', 'Helvetica Neue', Arial, sans-serif;
-  /* Steiner wght400 (Book) + 石井ゴシック R (TypeSquare) ahead of Tazugane
-     (FontPlus) — both name variants listed since it's unconfirmed which one
-     TypeSquare's loader actually matches against; an unmatched name is a
-     harmless no-op in a font-family list. */
-  --font-ja:     'Steiner', '石井ゴシック R', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
+  /* Steiner wght400 (Book) + Ishii Gothic R (TypeSquare) ahead of Tazugane
+     (FontPlus). */
+  --font-ja:     'Steiner', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   /* Steiner wght330 + Tazugane Light — lighter JP text */
@@ -185,7 +183,7 @@ a {
   --fs-p-ja: 11.5px;   /* Body copy (JP) — SP */
 
   /* --- Font weights (single source of truth — no per-component weights) --- */
-  --fw-base:   400;   /* default for all text unless emphasized */
+  --fw-base:   350;   /* default for all text unless emphasized */
   --fw-medium: 450;   /* medium emphasis */
   --fw-bold:   450;   /* bold — same as medium per spec */
   --fw-lead:   325;   /* exception: large display lead (Radix. For what endures.) */
@@ -305,6 +303,9 @@ a {
 :lang(ja) {
   --heading-font: var(--font-ja);
   --text-font:    var(--font-ja);
+  /* 石井ゴシック R (TypeSquare) sits tighter than Tazugane by default —
+     opened up to read comfortably again now that it leads the JP stack. */
+  letter-spacing: 0.02em;
 }
 
 /* ------------------------------------------------------------

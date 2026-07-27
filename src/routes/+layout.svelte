@@ -117,24 +117,21 @@
 
 	// TypeSquare (石井ゴシック webfont), same shape as FontPlus above: script tag
 	// in app.html, global may not exist yet, poll briefly then give up silently.
-	// UNVERIFIED beyond what live inspection showed: this v3 "tsst" tag exposes
-	// window.TypeSquareJS (not the `Ts` global some TypeSquare docs/blog posts
-	// describe — that appears to be a different, older API surface) with a
-	// `loadFontAsync` property. Confirmed present but `null` (not yet a
-	// function) at initial inspection, so its exact call signature and whether
-	// it's really the re-scan trigger is unconfirmed — the wrapping try/catch
-	// is precautionary for that reason. TypeSquare's v3 also advertises a
-	// no-code "auto-reload" option, toggled in their dashboard, which — if
-	// enabled on this account — would make this call redundant rather than
-	// load-bearing. If 石井ゴシック never re-applies after a client-side
-	// navigation (Tazugane, already working, would keep showing instead),
-	// check that dashboard setting before assuming this call is the problem.
-	function whenTypeSquareReady(cb: (ts: { loadFontAsync: () => void }) => void, timeoutMs = 6000) {
+	// window.Ts / Ts.loadFont() per TypeSquare's own API reference
+	// (https://typesquare.com/service/api_reference) — "ページ全体のテキスト
+	// に対してフォントを再読込します" (re-scans the whole page's text). This is
+	// what was missing before: SvelteKit's client-side nav never re-scans on
+	// its own, so a new page's JP text kept whatever subset the FIRST page
+	// load requested — any character not in that original page's copy had no
+	// glyph to show and fell through to Tazugane, i.e. exactly the mixed-font
+	// "some glyphs never loaded" symptom on pages reached via navigation
+	// rather than a fresh load.
+	function whenTypeSquareReady(cb: (ts: { loadFont: () => void }) => void, timeoutMs = 6000) {
 		const startedAt = performance.now();
 		const poll = () => {
-			const ts = (window as unknown as { TypeSquareJS?: { loadFontAsync: unknown } }).TypeSquareJS;
-			if (ts && typeof ts.loadFontAsync === 'function') {
-				cb(ts as { loadFontAsync: () => void });
+			const ts = (window as unknown as { Ts?: { loadFont: unknown } }).Ts;
+			if (ts && typeof ts.loadFont === 'function') {
+				cb(ts as { loadFont: () => void });
 				return;
 			}
 			if (performance.now() - startedAt > timeoutMs) return; // give up silently
@@ -357,14 +354,7 @@
 		// Real navigations → reload(false): keep subset, fetch newly seen chars.
 		if (browser) {
 			whenFontplusReady((fp) => fp.reload(nav.type === 'enter'));
-			whenTypeSquareReady((ts) => {
-				try {
-					ts.loadFontAsync();
-				} catch {
-					// Unconfirmed API — see whenTypeSquareReady's comment. Fail
-					// quiet rather than break the rest of this navigation handler.
-				}
-			});
+			whenTypeSquareReady((ts) => ts.loadFont());
 		}
 
 		if (!needsEntryAnim) return;

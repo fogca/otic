@@ -402,6 +402,16 @@
 		width: 85%;
 		margin-left: auto;
 		margin-right: auto;
+	}
+	/* EN ragged-left, not justified — justify's stretched word-spacing reads
+	   worse in Latin text than in JP (where justify just closes up/spreads
+	   character gaps, no word-spacing involved). JA keeps justify below;
+	   .lead__body--ja is declared after .lead__body so it wins on the JA
+	   element, which carries both classes. */
+	.lead__body {
+		text-align: left;
+	}
+	.lead__body--ja {
 		text-align: justify;
 	}
 
