@@ -150,8 +150,11 @@ a {
 
   /* --- Typography stacks --- */
   --font-en:     'Steiner', 'Helvetica Neue', Arial, sans-serif;
-  /* Steiner wght400 (Book) + Tazugane Book — standard JP body */
-  --font-ja:     'Steiner', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
+  /* Steiner wght400 (Book) + 石井ゴシック R (TypeSquare) ahead of Tazugane
+     (FontPlus) — both name variants listed since it's unconfirmed which one
+     TypeSquare's loader actually matches against; an unmatched name is a
+     harmless no-op in a font-family list. */
+  --font-ja:     'Steiner', '石井ゴシック R', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   /* Steiner wght330 + Tazugane Light — lighter JP text */

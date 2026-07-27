@@ -115,6 +115,34 @@
 		poll();
 	}
 
+	// TypeSquare (石井ゴシック webfont), same shape as FontPlus above: script tag
+	// in app.html, global may not exist yet, poll briefly then give up silently.
+	// UNVERIFIED beyond what live inspection showed: this v3 "tsst" tag exposes
+	// window.TypeSquareJS (not the `Ts` global some TypeSquare docs/blog posts
+	// describe — that appears to be a different, older API surface) with a
+	// `loadFontAsync` property. Confirmed present but `null` (not yet a
+	// function) at initial inspection, so its exact call signature and whether
+	// it's really the re-scan trigger is unconfirmed — the wrapping try/catch
+	// is precautionary for that reason. TypeSquare's v3 also advertises a
+	// no-code "auto-reload" option, toggled in their dashboard, which — if
+	// enabled on this account — would make this call redundant rather than
+	// load-bearing. If 石井ゴシック never re-applies after a client-side
+	// navigation (Tazugane, already working, would keep showing instead),
+	// check that dashboard setting before assuming this call is the problem.
+	function whenTypeSquareReady(cb: (ts: { loadFontAsync: () => void }) => void, timeoutMs = 6000) {
+		const startedAt = performance.now();
+		const poll = () => {
+			const ts = (window as unknown as { TypeSquareJS?: { loadFontAsync: unknown } }).TypeSquareJS;
+			if (ts && typeof ts.loadFontAsync === 'function') {
+				cb(ts as { loadFontAsync: () => void });
+				return;
+			}
+			if (performance.now() - startedAt > timeoutMs) return; // give up silently
+			setTimeout(poll, 60);
+		};
+		poll();
+	}
+
 	// One-time cleanup: the service worker used to runtime-cache whole video
 	// files from cdn.takumiisobe.com ('cdn-media', CacheFirst — rule now
 	// removed in vite.config.ts). Workbox's cleanupOutdatedCaches only clears
@@ -329,6 +357,14 @@
 		// Real navigations → reload(false): keep subset, fetch newly seen chars.
 		if (browser) {
 			whenFontplusReady((fp) => fp.reload(nav.type === 'enter'));
+			whenTypeSquareReady((ts) => {
+				try {
+					ts.loadFontAsync();
+				} catch {
+					// Unconfirmed API — see whenTypeSquareReady's comment. Fail
+					// quiet rather than break the rest of this navigation handler.
+				}
+			});
 		}
 
 		if (!needsEntryAnim) return;
@@ -397,8 +433,9 @@
 <svelte:head>
 	<link rel="icon" type="image/png" href="/favicon.png" />
 	<title>TAKUMIISOBE.com</title>
-	<!-- FONTPLUS (Tazugane) loader lives in app.html <head>: loads once and
-	     survives SPA navigation. Re-applied per navigation via afterNavigate. -->
+	<!-- FONTPLUS (Tazugane) and TypeSquare (石井ゴシック) loaders live in
+	     app.html <head>: each loads once and survives SPA navigation, and is
+	     re-applied per navigation via afterNavigate above. -->
 </svelte:head>
 
 <div class="transition-bg">
