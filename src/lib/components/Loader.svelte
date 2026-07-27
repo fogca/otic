@@ -86,8 +86,22 @@
 		let cancelled = false;
 		import('gsap').then(async ({ gsap }) => {
 			if (cancelled) return;
-			// Wait for bind:this on each items to populate
+			// Wait for bind:this on each item to populate, AND for the
+			// browser to genuinely settle a paint — tick() alone flushes
+			// Svelte's own reactive scheduler but isn't sufficient here:
+			// this callback only runs once, so whatever frameEls holds at
+			// the moment it's read becomes the GSAP timeline permanently,
+			// and a frame that finishes binding a moment later is silently
+			// never revealed. Confirmed live as a real, timing-sensitive bug
+			// — even a tick() that already sees every slot populated wasn't
+			// reliable (adding diagnostic overhead nearby made it disappear,
+			// a classic sign of a race against real paint/layout, not
+			// against Svelte's own effect flush). Two animation frames is
+			// the standard robust wait for "the DOM has actually settled",
+			// stacked on top of tick() rather than replacing it.
 			await tick();
+			if (cancelled) return;
+			await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 			if (cancelled) return;
 
 			// Defensive: drop any holes/null refs from $state arrays
