@@ -20,25 +20,44 @@
 	// the convention already used in archives/list/+page.svelte.
 	const workScope = (w: { scope?: string[] }) => (w.scope ?? []).slice(0, 2).join(' / ');
 
-	// 3 filler frames + firstWork = 4 frames revealed in the loader.
-	// The last frame matches Archives card-01 so the handoff is seamless.
-	// Image-only (the loader can't play video) — main_visual image / thumbnail.
+	// Filler frames: src/lib/assets/op/OP_<NN>.jpg, glob-imported at build
+	// time so any file dropped in there is picked up on the next deploy —
+	// no code change needed. Sorted by that number; anything that doesn't
+	// match the numbered pattern (e.g. a stray file left over from curating
+	// the set) is silently excluded rather than sorted last, so it never
+	// accidentally ships. Previously these were 3 OTHER works' own images
+	// pulled from the CMS — now a fixed, curated set instead.
+	const opModules = import.meta.glob('../lib/assets/op/*.jpg', {
+		eager: true,
+		import: 'default'
+	}) as Record<string, string>;
+	const opFrames = Object.entries(opModules)
+		.map(([path, src]) => {
+			const name = path.split('/').pop()!;
+			const match = name.match(/^OP_(\d+)\.jpg$/i);
+			return match ? { num: Number(match[1]), name, src } : null;
+		})
+		.filter((x): x is { num: number; name: string; src: string } => x !== null)
+		.sort((a, b) => a.num - b.num)
+		.map((x) => ({ id: x.name, src: x.src, alt: x.name }));
+
+	// firstWork (RC1) is always the LAST frame — its own card-01 hero takes
+	// over seamlessly right after (see Loader's handoff comment). The op
+	// frames ahead of it are decorative only (the whole Loader is
+	// aria-hidden), so a filename alt is fine — nothing reads it.
 	const loaderFrames = $derived.by(() => {
 		const fw = firstWork;
-		const frame = (w: (typeof works)[number]) => {
-			const img = mainVisualImage(w)!;
-			return {
-				id: w.id,
+		if (!fw || !mainVisualImage(fw)) return opFrames;
+		const img = mainVisualImage(fw)!;
+		return [
+			...opFrames,
+			{
+				id: fw.id,
 				src: imgOpt(img.url, 1600),
 				srcset: imgSrcset(img.url, [800, 1200, 1600, 2400]),
-				alt: w.title
-			};
-		};
-		if (!fw || !mainVisualImage(fw)) {
-			return works.filter((w) => mainVisualImage(w)).slice(0, 4).map(frame);
-		}
-		const others = works.filter((w) => mainVisualImage(w) && w.id !== fw.id).slice(0, 3);
-		return [...others, fw].map(frame);
+				alt: fw.title
+			}
+		];
 	});
 
 	onMount(() => {
