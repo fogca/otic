@@ -228,10 +228,12 @@
 								Born in Japan in 2001.<br />
 								While attending the University of Westminster in the UK, exposed to a wide
 								range of cultures and arts, I developed a strong interest in visual
-								expression and entered the creative industry. After working at several
-								design studios in Tokyo, I established my own practice. Today, as creative
-								director, I run a design office at the core of my work, alongside a type
-								foundry, an image-making studio, and a wine community.
+								expression and entered the creative design industry. After returning to
+								Japan during COVID-19 and working at several design studios in Tokyo, I
+								established my own practice. Today, as creative director at Mirai Service
+								Co., Ltd., I run a design office at the core of my work, alongside AUGUST
+								— a type foundry designing original typefaces — and an image-making
+								studio.
 							</p>
 							<p lang="ja">
 								2001年日本生まれ。<br />

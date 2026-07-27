@@ -115,29 +115,40 @@
 		poll();
 	}
 
-	// TypeSquare (石井ゴシック webfont), same shape as FontPlus above: script tag
-	// in app.html, global may not exist yet, poll briefly then give up silently.
-	// window.Ts / Ts.loadFont() per TypeSquare's own API reference
-	// (https://typesquare.com/service/api_reference) — "ページ全体のテキスト
-	// に対してフォントを再読込します" (re-scans the whole page's text). This is
-	// what was missing before: SvelteKit's client-side nav never re-scans on
-	// its own, so a new page's JP text kept whatever subset the FIRST page
-	// load requested — any character not in that original page's copy had no
-	// glyph to show and fell through to Tazugane, i.e. exactly the mixed-font
-	// "some glyphs never loaded" symptom on pages reached via navigation
-	// rather than a fresh load.
-	function whenTypeSquareReady(cb: (ts: { loadFont: () => void }) => void, timeoutMs = 6000) {
-		const startedAt = performance.now();
-		const poll = () => {
-			const ts = (window as unknown as { Ts?: { loadFont: unknown } }).Ts;
-			if (ts && typeof ts.loadFont === 'function') {
-				cb(ts as { loadFont: () => void });
-				return;
-			}
-			if (performance.now() - startedAt > timeoutMs) return; // give up silently
-			setTimeout(poll, 60);
-		};
-		poll();
+	// TypeSquare (Ishii Gothic webfont). Unlike FontPlus there is nothing to
+	// CALL here — the tag this account serves (tsst build v3.0.8, bundle
+	// inspected directly 2026-07-27) is a scan-once-on-load build: its
+	// `TypeSquareJS` global is an inert options shell (the IIFE ends with
+	// `return gApiOption`, an object the runtime itself never reads back),
+	// and the JS API from the docs (`Ts.loadFont()` etc.) is simply not in
+	// this bundle — no `Ts` global is ever assigned, with or without the
+	// documented &onload=false param (both variants fetched and diffed). So
+	// every previous poll-for-a-global-then-call version of this hook could
+	// never fire, and a navigated-to page kept whatever glyph subset the
+	// first-loaded page had requested: characters shared with that first
+	// page rendered Ishii, the rest fell through to Tazugane — the mixed
+	// "ガタガタ" state that only a full reload (= a fresh initial scan)
+	// fixed.
+	//
+	// The fix re-runs that same initial scan without the reload: re-inject
+	// the script tag per navigation. Its startup gate (verified in the
+	// bundle) is `document.readyState === 'complete' ? main() : wait for
+	// load/DOMContentLoaded` — so a tag appended long after load scans the
+	// CURRENT page's DOM synchronously and fetches exactly the subset this
+	// page needs. Each scan spends one font-load PV, the same per-page cost
+	// the site would incur as a classic MPA.
+	const TYPESQUARE_SRC =
+		'https://typesquare.com/3/tsst/script/ja/typesquare.js?616abf4f07244993b0057f1eac1e02e5';
+	function rescanTypeSquare() {
+		// Drop the previously re-injected tag (never app.html's original);
+		// the script bytes are identical each time, so this re-fetch is
+		// served from HTTP cache.
+		document.querySelectorAll('script[data-ts-rescan]').forEach((el) => el.remove());
+		const s = document.createElement('script');
+		s.src = TYPESQUARE_SRC;
+		s.async = true;
+		s.setAttribute('data-ts-rescan', '');
+		document.head.appendChild(s);
 	}
 
 	// One-time cleanup: the service worker used to runtime-cache whole video
@@ -354,7 +365,9 @@
 		// Real navigations → reload(false): keep subset, fetch newly seen chars.
 		if (browser) {
 			whenFontplusReady((fp) => fp.reload(nav.type === 'enter'));
-			whenTypeSquareReady((ts) => ts.loadFont());
+			// First load (type 'enter') is already scanned by app.html's own
+			// tag — re-injecting there would only double the PV spend.
+			if (nav.type !== 'enter') rescanTypeSquare();
 		}
 
 		if (!needsEntryAnim) return;
