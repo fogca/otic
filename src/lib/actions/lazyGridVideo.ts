@@ -16,13 +16,10 @@
 //
 // `src` is always the raw R2 file — NOT routed through Cloudflare Media
 // Transformations. That was tried (see git history) to cut decode memory
-// via a smaller rendition, but mode=video ignores Range requests entirely
-// (confirmed directly: a Range: bytes=0-1023 request against a transformed
-// URL comes back 200 with the whole file, no Content-Range — the same
-// request against the raw R2 URL correctly 206s). Without real range
-// support the browser effectively has to fetch the whole file before
-// playback can start, which read as "stuck loading, still blurred" —
-// worse than the problem it was meant to solve.
+// via a smaller rendition; the disqualifiers are the 2000px output cap and
+// the non-streaming cold transform, NOT Range support (see the detailed
+// note on VIDEO_CDN in $lib/js/img.ts — an earlier version of this comment
+// had the causality wrong). The right lever is smaller SOURCES.
 import { acquireVideoSlot, releaseVideoSlot } from './videoBudget';
 
 type Opts = {

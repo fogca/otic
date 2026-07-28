@@ -40,15 +40,28 @@ export const imgOpt = (url: string | undefined, width: number, quality = 72): st
 };
 
 /** Cloudflare Media Transformations CDN root — used by videoFrame() below.
-    NOT used for video `src` itself: mode=video ignores Range requests
-    entirely (confirmed directly — a Range: bytes=0-1023 request against a
-    transformed URL comes back 200 with the full file and no Content-Range
-    header, while the same request against the raw R2 URL correctly returns
-    206/Content-Range). Browsers — Safari especially — rely on real range
-    support to start playback before the whole file arrives; without it a
-    video effectively has to fully download first, which read as "stuck
-    loading, still blurred" on larger files. Video `src` therefore uses the
-    raw URL directly everywhere (see git history for the removed videoOpt). */
+    NOT used for video `src` itself. mode=video IS enabled on this zone and
+    does transform all our sources correctly, so the reason is not "it
+    doesn't work" — it's that this endpoint is a proof press, not a print
+    run. Re-measured 2026-07-28:
+      - Output width is hard-capped at 2000px (width=2400 -> error 9401).
+        The slug gallery renders ~2300 device px on a 1512pt laptop, and
+        one source is natively 2800px wide — this alone disqualifies it.
+      - A cold transform is non-streaming: nothing is returned until the
+        whole file is re-encoded (measured TTFB 3-14s). Warm is ~0.4s,
+        cached 20 days.
+      - quality= is silently ignored; format= only accepts jpg/png/m4a, so
+        there is no control over the output encode at all.
+    An earlier version of this comment blamed Range support. That fact is
+    real (mode=video answers a Range request with 200 + the whole body, no
+    Content-Range, while still advertising accept-ranges) but the causal
+    story was wrong: real Safari plays AND seeks such a response fine — the
+    "stuck loading, still blurred" symptom was the cold-transform latency
+    above, sitting behind a mode=frame LQIP of that same video. Do not
+    revive this endpoint for `src` on the theory that smaller files would
+    fix it; the 2000px cap and the encode latency are the blockers.
+    Video `src` therefore uses the raw URL directly everywhere, served from
+    pre-transcoded derivatives (see git history for the removed videoOpt). */
 const VIDEO_CDN = 'https://cdn.takumiisobe.com/';
 
 /** Tiny first-frame capture of a CDN video (Media Transformations
