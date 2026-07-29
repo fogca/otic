@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { getDetail, getVisibleWorks } from '$lib/js/microcms';
-import { mainVisual } from '$lib/js/img';
+import { mainVisual, imgOpt, videoFrame } from '$lib/js/img';
+import { TITLE_SUFFIX } from '$lib/js/seo';
 import type { PageServerLoad } from './$types';
 
 // Count of shared `scope` values — the more overlap with the current work,
@@ -137,5 +138,30 @@ export const load: PageServerLoad = async ({ params }) => {
 			visual: mainVisual(w)
 		}));
 
-	return { archive, nextWorks };
+	// Social card for this specific work — the layout emits the tags, this
+	// just supplies the values (see $lib/js/seo.ts / +layout.svelte).
+	// og:image must be an ABSOLUTE url: microCMS asset URLs already are, and
+	// videoFrame() returns an absolute CDN url, so video-led works get a real
+	// poster frame instead of falling back to the generic site card. Width
+	// 1200 matches the OG card size platforms render at.
+	const heroVisual = mainVisual(work);
+	const ogImage = heroVisual
+		? heroVisual.isVideo
+			? videoFrame(heroVisual.src, 1200)
+			: imgOpt(heroVisual.src, 1200)
+		: undefined;
+	// Strip the "ja!en" split and any "?" line-break markers out of the
+	// tagline — a meta description wants one clean sentence.
+	const ogDescription =
+		[tag.ja, tag.en].find((s) => s.trim().length > 0)?.replace(/\n/g, ' ').trim() ||
+		`${work.title} — ${(work.scope ?? []).join(' / ')}`;
+
+	const seo = {
+		title: `${work.title} — ${TITLE_SUFFIX}`,
+		description: ogDescription,
+		image: ogImage,
+		type: 'article' as const
+	};
+
+	return { archive, nextWorks, seo };
 };

@@ -14,6 +14,14 @@
 	import LangSwitchOverlay from '$lib/components/LangSwitchOverlay.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import { setLenis } from '$lib/state/lenis';
+	import {
+		SITE_NAME,
+		OG_IMAGE_WIDTH,
+		OG_IMAGE_HEIGHT,
+		canonicalUrl,
+		hasKnownImageSize,
+		resolveSeo
+	} from '$lib/js/seo';
 
 	// Office's corner-logo starts oversized at the bottom (same left inset,
 	// just wider) until the user scrolls at all (officeIntro.pastHero, set
@@ -33,6 +41,15 @@
 	// site's chrome (nav, footer, lang toggle, corner wordmark) should show;
 	// it's meant to reveal nothing about the site underneath.
 	const isTeaser = $derived(page.url.pathname === '/teaser');
+
+	// Canonical + social card. Emitted ONLY here, never per-page: two
+	// <svelte:head> blocks both setting og:title would ship duplicate tags
+	// (Svelte doesn't dedupe by property). Pages that need their own values
+	// return an `seo` object from their load function instead — see
+	// archives/[slug]/+page.server.ts — and everything else is resolved from
+	// the pathname map in $lib/js/seo.ts.
+	const seo = $derived(resolveSeo(page.url.pathname, page.data?.seo));
+	const canonical = $derived(canonicalUrl(page.url.pathname));
 
 	// Sync the reactive lang.current from the session (app.html's inline script
 	// already set <html data-lang> pre-paint — this just reconciles the store so
@@ -439,6 +456,27 @@
 	<!-- FONTPLUS (Tazugane) and TypeSquare (石井ゴシック) loaders live in
 	     app.html <head>: each loads once and survives SPA navigation, and is
 	     re-applied per navigation via afterNavigate above. -->
+
+	<!-- Canonical always points at the custom domain, even while served from
+	     otic.pages.dev — that's the point of it (see $lib/js/seo.ts). -->
+	<link rel="canonical" href={canonical} />
+	<meta name="description" content={seo.description} />
+
+	<meta property="og:site_name" content={SITE_NAME} />
+	<meta property="og:type" content={seo.type} />
+	<meta property="og:url" content={canonical} />
+	<meta property="og:title" content={seo.title} />
+	<meta property="og:description" content={seo.description} />
+	<meta property="og:image" content={seo.image} />
+	{#if hasKnownImageSize(seo.image)}
+		<meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+		<meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+	{/if}
+
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={seo.title} />
+	<meta name="twitter:description" content={seo.description} />
+	<meta name="twitter:image" content={seo.image} />
 </svelte:head>
 
 <div class="transition-bg">
