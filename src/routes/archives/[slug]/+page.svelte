@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { imgOpt, imgSrcset, videoFrame } from '$lib/js/img';
+	import { imgOpt, imgSrcset, videoFrame, videoOpt } from '$lib/js/img';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
 
 	let { data }: { data: PageData } = $props();
@@ -222,7 +222,7 @@
 								     and play them invisibly). -->
 								<div class="vclip">
 									<video
-										src={item.visual.src}
+										src={videoOpt(item.visual.src)}
 										use:lazyVideo
 										loop
 										muted
@@ -716,6 +716,31 @@
 			max-width: 100%;
 			height: auto;
 			max-height: 50vh;
+			margin-inline: auto;
+		}
+
+		/* Two visible cards at different scales (100vw then 75vw) rather than
+		   a uniform stack — the first reads as the primary suggestion, the
+		   second as a lesser one.
+
+		   Only the MEDIA breaks out to full bleed, not the whole card: the
+		   .wrapper carries the page's inline padding, so a negative margin on
+		   .next-item would drag its caption to the screen edge too, out of
+		   line with every other text on the page. max-width:none is needed
+		   because the rule above caps the media at 100% of its (padded) box,
+		   which would otherwise cancel the negative margin entirely. */
+		.next-item:first-child .vclip,
+		.next-item:first-child > img {
+			width: 100vw;
+			max-width: none;
+			margin-inline: calc(var(--padding) * -1);
+		}
+		.next-item:first-child .vclip video {
+			width: 100%;
+			max-width: none;
+		}
+		.next-item:nth-child(2) {
+			width: 75vw;
 			margin-inline: auto;
 		}
 	}
