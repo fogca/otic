@@ -79,6 +79,29 @@ export const videoFrame = (url: string, width = 64): string => {
 	return `${VIDEO_CDN}cdn-cgi/media/mode=frame,time=0s,format=jpg,width=${width},fit=scale-down/${path}`;
 };
 
+/** Downscaled video via Media Transformations (mode=video).
+ *
+ * ONLY safe where the rendered box stays well under the endpoint's hard
+ * 2000px output cap. Measured 2026-07-29: archives grid tiles render at
+ * 187 CSS px (SP) / 264 (PC) — ~561 device px at 3x — so 1280 covers every
+ * viewport with room to spare. The slug gallery does NOT qualify: its
+ * items reach ~2800 device px, past the cap, so those keep the raw URL.
+ *
+ * Why this is worth it: decode memory scales with the SOURCE frame, not
+ * the box it's drawn into. Ten of the grid's videos are 3840x2160 —
+ * 11.86 MiB per frame each — to fill a 187px tile. At width=1280 that
+ * becomes 1.31 MiB (9x less) and 6.0MB of transfer becomes 845KB.
+ *
+ * Cold transforms are non-streaming (Cloudflare re-encodes before sending
+ * a byte) but the result is edge-cached for 20 days, and the LQIP poster
+ * from videoFrame() covers the gap. Returns the URL unchanged for
+ * non-CDN sources. */
+export const videoOpt = (url: string, width = 1280): string => {
+	if (!url.startsWith(VIDEO_CDN)) return url;
+	const path = url.slice(VIDEO_CDN.length);
+	return `${VIDEO_CDN}cdn-cgi/media/mode=video,width=${width}/${path}`;
+};
+
 /** Responsive srcset for a microCMS image across the given widths. */
 export const imgSrcset = (url: string | undefined, widths: number[], quality = 72): string => {
 	if (!url) return '';

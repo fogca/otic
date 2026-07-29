@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { lazyGridVideo } from '$lib/actions/lazyGridVideo';
-	import { imgOpt, imgSrcset, videoFrame } from '$lib/js/img';
+	import { imgOpt, imgSrcset, videoFrame, videoOpt } from '$lib/js/img';
 	import ArchivesTitleBar from '$lib/components/ArchivesTitleBar.svelte';
 	import type { PageData } from './$types';
 
@@ -241,7 +241,10 @@
 					{#if image.isVideo}
 						<video
 							use:lazyGridVideo={{
-								src: image.url,
+								// Tiles render at 187-264 CSS px, so a 1280-wide rendition
+								// is generous — and it cuts decode memory ~9x versus the
+								// 3840x2160 sources. See videoOpt().
+								src: videoOpt(image.url),
 								onMeta: handleVideoMeta,
 								rootMargin: videoMargin
 							}}
