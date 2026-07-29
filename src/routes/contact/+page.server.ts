@@ -127,6 +127,80 @@ export const actions: Actions = {
 			});
 		}
 
+		// ── Acknowledgement to the visitor ──
+		// Deliberately fire-and-forget, and deliberately AFTER the inquiry has
+		// already been delivered: by this point we genuinely have the message,
+		// so a failure here must not turn a received inquiry into an error the
+		// visitor sees and then re-submits. Logged, never surfaced.
+		//
+		// Bilingual because the form itself is (the page's body copy toggles
+		// EN/JA) but the submission carries no language signal — there is
+		// nothing to branch on, so both are sent, JA first.
+		//
+		// reply_to is the studio inbox, not the no-reply sending address: if
+		// someone answers this mail it should reach a human.
+		try {
+			const ackText =
+				`${values.name} 様\n\n` +
+				`このたびはお問い合わせいただき、ありがとうございます。\n` +
+				`以下の内容で承りました。5営業日以内にご返信いたします。\n\n` +
+				`----------------------------------------\n` +
+				`種別: ${values.type}\n` +
+				`お名前: ${values.name}\n` +
+				`メールアドレス: ${values.email}\n\n` +
+				`${values.message}\n` +
+				`----------------------------------------\n\n` +
+				`本メールは自動送信ですが、このままご返信いただけます。\n\n` +
+				`— — —\n\n` +
+				`Dear ${values.name},\n\n` +
+				`Thank you for reaching out. We have received your message as shown\n` +
+				`above, and will reply within five business days.\n\n` +
+				`This is an automated confirmation, but you can reply to it directly.\n\n` +
+				`Office / TAKUMI ISOBE\n` +
+				`https://takumiisobe.com`;
+
+			const ackHtml =
+				`<p>${escapeHtml(values.name)} 様</p>` +
+				`<p>このたびはお問い合わせいただき、ありがとうございます。<br>` +
+				`以下の内容で承りました。5営業日以内にご返信いたします。</p>` +
+				`<hr>` +
+				`<p><strong>種別:</strong> ${escapeHtml(values.type)}<br>` +
+				`<strong>お名前:</strong> ${escapeHtml(values.name)}<br>` +
+				`<strong>メールアドレス:</strong> ${escapeHtml(values.email)}</p>` +
+				`<p style="white-space:pre-wrap">${escapeHtml(values.message)}</p>` +
+				`<hr>` +
+				`<p>本メールは自動送信ですが、このままご返信いただけます。</p>` +
+				`<p>— — —</p>` +
+				`<p>Dear ${escapeHtml(values.name)},</p>` +
+				`<p>Thank you for reaching out. We have received your message as shown ` +
+				`above, and will reply within five business days.</p>` +
+				`<p>This is an automated confirmation, but you can reply to it directly.</p>` +
+				`<p>Office / TAKUMI ISOBE<br>` +
+				`<a href="https://takumiisobe.com">takumiisobe.com</a></p>`;
+
+			const ack = await fetch('https://api.resend.com/emails', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${apiKey}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					from,
+					to: [values.email],
+					reply_to: to,
+					subject: 'お問い合わせありがとうございます — Office / TAKUMI ISOBE',
+					text: ackText,
+					html: ackHtml
+				})
+			});
+			if (!ack.ok) {
+				const detail = await ack.text().catch(() => '');
+				console.error('[contact] ack email failed', ack.status, detail);
+			}
+		} catch (err) {
+			console.error('[contact] ack email threw', err);
+		}
+
 		return { success: true };
 	}
 };
