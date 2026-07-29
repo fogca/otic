@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import Loader from '$lib/components/Loader.svelte';
 	import { intro } from '$lib/state/intro.svelte';
-	import { imgOpt, imgSrcset, mainVisual, mainVisualImage } from '$lib/js/img';
+	import { imgOpt, imgSrcset, mainVisual, mainVisualImage, videoOpt } from '$lib/js/img';
 	import { lazyVideo } from '$lib/actions/lazyVideo';
 	import { padNumber } from '$lib/js/format';
 	import type { PageData } from './$types';
@@ -19,6 +19,26 @@
 	// Meta's third column: first 2 scope tags, e.g. "Branding / Web" — matches
 	// the convention already used in archives/list/+page.svelte.
 	const workScope = (w: { scope?: string[] }) => (w.scope ?? []).slice(0, 2).join(' / ');
+
+	// Widest each card's media is ever drawn, in CSS px — read off the
+	// card-NN rules in this file's own scoped styles (their PC max-width,
+	// the largest any viewport produces; measured 2026-07-29 to confirm).
+	// Doubled for 2x displays, that is the rendition each card needs.
+	const CARD_MAX_CSS_W: Record<number, number> = {
+		1: 380, 2: 720, 3: 1400, 4: 500, 5: 900,
+		6: 700, 7: 580, 8: 800, 9: 1400, 10: 540
+	};
+
+	// Media Transformations caps output at 2000px. The two full-bleed cards
+	// (3 and 9) need ~2800 device px on a wide 2x display, so transforming
+	// them would visibly upscale — they keep the raw source, which is what a
+	// full-bleed frame should be anyway. Everything else gets a rendition
+	// sized to its card instead of decoding a 3840x2160 source for a tile a
+	// few hundred px wide.
+	function cardVideoSrc(url: string, cardIndex: number): string {
+		const needed = (CARD_MAX_CSS_W[cardIndex] ?? 800) * 2;
+		return needed > 2000 ? url : videoOpt(url, needed);
+	}
 
 	// Filler frames: src/lib/assets/op/OP_<NN>.jpg, glob-imported at build
 	// time so any file dropped in there is picked up on the next deploy —
@@ -143,7 +163,7 @@
 							     stream now releases its decoder/buffer instead of holding
 							     them for the whole page. -->
 							<video
-								src={fwVisual.src}
+								src={cardVideoSrc(fwVisual.src, 1)}
 								use:lazyVideo
 								autoplay
 								loop
@@ -191,7 +211,7 @@
 						{#if wVisual?.isVideo}
 							<video
 								use:lazyVideo
-								src={wVisual.src}
+								src={cardVideoSrc(wVisual.src, i + 2)}
 								loop
 								muted
 								playsinline
