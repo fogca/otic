@@ -19,12 +19,26 @@ const holders = new Set<HTMLElement>();
 type Waiter = { node: HTMLElement; start: () => void };
 const waiters: Waiter[] = [];
 
-// 3 on touch devices (phones/tablets — small decoder pools, tight jetsam
-// limits), 6 on desktop (no crash history, but 15 concurrent decoders is
-// waste on any machine). Evaluated per call so a resize/mode change is
-// picked up on the next grant.
+// 6 on touch devices, 12 on desktop. The first pass at this was 3/6, which
+// bounded memory but starved the page visually: with more tiles on screen
+// than slots, the surplus sat frozen on their LQIP poster, which reads as
+// broken rather than as restraint.
+//
+// What makes 6 defensible on mobile now is that the worst source is gone.
+// The site used to serve a 5523x1628 yuv444p file at 25.72 MiB/frame — 4:4:4
+// carries chroma at full resolution, so its buffer was w*h*3, not w*h*1.5,
+// making it 2.17x heavier than a 4K frame despite having fewer pixels. It is
+// no longer referenced. Today's ceiling is a uniform 11.86 MiB/frame (10 of
+// the 17 files are 3840x2160), so 6 concurrent is ~71 MiB of frame buffers
+// against the ~100-150 MiB mix that was crashing at 8.
+//
+// That is a real but bounded increase, and it is still the SOURCES doing the
+// damage: every one of those tiles renders at a few hundred px. Serving
+// pre-transcoded 1280-wide derivatives would cut each stream ~9x and make
+// this cap comfortable rather than calculated. Evaluated per call so a
+// resize or mode change is picked up on the next grant.
 function limit(): number {
-	return typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches ? 3 : 6;
+	return typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches ? 6 : 12;
 }
 
 // Distance from the viewport's edges (0 while intersecting) — used to pick
