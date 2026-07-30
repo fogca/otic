@@ -150,9 +150,9 @@ a {
 
   /* --- Typography stacks --- */
   --font-en:     'Steiner', 'Helvetica Neue', Arial, sans-serif;
-  /* Steiner wght400 (Book) + Ishii Gothic M (TypeSquare) ahead of Tazugane
+  /* Steiner wght400 (Book) + Ishii Gothic R (TypeSquare) ahead of Tazugane
      (FontPlus). */
-  --font-ja:     'Steiner', 'Ishii Gothic M', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja:     'Steiner', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   /* Steiner wght330 + Tazugane Light — lighter JP text */
