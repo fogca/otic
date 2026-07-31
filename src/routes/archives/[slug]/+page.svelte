@@ -628,24 +628,36 @@
 	.Next .title {
 		text-transform: uppercase;
 	}
+	/* Table-like rows — label left, value right, each row divided by a
+	   hairline (border-top) with one closing line under the last row. */
 	.Colophon .rows {
 		display: flex;
 		flex-direction: column;
+		border-bottom: 0.5px solid #ccc;
 	}
-	/* Label above value, not side-by-side — every row (and the free-form
-	   .text above, its own " / " separators swapped for <br> server-side)
-	   now reads as one item per line. */
 	.Colophon .row {
 		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		padding-block: 4px;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 24px;
+		padding-block: 14px;
+		border-top: 0.5px solid #ccc;
 	}
 	.Colophon .row dt,
 	.Colophon .row dd {
 		font-size: var(--fs-h5);
 		line-height: 24px;
 		font-weight: var(--fw-base);
+	}
+	.Colophon .row dt {
+		font-weight: var(--fw-medium);
+		flex-shrink: 0;
+	}
+	.Colophon .row dd {
+		text-align: right;
+		/* Supports a multi-line value (e.g. several names, one per row) via
+		   a literal newline in the CMS field. */
+		white-space: pre-line;
 	}
 	.Colophon .row dd a {
 		text-decoration: underline;
