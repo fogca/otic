@@ -4,6 +4,12 @@ import { mainVisual, imgOpt, videoFrame } from '$lib/js/img';
 import { TITLE_SUFFIX } from '$lib/js/seo';
 import type { PageServerLoad } from './$types';
 
+// A Colophon row: `url` drives a plain-text-plus-link row from the
+// structured `colophon` array field; `html` marks a row parsed from
+// colophon_text, whose value may itself contain an editor-authored <a> and
+// so renders via {@html} instead of escaped text (see +page.svelte).
+type ColophonRow = { label: string; value: string; url?: string; html?: true };
+
 // Count of shared `scope` values — the more overlap with the current work,
 // the more likely two projects read as related (e.g. two typeface/V.I.
 // works vs. a typeface work next to a pure web-dev one).
@@ -99,23 +105,31 @@ export const load: PageServerLoad = async ({ params }) => {
 			rows: [
 				...(work.colophon ?? [])
 					.filter((r) => r.label?.trim() || r.value?.trim() || r.url?.trim())
-					.map((r) => ({
-						label: r.label ?? '',
-						value: r.value ?? '',
-						url: r.url?.trim() || undefined
-					})),
+					.map(
+						(r): ColophonRow => ({
+							label: r.label ?? '',
+							value: r.value ?? '',
+							url: r.url?.trim() || undefined
+						})
+					),
 				...(work.colophon_text ?? '')
 					// richEditor output wraps lines in <p>/<br> — normalize both to
-					// real newlines before stripping the remaining markup.
+					// real newlines. Strip every tag EXCEPT <a>/</a>: editors link a
+					// name inline (e.g. "Photography!<a href=...>Kenta Hasegawa</a>")
+					// and that anchor has to survive into the rendered value.
 					.replace(/<\/(p|div)>/gi, '\n')
 					.replace(/<br\s*\/?>/gi, '\n')
-					.replace(/<[^>]+>/g, '')
+					.replace(/<(?!\/?a(?:\s|>))[^>]*>/gi, '')
 					.split('\n')
 					.map((line) => line.trim())
 					.filter((line) => line.includes('!'))
-					.map((line) => {
+					.map((line): ColophonRow => {
 						const [label, ...rest] = line.split('!');
-						return { label: label.trim(), value: rest.join('!').trim() };
+						return {
+							label: label.replace(/<[^>]+>/g, '').trim(),
+							value: rest.join('!').trim(),
+							html: true
+						};
 					})
 			]
 		}

@@ -188,6 +188,11 @@
 									<a href={row.url} target="_blank" rel="noopener noreferrer"
 										>{row.value || row.url}</a
 									>
+								{:else if row.html}
+									<!-- colophon_text rows may carry an editor-authored inline
+									     <a> (see +page.server.ts) — trusted CMS content, not
+									     user input. -->
+									{@html row.value}
 								{:else}
 									{row.value}
 								{/if}
