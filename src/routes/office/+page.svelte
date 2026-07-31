@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { officeIntro } from '$lib/state/officeIntro.svelte';
+	import { scrollReveal } from '$lib/actions/scrollReveal';
 
 	// The site-wide corner-logo starts oversized at the bottom of this page
 	// (same left inset, just wider — see +layout.svelte's .is-hero state) —
@@ -121,16 +122,16 @@
 	<section class="panel panel--intro">
 		<div class="panel-inner">
 			<!-- DRAFT — headline not yet approved, see chat. -->
-			<p class="intro-headline" lang="en">
+			<p class="intro-headline" lang="en" use:scrollReveal={{ y: 36 }}>
 				An independent<br />
 				multidisciplinary<br />
 				design office.
 			</p>
 
-			<header class="panel-hd">
+			<header class="panel-hd" use:scrollReveal={{ delay: 0.1 }}>
 				<h2 class="pt" lang="en">About Office</h2>
 			</header>
-			<div class="panel-content">
+			<div class="panel-content" use:scrollReveal={{ delay: 0.2 }}>
 				<!-- DRAFT — lead + JA translation not yet approved, see chat. -->
 				<p class="panel-lead" lang="en">
 					A creative office in Tokyo, working across identity, product, and digital
@@ -164,10 +165,10 @@
 	<!-- ─── Panel 2: Services — single-column stack ─── -->
 	<section class="panel panel--services">
 		<div class="panel-inner">
-			<header class="panel-hd">
+			<header class="panel-hd" use:scrollReveal>
 				<h2 class="pt" lang="en">Services &amp; Partners</h2>
 			</header>
-			<div class="panel-content">
+			<div class="panel-content" use:scrollReveal={{ delay: 0.1 }}>
 				<!-- DRAFT — lead + JA translation not yet approved, see chat. -->
 				<p class="panel-lead" lang="en">
 					Four practices and a network of partner studios, shaping a brand from
@@ -214,10 +215,10 @@
 	<section class="panel panel--company-director">
 		<div class="panel-inner duo-inner">
 			<div class="duo-col">
-				<header class="panel-hd">
+				<header class="panel-hd" use:scrollReveal>
 					<h2 class="pt" lang="en">Director</h2>
 				</header>
-				<div class="panel-content">
+				<div class="panel-content" use:scrollReveal={{ delay: 0.1 }}>
 					<p class="panel-lead" lang="en">Takumi Isobe</p>
 					<p class="panel-lead panel-lead--ja" lang="ja">磯部タクミ</p>
 					<div class="director-row">
@@ -242,10 +243,10 @@
 				</div>
 			</div>
 			<div class="duo-col">
-				<header class="panel-hd">
+				<header class="panel-hd" use:scrollReveal>
 					<h2 class="pt" lang="en">Company</h2>
 				</header>
-				<div class="panel-content">
+				<div class="panel-content" use:scrollReveal={{ delay: 0.1 }}>
 					<p class="panel-lead" lang="en">Operating Company</p>
 					<p class="panel-lead panel-lead--ja" lang="ja">運営会社</p>
 					<div class="company-row">
@@ -275,22 +276,30 @@
 	<!-- ─── Panel 5: Ethos ─── -->
 	<section class="panel panel--ethos">
 		<div class="panel-inner">
-			<header class="panel-hd">
+			<header class="panel-hd" use:scrollReveal>
 				<h2 class="pt" lang="en">Ethos</h2>
 			</header>
 			<div class="panel-content">
 				<!-- DRAFT — reuses the homepage's own ethos tagline (see
 				     HomeFeed.svelte ".ethos__line") for consistency rather than
 				     inventing new copy; JA translation not yet approved, see chat. -->
-				<p class="panel-lead" lang="en">Embodied humanism.</p>
-				<p class="panel-lead panel-lead--ja" lang="ja">身体性に根ざしたヒューマニズム。</p>
+				<p class="panel-lead" lang="en" use:scrollReveal={{ delay: 0.1 }}>
+					Embodied humanism.
+				</p>
+				<p
+					class="panel-lead panel-lead--ja"
+					lang="ja"
+					use:scrollReveal={{ delay: 0.1 }}
+				>
+					身体性に根ざしたヒューマニズム。
+				</p>
 				<div class="ethos-row">
-					<div class="ethos-block ethos-block--intro">
+					<div class="ethos-block ethos-block--intro" use:scrollReveal>
 						<p class="ethos-en" lang="en">{ethosIntro.en}</p>
 						<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
 					</div>
-					{#each ethosParts as p}
-						<div class="ethos-block">
+					{#each ethosParts as p, i}
+						<div class="ethos-block" use:scrollReveal={{ delay: i * 0.08 }}>
 							<h3 class="ethos-part">
 								<span class="ethos-part-en" lang="en">{p.en}</span>
 								<span class="ethos-part-ja" lang="ja">{p.ja}</span>
@@ -640,6 +649,16 @@
 			margin-left: auto;
 			margin-right: 0;
 			padding: 72px calc(var(--padding) * 1.5) 40px;
+		}
+
+		/* Body copy reads too small at base.css's global PC p:lang() size on
+		   this page's wider column — bump 2px over the site-wide token here
+		   rather than raising the token itself (would affect every page). */
+		.OfficePage p:lang(en) {
+			font-size: calc(var(--fs-p-en) + 2px);
+		}
+		.OfficePage p:lang(ja) {
+			font-size: calc(var(--fs-p-ja) + 2px);
 		}
 
 		/* A bit more room than SP for a full-bleed image and a longer,
