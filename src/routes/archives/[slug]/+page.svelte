@@ -614,10 +614,14 @@
 		padding-top: 60px;
 		padding-bottom: 40px;
 	}
-	.Colophon .title,
-	.Next .title {
+	.Colophon .title {
 		font-size: var(--fs-h1);
 		font-weight: var(--fw-medium);
+		margin-bottom: 28px;
+	}
+	.Next .title {
+		font-size: 42px;
+		font-weight: var(--fw-base);
 		margin-bottom: 28px;
 	}
 	.Colophon .title,
@@ -679,13 +683,13 @@
 	   +page.server.ts) — same padding-top/bottom + no wrapper padding as
 	   Colophon above (only its own divider's margin-top differs). ── */
 	.Next {
-		padding-top: 40px;
-		padding-bottom: 80px;
+		padding-top: 80px;
+		padding-bottom: 0;
 	}
 	.next-grid {
 		display: flex;
 		flex-direction: column;
-		gap: 24px;
+		gap: 60px;
 	}
 	.next-item {
 		display: block;
