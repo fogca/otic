@@ -82,10 +82,12 @@ export type Work = {
 		value?: string;
 		url?: string;
 	}>;
-	/** Colophon as free-form rich text (richEditor — raw HTML) — an
-	    alternative to the structured `colophon` rows above, tried alongside
-	    it rather than replacing it. Not yet a live CMS field; optional
-	    until added. */
+	/** Colophon credit rows as free-form rich text (richEditor — raw HTML) —
+	    one "Label!Value" line per credit (e.g. "Client!et cetera inc."),
+	    parsed into the same row shape as the structured `colophon` array
+	    above and rendered in the same table (see +page.server.ts). Lets
+	    editors add credits without an array row per line. Not yet a live
+	    CMS field; optional until added. */
 	colophon_text?: string;
 };
 

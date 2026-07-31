@@ -91,22 +91,33 @@ export const load: PageServerLoad = async ({ params }) => {
 		gallery,
 		colophonBase: {
 			brand: work.brand ?? '',
-			// Free-form credit/link rows — plain "label: value" text, or a
-			// clickable link when `url` is set. Rows with nothing filled in
-			// are dropped rather than shown blank.
-			rows: (work.colophon ?? [])
-				.filter((r) => r.label?.trim() || r.value?.trim() || r.url?.trim())
-				.map((r) => ({
-					label: r.label ?? '',
-					value: r.value ?? '',
-					url: r.url?.trim() || undefined
-				})),
-			// Alternative free-form rich text version, tried alongside the
-			// structured rows above rather than replacing them. Editors write
-			// credit lines " / "-separated on one line (e.g. "Direction: X /
-			// Design: Y") — break each onto its own line rather than leaving
-			// them run together.
-			text: (work.colophon_text ?? '').replace(/ \/ /g, '<br>')
+			// Structured rows (the `colophon` array field) plus rows parsed out
+			// of the free-form `colophon_text` richEditor field — editors write
+			// one "Label!Value" credit per line there (the same "!" convention
+			// as `description`'s ja!en split above) rather than adding an array
+			// row per credit. Both feed the same table, structured rows first.
+			rows: [
+				...(work.colophon ?? [])
+					.filter((r) => r.label?.trim() || r.value?.trim() || r.url?.trim())
+					.map((r) => ({
+						label: r.label ?? '',
+						value: r.value ?? '',
+						url: r.url?.trim() || undefined
+					})),
+				...(work.colophon_text ?? '')
+					// richEditor output wraps lines in <p>/<br> — normalize both to
+					// real newlines before stripping the remaining markup.
+					.replace(/<\/(p|div)>/gi, '\n')
+					.replace(/<br\s*\/?>/gi, '\n')
+					.replace(/<[^>]+>/g, '')
+					.split('\n')
+					.map((line) => line.trim())
+					.filter((line) => line.includes('!'))
+					.map((line) => {
+						const [label, ...rest] = line.split('!');
+						return { label: label.trim(), value: rest.join('!').trim() };
+					})
+			]
 		}
 	};
 
