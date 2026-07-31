@@ -1,7 +1,10 @@
 // microCMS (imgix Rendering API) image optimization helpers.
 // Pure string utilities — safe to import in client components (no env access).
 //
-// auto=format → imgix serves AVIF/WebP per the browser's Accept header.
+// fm=webp     → force WebP output. auto=format (imgix's usual Accept-header
+//               content negotiation) does NOT work on microCMS's delivery
+//               CDN — verified it returns image/jpeg regardless of the
+//               request's Accept header, so format is forced explicitly here.
 // compress    → extra lossless/lossy optimization.
 // q (def 72)  → output quality. fit=max → never upscales past the source.
 
@@ -36,7 +39,7 @@ export const mainVisualImage = (w: Work): MicroCMSImage | undefined =>
 export const imgOpt = (url: string | undefined, width: number, quality = 72): string => {
 	if (!url) return '';
 	const sep = url.includes('?') ? '&' : '?';
-	return `${url}${sep}auto=format,compress&q=${quality}&w=${width}&fit=max`;
+	return `${url}${sep}fm=webp&auto=compress&q=${quality}&w=${width}&fit=max`;
 };
 
 /** Cloudflare Media Transformations CDN root — used by videoFrame() below.

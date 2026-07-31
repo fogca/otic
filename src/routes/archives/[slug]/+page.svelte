@@ -109,16 +109,19 @@
 						<!-- Optional horizontal PC-specific crop — for works whose
 						     main_visual is portrait, which reads too narrow now that
 						     PC runs the same full-width flow as SP. Falls back to the
-						     regular hero below when unset. -->
+						     regular hero below when unset. Top tier (3840) covers
+						     24"+/5K desktops at full-bleed (sizes=100vw); fit=max in
+						     imgOpt caps at the source's own resolution, so this is
+						     free when the CMS asset itself is smaller. -->
 						<source
 							media="(min-width: 1024px)"
-							srcset={imgSrcset(archive.heroImagePc, [900, 1400, 2000])}
+							srcset={imgSrcset(archive.heroImagePc, [900, 1400, 2000, 2800, 3840])}
 							sizes="100vw"
 						/>
 					{/if}
 					<img
 						src={imgOpt(archive.hero.src, 1600)}
-						srcset={imgSrcset(archive.hero.src, [900, 1400, 2000])}
+						srcset={imgSrcset(archive.hero.src, [640, 900, 1400, 2000, 2800, 3840])}
 						sizes="100vw"
 						alt={archive.title}
 						fetchpriority="high"
@@ -154,7 +157,7 @@
 				{:else}
 					<img
 						src={imgOpt(item.src, 1600)}
-						srcset={imgSrcset(item.src, [800, 1200, 1600, 2000])}
+						srcset={imgSrcset(item.src, [800, 1200, 1600, 2000, 2800, 3840])}
 						sizes="100vw"
 						alt={item.caption || `${archive.title} ${i + 1}`}
 						loading="lazy"
