@@ -269,11 +269,30 @@
 		height: auto;
 	}
 
-	/* SP: logo left, nav right — order flips visual position without
-	   touching DOM order (nav stays first for tab/reading order). */
+	/* SP: logo stacked above the nav row (was side-by-side) — order still
+	   flips visual position without touching DOM order (nav stays first
+	   for tab/reading order). Logo runs full-width within the Header's own
+	   padding; the nav row below it keeps its own item gap (10px, set
+	   above) and is centered as a whole via justify-content. */
 	@media (max-width: 1023px) {
+		.Header {
+			flex-direction: column;
+			align-items: stretch;
+			justify-content: flex-start;
+			gap: 20px;
+		}
+
 		.Header .head-end {
 			order: -1;
+			width: 100%;
+		}
+
+		.Header .logo {
+			width: 100%;
+		}
+
+		.Header .nav {
+			justify-content: center;
 		}
 	}
 
