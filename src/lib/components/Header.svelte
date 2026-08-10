@@ -412,7 +412,7 @@
 			box-shadow:
 				inset 0 1px 0 rgba(255, 255, 255, 0.6),
 				inset 0 0 0 1px rgba(255, 255, 255, 0.4),
-				0 8px 20px rgba(0, 0, 0, 0.08);
+				0 6px 16px rgba(0, 0, 0, 0.05);
 		}
 
 		.Header .nav-links {
@@ -430,7 +430,7 @@
 			box-shadow:
 				inset 0 1px 0 rgba(255, 255, 255, 0.25),
 				inset 0 0 0 1px rgba(255, 255, 255, 0.15),
-				0 8px 20px rgba(0, 0, 0, 0.3);
+				0 6px 16px rgba(0, 0, 0, 0.2);
 		}
 
 		.switch-highlight {
