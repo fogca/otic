@@ -8,6 +8,7 @@
 
 	// Underline only on the Archives index/list — not on individual project
 	// pages (/archives/[slug]).
+	const isHome = $derived(page.url.pathname === '/');
 	const isArchives = $derived(['/archives', '/archives/list'].includes(page.url.pathname));
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
 	const isContact = $derived(page.url.pathname === '/contact');
@@ -19,10 +20,11 @@
 
 	// SP-only segmented-pill nav (see .switch-highlight below, same design
 	// language as ArchivesTitleBar's view switch) — a sliding black capsule
-	// tracks whichever of Archives/Office/Contact is current. The lang
+	// tracks whichever of Home/Archives/Office/Contact is current. The lang
 	// toggle sits in the same pill but never becomes "active" itself (it's
 	// a persistent setting, not a page). Hidden (opacity:0) when none of
-	// the three match (e.g. Home) rather than left pointing at a stale one.
+	// the four match rather than left pointing at a stale one.
+	let homeEl: HTMLElement | null = $state(null);
 	let archivesEl: HTMLElement | null = $state(null);
 	let officeEl: HTMLElement | null = $state(null);
 	let contactEl: HTMLElement | null = $state(null);
@@ -30,7 +32,15 @@
 	let highlightReady = $state(false);
 
 	$effect(() => {
-		const target = isArchives ? archivesEl : isOffice ? officeEl : isContact ? contactEl : null;
+		const target = isHome
+			? homeEl
+			: isArchives
+				? archivesEl
+				: isOffice
+					? officeEl
+					: isContact
+						? contactEl
+						: null;
 		if (!highlightEl) return;
 		if (!target) {
 			highlightEl.style.opacity = '0';
@@ -138,33 +148,43 @@
 		     where .switch-option falls back to the plain dimmed-on-current
 		     look instead. -->
 		<div class="switch-highlight" class:is-ready={highlightReady} bind:this={highlightEl}></div>
-		<a
-			href="/archives"
-			class="switch-option"
-			class:is-active={isArchives}
-			lang="en"
-			bind:this={archivesEl}
-		>
-			Archives
-		</a>
-		<a
-			href="/office"
-			class="switch-option"
-			class:is-active={isOffice}
-			lang="en"
-			bind:this={officeEl}
-		>
-			Office
-		</a>
-		<a
-			href="/contact"
-			class="switch-option"
-			class:is-active={isContact}
-			lang="en"
-			bind:this={contactEl}
-		>
-			Contact
-		</a>
+		<!-- Left-aligned page-link group (SP: justify-content:space-between
+		     on .nav pushes this left and the lang toggle to the right edge;
+		     PC just flows left-to-right as before — see the media blocks
+		     below). Plain (non-positioned) wrapper — offsetLeft/offsetWidth
+		     used to place .switch-highlight above stay relative to .nav. -->
+		<div class="nav-links">
+			<a href="/" class="switch-option" class:is-active={isHome} lang="en" bind:this={homeEl}>
+				Home
+			</a>
+			<a
+				href="/archives"
+				class="switch-option"
+				class:is-active={isArchives}
+				lang="en"
+				bind:this={archivesEl}
+			>
+				Archives
+			</a>
+			<a
+				href="/office"
+				class="switch-option"
+				class:is-active={isOffice}
+				lang="en"
+				bind:this={officeEl}
+			>
+				Office
+			</a>
+			<a
+				href="/contact"
+				class="switch-option"
+				class:is-active={isContact}
+				lang="en"
+				bind:this={contactEl}
+			>
+				Contact
+			</a>
+		</div>
 		<!-- Language toggle: shows the CURRENT language only; click switches to
 		     the other (site-wide bilingual body copy) and fires the confirmation
 		     overlay (LangSwitchOverlay). Sits in the same pill but never gets
@@ -237,12 +257,23 @@
 		color: #fff;
 	}
 
-	/* ----- Nav (left): Archives / Office / Contact / lang toggle ----- */
+	/* ----- Nav (left): Home / Archives / Office / Contact / lang toggle ----- */
 	.Header .nav {
 		position: relative;
 		display: flex;
 		align-items: center;
-		/* SP: tight 10px rhythm across all four items */
+		/* SP: tight 10px rhythm between .nav-links and the lang toggle
+		   (moot once space-between spreads them further apart — see the
+		   max-width:1023px block). PC keeps this as its real gap (below). */
+		gap: 10px;
+	}
+
+	/* Home/Archives/Office/Contact as their own group — SP left-aligns this
+	   as a unit against the lang toggle pinned to .nav's other end (see the
+	   max-width:1023px block); PC just flows it inline like before. */
+	.Header .nav-links {
+		display: flex;
+		align-items: center;
 		gap: 10px;
 	}
 
@@ -384,13 +415,20 @@
 		}
 
 		/* Segmented pill (see ArchivesTitleBar.svelte's .view-switch — same
-		   design reused here): light-gray rounded track, centered as a
-		   whole, each option its own hit target inside it. */
+		   design reused here): light-gray rounded track spanning the full
+		   width, page links left-aligned as their own group (.nav-links,
+		   moderate 10px gap) and the lang toggle pinned to the right edge. */
 		.Header .nav {
-			justify-content: center;
+			justify-content: space-between;
 			padding: 4px;
 			border-radius: 999px;
 			background: var(--color-bg-gray);
+		}
+
+		.Header .nav-links {
+			display: flex;
+			align-items: center;
+			gap: 10px;
 		}
 
 		/* Dark pages (Contact/Legal — see .is-dark above): the light-gray
@@ -434,6 +472,10 @@
 		}
 
 		.Header .nav {
+			gap: 30px;
+		}
+
+		.Header .nav-links {
 			gap: 30px;
 		}
 
