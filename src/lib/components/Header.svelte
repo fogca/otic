@@ -12,10 +12,11 @@
 	const isArchives = $derived(['/archives', '/archives/list'].includes(page.url.pathname));
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
 	const isContact = $derived(page.url.pathname === '/contact');
-	// Contact and the Legal pages (Privacy/Imprint/Company) have a dark
-	// (charcoal/black) page background — the nav's default var(--color-text)
-	// is black, effectively invisible there, so invert to white on these.
-	const DARK_PAGES = ['/contact', '/legal/privacy', '/legal/imprint', '/legal/company'];
+	// The Legal pages (Privacy/Imprint/Company) have a dark (charcoal/black)
+	// page background — the nav's default var(--color-text) is black,
+	// effectively invisible there, so invert to white on these. Contact
+	// itself is white now, same as every other page — no longer in this list.
+	const DARK_PAGES = ['/legal/privacy', '/legal/imprint', '/legal/company'];
 	const isDark = $derived(DARK_PAGES.includes(page.url.pathname));
 
 	// SP-only segmented-pill nav (see .switch-highlight below, same design

@@ -175,31 +175,31 @@
 	}
 
 	.Contact {
-		background: #999;
-		color: #fff;
+		background: var(--color-bg);
+		color: var(--color-text);
 		padding-top: 100px;
 		padding-bottom: 120px;
 		min-height: 100vh;
 		min-height: 100dvh;
-		/* Absorb Footer's margin-top so Contact (black) flows seamlessly into Footer (black) */
-		margin-bottom: -120px;
-		/* Hairline divider between Contact and Footer (matches Footer__bottom top border) */
-		border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+		/* White now (was black, seamlessly merged into the black Footer via a
+		   negative margin-bottom + hairline divider) — with a real color
+		   change at the boundary, that trick is no longer needed; Footer's
+		   own 120px margin-top applies normally, same as every other page. */
 	}
 
 	.Contact :global(*) {
-		color: #fff;
+		color: var(--color-text);
 	}
 
 	.Contact :global(a) {
 		color: inherit;
 		text-decoration: none;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 		transition: border-color 0.15s ease;
 	}
 
 	.Contact :global(a:hover) {
-		border-bottom-color: #fff;
+		border-bottom-color: var(--color-text);
 	}
 
 	.Contact .wrapper {
@@ -264,7 +264,7 @@
 	.Contact .form-error {
 		margin: 0;
 		font-size: 13px;
-		color: #ff9a9a;
+		color: #b3261e;
 	}
 
 	.Contact .field {
@@ -279,7 +279,7 @@
 		font-size: 13px;
 		opacity: 0.6;
 		padding: 10px 0;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 	}
 
 	/* Groups a field row with its inline error below it — keeps the label +
@@ -300,7 +300,7 @@
 		color: inherit;
 		padding: 10px 0;
 		border: 0;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 		font-family: var(--font-en);
 		resize: vertical;
 		outline: none;
@@ -309,15 +309,15 @@
 
 	.Contact .field input::placeholder,
 	.Contact .field textarea::placeholder {
-		color: rgba(255, 255, 255, 0.5);
+		color: rgba(0, 0, 0, 0.4);
 		font-size: 12.5px;
 	}
 
 	.Contact .field select {
 		appearance: none;
 		-webkit-appearance: none;
-		background-image: linear-gradient(45deg, transparent 50%, #fff 50%),
-			linear-gradient(135deg, #fff 50%, transparent 50%);
+		background-image: linear-gradient(45deg, transparent 50%, #000 50%),
+			linear-gradient(135deg, #000 50%, transparent 50%);
 		background-position:
 			calc(100% - 12px) 50%,
 			calc(100% - 7px) 50%;
@@ -330,19 +330,19 @@
 	}
 
 	.Contact .field select option {
-		background: #000;
-		color: #fff;
+		background: #fff;
+		color: #000;
 	}
 
 	.Contact .field-error {
 		font-size: 12px;
-		color: #ff9a9a;
+		color: #b3261e;
 	}
 
 	.Contact .field input[aria-invalid='true'],
 	.Contact .field textarea[aria-invalid='true'],
 	.Contact .field select[aria-invalid='true'] {
-		border-bottom-color: #ff9a9a;
+		border-bottom-color: #b3261e;
 	}
 
 	/* Message field: stack label above full-width textarea */
@@ -367,7 +367,7 @@
 	.Contact .field input:focus-visible,
 	.Contact .field textarea:focus-visible,
 	.Contact .field select:focus-visible {
-		border-bottom-color: #fff;
+		border-bottom-color: #000;
 	}
 
 	.Contact .submit {
@@ -378,7 +378,7 @@
 		font-family: var(--font-en);
 		background: transparent;
 		color: inherit;
-		border: 1px solid rgba(255, 255, 255, 0.6);
+		border: 1px solid rgba(0, 0, 0, 0.6);
 		cursor: pointer;
 		transition:
 			background var(--duration-fast) var(--ease-default),
@@ -387,9 +387,9 @@
 	}
 
 	.Contact .submit:hover {
-		background: #fff;
-		color: #000;
-		border-color: #fff;
+		background: #000;
+		color: #fff;
+		border-color: #000;
 	}
 
 	.Contact .submit:disabled {
@@ -400,7 +400,7 @@
 	.Contact .submit:disabled:hover {
 		background: transparent;
 		color: inherit;
-		border-color: rgba(255, 255, 255, 0.6);
+		border-color: rgba(0, 0, 0, 0.6);
 	}
 
 	.Contact .thanks {

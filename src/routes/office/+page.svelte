@@ -334,7 +334,7 @@
 	/* ── Page host: normal vertical document flow, no scroll-jacking ── */
 	.OfficePage {
 		width: 100%;
-		padding-top: 80px;
+		padding-top: 120px;
 		margin: 0;
 		background: var(--color-bg);
 	}
@@ -372,7 +372,7 @@
 	   (see min-width:1024px block), matching the archives/[slug] page's
 	   lead/media split. */
 	.panel-inner {
-		padding: 50px var(--padding) 50px;
+		padding: 40px var(--padding) 40px;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
