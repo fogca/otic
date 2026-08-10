@@ -49,8 +49,20 @@
 	// ── Header visibility settings (adjust freely) ──
 	const HIDE_DISTANCE = 500; // px — scroll distance from resume point that triggers hide
 	const SCROLL_END_DELAY = 150; // ms — debounce to detect scroll-stop
+	const SP_HEADER_GAP = 12; // px — logo-row-to-nav-row gap (SP only, see .Header below)
 
 	let headerShown = $state(false);
+
+	// SP hide amount: NOT -100% of the whole header (that would take the
+	// nav pill with it) — only the logo's own rendered height + the gap
+	// above, so the header settles with just the nav pill still visible at
+	// the top instead of sliding fully off-screen. Logo height is fluid
+	// (clamp-based width, SVG aspect ratio), so it's measured rather than
+	// hardcoded, and re-measured on resize. PC keeps hiding fully (see the
+	// min-width:1024px block) — same size row either way there, no partial
+	// state to distinguish.
+	let headEndEl: HTMLElement | null = $state(null);
+	let spHideOffset = $state(0);
 
 	// Sync Header visibility to intro.completed:
 	// false → hide (slides up via translateY -100%)
@@ -98,9 +110,17 @@
 
 		window.addEventListener('scroll', onScroll, { passive: true });
 
+		const measure = () => {
+			if (headEndEl) spHideOffset = headEndEl.offsetHeight + SP_HEADER_GAP;
+		};
+		measure();
+		const ro = new ResizeObserver(measure);
+		if (headEndEl) ro.observe(headEndEl);
+
 		return () => {
 			window.removeEventListener('scroll', onScroll);
 			if (scrollEndTimer) clearTimeout(scrollEndTimer);
+			ro.disconnect();
 		};
 	});
 </script>
@@ -111,6 +131,7 @@
 	class:is-shown={headerShown}
 	class:is-office={isOffice}
 	class:is-dark={isDark}
+	style="--sp-hide-offset: {spHideOffset}px"
 >
 	<nav class="nav">
 		<!-- SP-only sliding highlight (see .switch-highlight) — inert on PC,
@@ -164,7 +185,7 @@
 		</span>
 	</nav>
 
-	<div class="head-end">
+	<div class="head-end" bind:this={headEndEl}>
 		<!-- Top-right wordmark, shown at every breakpoint. -->
 		<a href="/" class="logo" aria-label="Home">
 			<Logo />
@@ -342,7 +363,15 @@
 			flex-direction: column;
 			align-items: stretch;
 			justify-content: flex-start;
-			gap: 20px;
+			gap: 12px;
+		}
+
+		/* Hidden state: rise only far enough to tuck the logo away (its own
+		   measured height + the gap above — see --sp-hide-offset, set from
+		   Header.svelte's script), not the whole header's -100% — the nav
+		   pill stays put, visible, instead of leaving with it. */
+		.Header:not(.is-shown) {
+			transform: translateY(calc(-1 * var(--sp-hide-offset, 100%)));
 		}
 
 		.Header .head-end {
