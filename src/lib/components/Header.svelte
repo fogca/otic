@@ -441,7 +441,7 @@
 		}
 
 		.Header .switch-option {
-			padding: 5px 15px;
+			padding: 5px 10px;
 			margin: 0;
 			opacity: 0.5;
 			font-weight: 420;
