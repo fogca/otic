@@ -636,6 +636,16 @@
 		.panel-lead {
 			max-width: 85%;
 		}
+
+		/* Full-bleed break-out of .panel-inner's own padding (var(--padding)
+		   each side) — classic 100vw/negative-margin technique. Safe from
+		   the extra 1px+ of horizontal overflow it can introduce because
+		   base.css already sets overflow-x:hidden on html/body site-wide. */
+		.service-image {
+			width: 100vw;
+			margin-left: calc(50% - 50vw);
+			margin-right: calc(50% - 50vw);
+		}
 	}
 
 	/* ── Desktop: whole panel (title + content together) pushed to a

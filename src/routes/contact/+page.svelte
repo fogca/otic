@@ -175,7 +175,7 @@
 	}
 
 	.Contact {
-		background: #000;
+		background: #999;
 		color: #fff;
 		padding-top: 100px;
 		padding-bottom: 120px;
