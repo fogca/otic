@@ -209,6 +209,16 @@
 		border-bottom-color: var(--color-text);
 	}
 
+	/* base.css sets a bare `section { padding-left/right: var(--padding) }`
+	   rule — .Section (a <section>) matched it, stacking a second var(--padding)
+	   on top of .wrapper's own, doubling the side inset versus every other
+	   page (e.g. Office's .panel explicitly zeroes this same clash). Cancel
+	   it here so .wrapper is the single source of truth, same width as
+	   Office now. */
+	.Contact .Section {
+		padding-inline: 0;
+	}
+
 	.Contact .wrapper {
 		padding-inline: var(--padding);
 	}
@@ -224,31 +234,29 @@
 		margin: 0;
 	}
 
+	/* Hidden for now (kept in the DOM, not deleted; may come back) — same
+	   treatment as Office's "About Office" label. */
 	.Contact .subtitle-ja {
-		font-family: var(--font-ja);
-		font-size: var(--fs-h5);
-		font-weight: var(--fw-medium);
-		line-height: var(--lh-h-ja);
-		margin: 8px 0 0;
-		opacity: 0.85;
+		display: none;
 	}
 
 	/* Large tagline — sized to match Office's .intro-headline (same
-	   font-size/weight/uppercase treatment), left-aligned here rather than
-	   centered since Contact's layout (form, labels) is left-aligned
-	   throughout. */
+	   font-size/weight/uppercase treatment), left-aligned to fit Contact's
+	   left-aligned form layout. */
 	.Contact .intro-headline {
 		font-size: var(--fs-h0);
 		font-weight: 325;
 		font-variation-settings: 'wght' 325;
 		text-transform: uppercase;
+		text-align: left;
 		line-height: var(--lh-h0);
 		max-width: 100%;
 		margin: 16px 0 0;
 	}
 
+	/* Tightened from 40px — gap to .content (body copy) below. */
 	.Contact .header {
-		margin-bottom: 40px;
+		margin-bottom: 20px;
 	}
 
 	.Contact .body {
@@ -288,19 +296,20 @@
 		color: #b3261e;
 	}
 
+	/* Stacked (label above input) on SP — a fixed-width inline label left
+	   too little room for the input on a narrow viewport. PC switches back
+	   to the inline row (see the min-width:1024px block), where there's
+	   width to spare. */
 	.Contact .field {
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
 		align-items: stretch;
-		gap: 10px;
+		gap: 6px;
 	}
 
 	.Contact .field .label {
-		flex: 0 0 100px;
 		font-size: 13px;
 		opacity: 0.6;
-		padding: 10px 0;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 	}
 
 	/* Groups a field row with its inline error below it — keeps the label +
@@ -459,6 +468,21 @@
 
 		.Contact .body p {
 			font-size: 14px;
+		}
+
+		/* Back to an inline row (label left, input right) — width to spare
+		   at this breakpoint. .field--textarea keeps its own stacked layout
+		   regardless (message field is always full-width). */
+		.Contact .field:not(.field--textarea) {
+			flex-direction: row;
+			align-items: stretch;
+			gap: 10px;
+		}
+
+		.Contact .field:not(.field--textarea) .label {
+			flex: 0 0 100px;
+			padding: 10px 0;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 		}
 
 		.Contact .field input,

@@ -124,7 +124,7 @@
 				<h2 class="pt" lang="en">About Office</h2>
 			</header>
 			<p class="intro-headline" lang="en">
-				The intersection of culture, philosophy and design.
+				The intersection of culture, philosophy and creation.
 			</p>
 
 			<div class="panel-content">
