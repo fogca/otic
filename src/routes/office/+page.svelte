@@ -663,41 +663,135 @@
 		}
 	}
 
-	/* ── Desktop: whole panel (title + content together) pushed to a
-	   right-aligned column, mirroring archives/[slug]'s right-weighted
-	   layout — unlike slug's own lead/media split, the title stays WITH the
-	   content on the right rather than sitting in a separate left column;
-	   the left ~38% of the page is simply open space. ── */
+	/* ── Desktop ──
+	   Was: the whole panel squeezed into a right-aligned 62% column, leaving
+	   the left ~38% of a 1700px canvas as dead space, with body copy running
+	   900px+ per line.
+
+	   Now a conventional editorial two-column grid — a fixed label rail on
+	   the left (section eyebrow) and the content column beside it, both
+	   inside the page's normal side padding so the full width is actually
+	   used. Reference: takram.com/ja/about (label at the margin, display
+	   statement at full width, body copy held to a readable measure). ── */
 	@media (min-width: 1024px) {
+		/* Measure cap for body copy — long lines are the single biggest
+		   readability problem on a wide canvas. ~680px keeps JP around
+		   40-45 characters per line. */
+		.OfficePage {
+			--measure: 680px;
+			--rail: 220px;
+			--rail-gap: 72px;
+		}
+
 		.panel-inner {
-			width: 62%;
-			margin-left: auto;
-			margin-right: 0;
-			padding: 72px calc(var(--padding) * 1.5) 40px;
+			display: grid;
+			grid-template-columns: var(--rail) minmax(0, 1fr);
+			column-gap: var(--rail-gap);
+			align-items: start;
+			width: 100%;
+			/* Cap on very wide displays so the grid doesn't keep stretching;
+			   centred once the viewport passes it. */
+			max-width: 1600px;
+			margin-inline: auto;
+			padding: 96px var(--padding) 96px;
+		}
+
+		/* Section label sits in the left rail, aligned to the top of its
+		   content — the rail is what makes the left side purposeful rather
+		   than empty. */
+		.panel-hd {
+			grid-column: 1;
+		}
+		.panel-content {
+			grid-column: 2;
+		}
+
+		/* Intro panel's label ("About Office") is hidden, so its rail is
+		   empty — running the content in column 2 anyway would read as an
+		   arbitrary indent. Span it full width instead, flush left under the
+		   display statement. */
+		.panel--intro .panel-content {
+			grid-column: 1 / -1;
+		}
+
+		/* Display statement — spans both columns (it's the panel's hero, not
+		   a column of body copy) and finally renders at display size on PC:
+		   the .OfficePage p:lang() rule below used to out-specify this one,
+		   silently rendering it at ~14px body size. */
+		.intro-headline {
+			grid-column: 1 / -1;
+			font-size: clamp(44px, 4vw, 68px);
+			line-height: 1.06;
+			letter-spacing: -0.01em;
+			text-align: left;
+			max-width: 20ch;
+			margin: 0 0 64px;
 		}
 
 		/* Body copy reads too small at base.css's global PC p:lang() size on
-		   this page's wider column — bump 2px over the site-wide token here
-		   rather than raising the token itself (would affect every page). */
-		.OfficePage p:lang(en) {
+		   this page — bump 2px over the site-wide token here rather than
+		   raising the token itself (would affect every page).
+
+		   Listed explicitly rather than as a blanket `p:lang()`: that form
+		   (0,2,1) out-specified every type rule on this page that's a single
+		   class — .intro-headline and .panel-lead both silently collapsed to
+		   ~14px on PC, flattening the whole hierarchy. An allowlist can't
+		   swallow a display tier by accident. */
+		.OfficePage .intro-text:lang(en),
+		.OfficePage .service-en:lang(en),
+		.OfficePage .ethos-en:lang(en),
+		.OfficePage .director-text p:lang(en) {
 			font-size: calc(var(--fs-p-en) + 2px);
 		}
-		.OfficePage p:lang(ja) {
+		.OfficePage .intro-text:lang(ja),
+		.OfficePage .service-ja:lang(ja),
+		.OfficePage .ethos-ja:lang(ja),
+		.OfficePage .director-text p:lang(ja) {
 			font-size: calc(var(--fs-p-ja) + 2px);
 		}
 
-		/* A bit more room than SP for a full-bleed image and a longer,
-		   multi-line service body — but tightened from the original 100/32/20.
-		   service-image's margin-bottom isn't split here — 20px is now a
-		   single flat value across breakpoints. */
+		.intro-text,
+		.panel-lead,
+		.ethos-en,
+		.ethos-ja,
+		.director-text {
+			max-width: var(--measure);
+		}
+
+		/* Two-up service grid — a single stacked column left half the width
+		   unused and made each entry scroll far longer than it needs to. */
 		.services-grid {
-			gap: 80px;
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: 48px;
+			row-gap: 88px;
+			margin-top: 32px;
+		}
+		.service-en,
+		.service-ja {
+			max-width: none;
 		}
 		.service-en {
 			margin-top: 16px;
 		}
 		.service-link {
 			padding-top: 12px;
+		}
+
+		/* Ethos: the numbered parts read as a set, so give them the same
+		   two-up treatment rather than one long stack. */
+		.ethos-row {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: 48px;
+			row-gap: 72px;
+		}
+		.ethos-block--intro {
+			grid-column: 1 / -1;
+		}
+		.ethos-block--intro .ethos-en,
+		.ethos-block--intro .ethos-ja {
+			max-width: var(--measure);
 		}
 
 		.company-row {
@@ -709,14 +803,26 @@
 			width: auto;
 		}
 
-		/* Company / Director side by side, sharing the duo-inner row. */
+		/* Company / Director sit side by side inside the content column —
+		   the label rail above already carries their headings, so this row
+		   only splits the content itself. */
 		.duo-inner {
-			flex-direction: row;
-			gap: 56px;
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: var(--rail-gap);
 		}
 		.duo-col {
-			flex: 1;
 			min-width: 0;
+		}
+		/* Each duo column is its own mini label-over-content stack (there's
+		   no room for a rail inside half a column). */
+		.duo-col .panel-hd,
+		.duo-col .panel-content {
+			grid-column: auto;
+		}
+		.duo-col .director-text,
+		.duo-col .panel-lead {
+			max-width: none;
 		}
 	}
 </style>
