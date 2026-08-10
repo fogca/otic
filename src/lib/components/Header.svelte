@@ -10,11 +10,41 @@
 	// pages (/archives/[slug]).
 	const isArchives = $derived(['/archives', '/archives/list'].includes(page.url.pathname));
 	const isOffice = $derived(page.url.pathname.startsWith('/office'));
+	const isContact = $derived(page.url.pathname === '/contact');
 	// Contact and the Legal pages (Privacy/Imprint/Company) have a dark
 	// (charcoal/black) page background — the nav's default var(--color-text)
 	// is black, effectively invisible there, so invert to white on these.
 	const DARK_PAGES = ['/contact', '/legal/privacy', '/legal/imprint', '/legal/company'];
 	const isDark = $derived(DARK_PAGES.includes(page.url.pathname));
+
+	// SP-only segmented-pill nav (see .switch-highlight below, same design
+	// language as ArchivesTitleBar's view switch) — a sliding black capsule
+	// tracks whichever of Archives/Office/Contact is current. The lang
+	// toggle sits in the same pill but never becomes "active" itself (it's
+	// a persistent setting, not a page). Hidden (opacity:0) when none of
+	// the three match (e.g. Home) rather than left pointing at a stale one.
+	let archivesEl: HTMLElement | null = $state(null);
+	let officeEl: HTMLElement | null = $state(null);
+	let contactEl: HTMLElement | null = $state(null);
+	let highlightEl: HTMLElement | null = $state(null);
+	let highlightReady = $state(false);
+
+	$effect(() => {
+		const target = isArchives ? archivesEl : isOffice ? officeEl : isContact ? contactEl : null;
+		if (!highlightEl) return;
+		if (!target) {
+			highlightEl.style.opacity = '0';
+			return;
+		}
+		highlightEl.style.opacity = '1';
+		highlightEl.style.width = `${target.offsetWidth}px`;
+		highlightEl.style.transform = `translateX(${target.offsetLeft}px)`;
+		if (!highlightReady) {
+			requestAnimationFrame(() => {
+				highlightReady = true;
+			});
+		}
+	});
 
 	// ── Header visibility settings (adjust freely) ──
 	const HIDE_DISTANCE = 500; // px — scroll distance from resume point that triggers hide
@@ -83,35 +113,51 @@
 	class:is-dark={isDark}
 >
 	<nav class="nav">
+		<!-- SP-only sliding highlight (see .switch-highlight) — inert on PC,
+		     where .switch-option falls back to the plain dimmed-on-current
+		     look instead. -->
+		<div class="switch-highlight" class:is-ready={highlightReady} bind:this={highlightEl}></div>
 		<a
 			href="/archives"
-			class="link"
-			class:is-current={isArchives}
+			class="switch-option"
+			class:is-active={isArchives}
 			lang="en"
+			bind:this={archivesEl}
 		>
 			Archives
 		</a>
 		<a
 			href="/office"
-			class="link"
-			class:is-current={isOffice}
+			class="switch-option"
+			class:is-active={isOffice}
 			lang="en"
+			bind:this={officeEl}
 		>
 			Office
 		</a>
+		<a
+			href="/contact"
+			class="switch-option"
+			class:is-active={isContact}
+			lang="en"
+			bind:this={contactEl}
+		>
+			Contact
+		</a>
 		<!-- Language toggle: shows the CURRENT language only; click switches to
 		     the other (site-wide bilingual body copy) and fires the confirmation
-		     overlay (LangSwitchOverlay). -->
+		     overlay (LangSwitchOverlay). Sits in the same pill but never gets
+		     .is-active — it's a persistent setting, not a page. -->
 		<button
 			type="button"
-			class="lang-toggle"
+			class="switch-option lang-toggle"
 			onclick={() => lang.toggle()}
 			aria-label={lang.current === 'en' ? 'Switch to Japanese' : 'Switch to English'}
 			lang="en"
 		>
-			{lang.current === 'en' ? 'EN' : 'JP'}
+			{lang.current === 'en' ? 'EN' : 'JA'}
 		</button>
-		<!-- Announces the language change to screen readers (the EN/JP label
+		<!-- Announces the language change to screen readers (the EN/JA label
 		     alone doesn't say what happened). -->
 		<span class="sr-only" aria-live="polite">
 			{lang.current === 'en' ? 'English' : '日本語'}
@@ -158,33 +204,47 @@
 	}
 
 	/* Office page: match the page text color (blue) */
-	.Header.is-office .link,
+	.Header.is-office .switch-option,
 	.Header.is-office .logo {
 		color: var(--color-text);
 	}
 
 	/* Contact / Legal pages: dark (charcoal/black) background — invert the
 	   nav to white so it's actually visible against it. */
-	.Header.is-dark .link,
-	.Header.is-dark .lang-toggle,
+	.Header.is-dark .switch-option,
 	.Header.is-dark .logo {
 		color: #fff;
 	}
 
-	/* ----- Nav (left): Archives / Office / lang toggle ----- */
+	/* ----- Nav (left): Archives / Office / Contact / lang toggle ----- */
 	.Header .nav {
+		position: relative;
 		display: flex;
 		align-items: center;
-		/* SP: tight 10px rhythm across all three items */
+		/* SP: tight 10px rhythm across all four items */
 		gap: 10px;
 	}
 
-	.Header .link {
+	/* Shared by every segment (the three page links + the lang-toggle
+	   button) — same tap-target/hit-area treatment as before, just
+	   consolidated onto one class instead of separate .link/.lang-toggle
+	   rules. PC keeps the plain dimmed-on-current look (below); SP repaints
+	   this into a segmented pill with a sliding highlight (see the
+	   max-width:1023px block) — same design language as
+	   ArchivesTitleBar.svelte's view switch. */
+	.Header .switch-option {
 		position: relative;
+		z-index: 1;
+		display: inline-block;
 		font-size: 11px;
 		line-height: 1;
 		color: var(--color-text);
 		font-weight: var(--fw-base);
+		background: none;
+		border: none;
+		cursor: pointer;
+		text-decoration: none;
+		opacity: 1;
 		/* Grow the tap target to ~35px tall without moving the text — the
 		   negative margin cancels the padding's layout effect (baseline stays
 		   put), so this is a hit-area-only change. WCAG 2.5.8. */
@@ -194,7 +254,9 @@
 		   border-box, so this also rounds that flash — not just a resting-state
 		   style (there's no visible background/border normally). */
 		border-radius: 6px;
-		transition: opacity var(--duration-fast) var(--ease-default);
+		transition:
+			opacity var(--duration-fast) var(--ease-default),
+			color var(--duration-fast) var(--ease-default);
 		/* base.css sets font-feature-settings:"palt" directly on `a` (a bare
 		   type-selector rule applied straight to the element), which
 		   suppresses even the browser's default "liga" ligature — kills the
@@ -206,34 +268,38 @@
 			'liga' 1;
 	}
 
-	/* Current page: dimmed instead of the dot marker */
-	.Header .link.is-current {
+	/* PC default: current page dimmed (no pill/highlight there — see the
+	   min-width:1024px block, which doesn't touch opacity/color). */
+	.Header .switch-option.is-active {
 		opacity: 0.5;
 	}
 
-	.Header .link:hover {
+	.Header .switch-option:hover {
 		opacity: 1;
 	}
 
-	/* ----- Right cluster (lang toggle + SP logo) ----- */
+	/* SP-only sliding capsule — positioned/sized in Header.svelte's script
+	   via offsetLeft/offsetWidth of whichever link is current. Hidden
+	   (opacity via inline style) when none of the three match. */
+	.switch-highlight {
+		position: absolute;
+		display: none;
+		border-radius: 999px;
+		background: var(--color-text);
+		opacity: 0;
+	}
+	.switch-highlight.is-ready {
+		transition:
+			transform var(--duration-fast) var(--ease-default),
+			width var(--duration-fast) var(--ease-default),
+			opacity var(--duration-fast) var(--ease-default);
+	}
+
+	/* ----- Right cluster (SP logo) ----- */
 	.head-end {
 		display: flex;
 		align-items: center;
 		gap: 24px;
-	}
-
-	.lang-toggle {
-		font-size: 11px;
-		line-height: 1;
-		color: var(--color-text);
-		font-weight: var(--fw-base);
-		opacity: 0.7;
-		/* Same hit-area-only enlargement as .link above (WCAG 2.5.8). */
-		padding: 12px 4px;
-		margin: -12px -4px;
-		/* Rounds the mobile tap-highlight flash, same reasoning as .link. */
-		border-radius: 6px;
-		transition: opacity var(--duration-fast) var(--ease-default);
 	}
 
 	/* Visually hidden, but announced by screen readers. */
@@ -247,9 +313,6 @@
 		clip: rect(0, 0, 0, 0);
 		white-space: nowrap;
 		border: 0;
-	}
-	.lang-toggle:hover {
-		opacity: 1;
 	}
 
 	/* ----- Logo (right on desktop layout order; SP flips this — see below) ----- */
@@ -291,8 +354,48 @@
 			width: 100%;
 		}
 
+		/* Segmented pill (see ArchivesTitleBar.svelte's .view-switch — same
+		   design reused here): light-gray rounded track, centered as a
+		   whole, each option its own hit target inside it. */
 		.Header .nav {
 			justify-content: center;
+			padding: 4px;
+			border-radius: 999px;
+			background: var(--color-bg-gray);
+		}
+
+		/* Dark pages (Contact/Legal — see .is-dark above): the light-gray
+		   track would disappear against a dark page background, so swap it
+		   for a translucent white one instead. The black sliding highlight
+		   (var(--color-text), unaffected by .is-dark) still reads fine
+		   against either. */
+		.Header.is-dark .nav {
+			background: rgba(255, 255, 255, 0.15);
+		}
+
+		.switch-highlight {
+			display: block;
+			top: 4px;
+			left: 0;
+			height: calc(100% - 8px);
+		}
+
+		.Header .switch-option {
+			padding: 5px 15px;
+			margin: 0;
+			opacity: 0.5;
+		}
+
+		/* White text on the black highlight capsule — correct as-is on both
+		   light and dark pages (.Header.is-dark .switch-option's own
+		   white-text override, further up, already agrees with this one). */
+		.Header .switch-option.is-active {
+			color: #fff;
+			opacity: 1;
+		}
+
+		.Header .nav:hover .switch-option:not(.is-active) {
+			opacity: 0.8;
 		}
 	}
 
@@ -305,11 +408,7 @@
 			gap: 30px;
 		}
 
-		.Header .link {
-			font-size: var(--fs-h6);
-		}
-
-		.lang-toggle {
+		.Header .switch-option {
 			font-size: var(--fs-h6);
 		}
 	}
