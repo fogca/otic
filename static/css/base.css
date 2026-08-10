@@ -180,7 +180,7 @@ a {
 
   /* Body copy is language-aware (Latin runs larger than JP) */
   --fs-p-en: 13px;   /* Body copy (Latin) — SP */
-  --fs-p-ja: 11.5px;   /* Body copy (JP) — SP */
+  --fs-p-ja: 12px;   /* Body copy (JP) — SP */
 
   /* --- Font weights (single source of truth — no per-component weights) --- */
   --fw-base:   350;   /* default for all text unless emphasized */
@@ -271,7 +271,7 @@ a {
     --fs-body: 12px;
     --fs-p:    14px;
     --fs-p-en: 12.5px;   /* Body copy (Latin) — PC */
-    --fs-p-ja: 11.5px;   /* Body copy (JP) — PC */
+    --fs-p-ja: 12px;   /* Body copy (JP) — PC */
     --padding:       3vw;
     --gutter:        40px;
     --gutter-alt:    40px;
