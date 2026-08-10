@@ -444,6 +444,8 @@
 			padding: 5px 15px;
 			margin: 0;
 			opacity: 0.5;
+			font-weight: 420;
+			font-variation-settings: 'wght' 420;
 		}
 
 		/* White text on the black highlight capsule — correct as-is on both

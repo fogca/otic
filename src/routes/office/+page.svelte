@@ -130,18 +130,42 @@
 			</p>
 
 			<div class="panel-content">
-				<!-- DRAFT — expanded body copy (2-3x current length) not yet
-				     approved, see chat; EN below is still the short version. -->
+				<!-- Expanded from the original 3-sentence version by folding in
+				     unaltered sentences already used verbatim in the Services
+				     blurbs below (V.I. & Typography / Product & Furniture Design /
+				     Image Visualisation / Digital Infrastructure) — same source
+				     text, not new copy. Original opening/closing sentences kept
+				     as-is. -->
 				<p class="intro-text" lang="en">
 					Office / TAKUMI ISOBE is a creative office based in Tokyo working across
 					visual identity and design engineering — experience, brand, product, type,
-					furniture, and digital communication. By blending culture, philosophy, and
-					design, we create strategies that speak to what makes us human — our
-					physicality, our emotion. Day by day, learning further, we strive toward
-					better creation.
+					furniture, and digital communication. From brand strategy and direction
+					through to logo, graphic, and package design, we work across the full arc
+					of creation. Our in-house type foundry, August Type Foundry, develops
+					typefaces in pursuit of new forms that reinterpret history within a
+					contemporary context. The precision honed in type design runs through all
+					our branding, shaping a coherent formal language at the core of each
+					brand. We develop products that bring use and quiet joy to daily life,
+					returning to the materiality that meets the body and pursuing the forms
+					that must inevitably arise from material, structure, and presence. We
+					direct and produce image creation as a single, integrated practice.
+					Extending the eye for light and texture honed in live-action photography
+					into 3DCGI and visualisation, we pursue imagery with true substance —
+					fixing into the image the atmosphere and mass latent within each subject.
+					Our in-house engineering studio, Post Script, designs and builds digital
+					products — brand sites, e-commerce, reservation systems, and web apps —
+					and digital infrastructure, including AI / DX integration. With a modern
+					stack and considered architecture, we refine experience and usability to
+					give form to a brand in the digital world. By blending culture,
+					philosophy, and design, we create strategies that speak to what makes us
+					human — our physicality, our emotion. Day by day, learning further, we
+					strive toward better creation.
 				</p>
 				<p class="intro-text intro-text--ja" lang="ja">
-					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学、デザインを掛け合わせながら、わたしたちを人間たらしめるもの——身体性と情緒に語りかける戦略をつくっています。日々学びを重ねながら、より良い創作を目指しています。
+					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。私たちは、ブランディングを始めとするクリエイティブ戦略の策定・ディレクションから、ロゴ・グラフィックデザイン・パッケージデザインといったクリエイションまで手掛けています。また弊社主宰のタイプファウンダリ——August
+					Type
+					Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる、必然のかたちを追い求めながら、日々の所作に添う用と喜びのあるプロダクトの企画・開発を行っています。私たちは、イメージクリエイションのディレクションと制作を一貫して手がけています。実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。弊社主宰のエンジニアリングスタジオ——Post
+					Scriptでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。文化と哲学、デザインを掛け合わせながら、わたしたちを人間たらしめるもの——身体性と情緒に語りかける戦略をつくっています。日々学びを重ねながら、より良い創作を目指しています。
 				</p>
 				<a
 					class="intro-instagram"
@@ -426,13 +450,19 @@
 		font-weight: 250;
 		font-variation-settings: 'wght' 250;
 		text-transform: uppercase;
+		text-align: center;
 		line-height: var(--lh-h0);
 		max-width: 780px;
-		/* .panel-inner's gap alone (now 10px) would pull "About Office" in
-		   right under the hero — too tight for a hero→section break. This
-		   hasn't been part of the requested tightening rounds, so keep it at
-		   the original ~32px total by making up the rest here. */
-		margin: 0 0 22px;
+		/* Narrowed from 22px — panel-inner's own 10px gap makes up the rest
+		   of the (now smaller) space to .panel-content below. */
+		margin: 0 0 8px;
+	}
+	/* About Office label — hidden for now (kept in the DOM, not deleted;
+	   may come back), so its layout box no longer takes up space above the
+	   headline. Scoped to .panel--intro only — other panels' .panel-hd
+	   (Services/Director/Company/Ethos) are unaffected. */
+	.panel--intro .panel-hd {
+		display: none;
 	}
 	/* Body paragraph — secondary to the headline now, so no explicit
 	   font-size override: falls back to base.css's standard p:lang(en|ja)
@@ -444,6 +474,7 @@
 	.intro-text {
 		max-width: 100%;
 		margin: 0;
+		text-align: justify;
 	}
 	/* Language-agnostic (just a handle/link), so it sits outside the
 	   intro-text/--ja toggle pair — always visible regardless of
