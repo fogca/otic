@@ -428,8 +428,8 @@
 	   don't toggle, only body copy does — see the lang-toggle rules above). */
 	.intro-headline {
 		font-size: var(--fs-h0);
-		font-weight: 250;
-		font-variation-settings: 'wght' 250;
+		font-weight: 325;
+		font-variation-settings: 'wght' 325;
 		text-transform: uppercase;
 		text-align: center;
 		line-height: var(--lh-h0);
