@@ -128,6 +128,11 @@
 			</p>
 
 			<div class="panel-content">
+				<!-- Expanded by folding in unaltered sentences already used verbatim
+				     in the Services blurbs below (V.I. & Typography / Product &
+				     Furniture Design / Image Visualisation / Digital
+				     Infrastructure), one per specialist office named above — same
+				     source text, not new copy. Original opening/closing kept as-is. -->
 				<p class="intro-text" lang="en">
 					Office / TAKUMI ISOBE is a creative office based in Tokyo working across
 					visual identity and design engineering — experience, brand, product, type,
@@ -138,13 +143,32 @@
 					YSOVE 2001, www.ysove.com / Type Foundry: AUGUST, www.august.tf / Image
 					Making: Pyrenees Pictures, www.pyrenees.pictures / Digital Creation: Post
 					Script, www.postscript.jp — shaping the creation of experience together.
+					From brand strategy and direction through to logo, graphic, and package
+					design, AUGUST works across the full arc of creation, developing
+					typefaces in pursuit of new forms that reinterpret history within a
+					contemporary context — precision that runs through all our branding,
+					shaping a coherent formal language at the core of each brand. YSOVE 2001
+					develops products that bring use and quiet joy to daily life, returning
+					to the materiality that meets the body and pursuing the forms that must
+					inevitably arise from material, structure, and presence. Pyrenees
+					Pictures directs and produces image creation as a single, integrated
+					practice, extending the eye for light and texture honed in live-action
+					photography into 3DCGI and visualisation to pursue imagery with true
+					substance — fixing into the image the atmosphere and mass latent within
+					each subject. Post Script designs and builds digital products — brand
+					sites, e-commerce, reservation systems, and web apps — and digital
+					infrastructure, including AI / DX integration, refining experience and
+					usability to give form to a brand in the digital world.
 				</p>
 				<p class="intro-text intro-text--ja" lang="ja">
 					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学にデザインを掛け合わせることで生まれる、わたしたちを人間たらしめる——身体性と情緒に語りかけるクリエイションを追求します。その実践としてわたしたちの主宰する4つの領域特化のオフィス——プロダクト：YSOVE
 					2001, www.ysove.com / タイプファウンダリ：AUGUST, www.august.tf /
 					イメージメーク：Pyrenees Pictures, www.pyrenees.pictures /
 					デジタルクリエイション：Post
-					Script, www.postscript.jp——との協業を重ねながら、体験のクリエイションを行なっていきます。
+					Script, www.postscript.jp——との協業を重ねながら、体験のクリエイションを行なっていきます。私たちは、ブランディングを始めとするクリエイティブ戦略の策定・ディレクションから、ロゴ・グラフィックデザイン・パッケージデザインといったクリエイションまで手掛けています。また弊社主宰のタイプファウンダリ——August
+					Type
+					Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。身体に直接触れる物質性に立ち返り、素材・構造・佇まいの関係性を再構築することで立ち上がる、必然のかたちを追い求めながら、日々の所作に添う用と喜びのあるプロダクトの企画・開発を行っています。私たちは、イメージクリエイションのディレクションと制作を一貫して手がけています。実写撮影で培った光と質感への眼差しを3DCGI・ビジュアライゼーションの領域まで拡げ、被写体に潜む空気と質量を画として定着させる、確かな実体性をまとうビジュアル表現を追求します。弊社主宰のエンジニアリングスタジオ——Post
+					Scriptでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。
 				</p>
 				<a
 					class="intro-instagram"
