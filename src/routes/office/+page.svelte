@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { officeIntro } from '$lib/state/officeIntro.svelte';
-	import { scrollReveal } from '$lib/actions/scrollReveal';
 
 	// The site-wide corner-logo starts oversized at the bottom of this page
 	// (same left inset, just wider — see +layout.svelte's .is-hero state) —
@@ -121,25 +120,18 @@
 	     intro (unnumbered hero) → About Office, no eyebrow numbering. ─── -->
 	<section class="panel panel--intro">
 		<div class="panel-inner">
-			<!-- DRAFT — headline not yet approved, see chat. -->
-			<p class="intro-headline" lang="en" use:scrollReveal={{ y: 36 }}>
+			<header class="panel-hd">
+				<h2 class="pt" lang="en">About Office</h2>
+			</header>
+			<p class="intro-headline" lang="en">
 				An independent<br />
 				multidisciplinary<br />
 				design office.
 			</p>
 
-			<header class="panel-hd" use:scrollReveal={{ delay: 0.1 }}>
-				<h2 class="pt" lang="en">About Office</h2>
-			</header>
-			<div class="panel-content" use:scrollReveal={{ delay: 0.2 }}>
-				<!-- DRAFT — lead + JA translation not yet approved, see chat. -->
-				<p class="panel-lead" lang="en">
-					A creative office in Tokyo, working across identity, product, and digital
-					craft.
-				</p>
-				<p class="panel-lead panel-lead--ja" lang="ja">
-					東京を拠点に、アイデンティティ・プロダクト・デジタルの領域を横断するクリエイティブオフィスです。
-				</p>
+			<div class="panel-content">
+				<!-- DRAFT — expanded body copy (2-3x current length) not yet
+				     approved, see chat; EN below is still the short version. -->
 				<p class="intro-text" lang="en">
 					Office / TAKUMI ISOBE is a creative office based in Tokyo working across
 					visual identity and design engineering — experience, brand, product, type,
@@ -165,10 +157,10 @@
 	<!-- ─── Panel 2: Services — single-column stack ─── -->
 	<section class="panel panel--services">
 		<div class="panel-inner">
-			<header class="panel-hd" use:scrollReveal>
+			<header class="panel-hd">
 				<h2 class="pt" lang="en">Services &amp; Partners</h2>
 			</header>
-			<div class="panel-content" use:scrollReveal={{ delay: 0.1 }}>
+			<div class="panel-content">
 				<!-- DRAFT — lead + JA translation not yet approved, see chat. -->
 				<p class="panel-lead" lang="en">
 					Four practices and a network of partner studios, shaping a brand from
@@ -215,10 +207,10 @@
 	<section class="panel panel--company-director">
 		<div class="panel-inner duo-inner">
 			<div class="duo-col">
-				<header class="panel-hd" use:scrollReveal>
+				<header class="panel-hd">
 					<h2 class="pt" lang="en">Director</h2>
 				</header>
-				<div class="panel-content" use:scrollReveal={{ delay: 0.1 }}>
+				<div class="panel-content">
 					<p class="panel-lead" lang="en">Takumi Isobe</p>
 					<p class="panel-lead panel-lead--ja" lang="ja">磯部タクミ</p>
 					<div class="director-row">
@@ -243,10 +235,10 @@
 				</div>
 			</div>
 			<div class="duo-col">
-				<header class="panel-hd" use:scrollReveal>
+				<header class="panel-hd">
 					<h2 class="pt" lang="en">Company</h2>
 				</header>
-				<div class="panel-content" use:scrollReveal={{ delay: 0.1 }}>
+				<div class="panel-content">
 					<p class="panel-lead" lang="en">Operating Company</p>
 					<p class="panel-lead panel-lead--ja" lang="ja">運営会社</p>
 					<div class="company-row">
@@ -276,30 +268,26 @@
 	<!-- ─── Panel 5: Ethos ─── -->
 	<section class="panel panel--ethos">
 		<div class="panel-inner">
-			<header class="panel-hd" use:scrollReveal>
+			<header class="panel-hd">
 				<h2 class="pt" lang="en">Ethos</h2>
 			</header>
 			<div class="panel-content">
 				<!-- DRAFT — reuses the homepage's own ethos tagline (see
 				     HomeFeed.svelte ".ethos__line") for consistency rather than
 				     inventing new copy; JA translation not yet approved, see chat. -->
-				<p class="panel-lead" lang="en" use:scrollReveal={{ delay: 0.1 }}>
+				<p class="panel-lead" lang="en">
 					Embodied humanism.
 				</p>
-				<p
-					class="panel-lead panel-lead--ja"
-					lang="ja"
-					use:scrollReveal={{ delay: 0.1 }}
-				>
+				<p class="panel-lead panel-lead--ja" lang="ja">
 					身体性に根ざしたヒューマニズム。
 				</p>
 				<div class="ethos-row">
-					<div class="ethos-block ethos-block--intro" use:scrollReveal>
+					<div class="ethos-block ethos-block--intro">
 						<p class="ethos-en" lang="en">{ethosIntro.en}</p>
 						<p class="ethos-ja" lang="ja">{ethosIntro.ja}</p>
 					</div>
-					{#each ethosParts as p, i}
-						<div class="ethos-block" use:scrollReveal={{ delay: i * 0.08 }}>
+					{#each ethosParts as p}
+						<div class="ethos-block">
 							<h3 class="ethos-part">
 								<span class="ethos-part-en" lang="en">{p.en}</span>
 								<span class="ethos-part-ja" lang="ja">{p.ja}</span>
@@ -428,14 +416,16 @@
 	}
 
 	/* ── Panel 1: Office ── */
-	/* Display statement — the "headline" tier, size alone (fs-h0) carries
-	   it, weight stays at base like the rest of the page's text. Stays
+	/* Display statement — the "headline" tier, size alone (fs-h0) carried it
+	   before; now also uppercase + an explicit lighter weight (250, below
+	   --fw-base) for more contrast against the page's body weight. Stays
 	   English always (matches the site's convention that headings/titles
 	   don't toggle, only body copy does — see the lang-toggle rules above). */
 	.intro-headline {
 		font-size: var(--fs-h0);
-		font-weight: var(--fw-base);
-		font-variation-settings: 'wght' var(--fw-base);
+		font-weight: 250;
+		font-variation-settings: 'wght' 250;
+		text-transform: uppercase;
 		line-height: var(--lh-h0);
 		max-width: 780px;
 		/* .panel-inner's gap alone (now 10px) would pull "About Office" in
@@ -448,9 +438,11 @@
 	   font-size override: falls back to base.css's standard p:lang(en|ja)
 	   presets, same convention .service-en/.ethos-en etc already use
 	   elsewhere on this page. Spacing above comes solely from
-	   .panel-content's gap now — no own margin, so it doesn't stack. */
+	   .panel-content's gap now — no own margin, so it doesn't stack.
+	   max-width:100% (was 560px) now that .panel-lead above it is gone and
+	   this carries the section's full body copy on its own. */
 	.intro-text {
-		max-width: 560px;
+		max-width: 100%;
 		margin: 0;
 	}
 	/* Language-agnostic (just a handle/link), so it sits outside the
@@ -501,8 +493,8 @@
 	}
 	.service-title {
 		font-size: var(--fs-h2);
-		font-weight: var(--fw-bold);
-		font-variation-settings: 'wght' var(--fw-bold);
+		font-weight: var(--fw-base);
+		font-variation-settings: 'wght' var(--fw-base);
 		line-height: var(--lh-h2);
 		margin: 0;
 	}
@@ -632,7 +624,6 @@
 	   side padding already does. */
 	@media (max-width: 1023px) {
 		.intro-headline,
-		.intro-text,
 		.panel-lead {
 			max-width: 85%;
 		}
