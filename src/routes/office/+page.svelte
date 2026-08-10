@@ -124,9 +124,7 @@
 				<h2 class="pt" lang="en">About Office</h2>
 			</header>
 			<p class="intro-headline" lang="en">
-				An independent<br />
-				multidisciplinary<br />
-				design office.
+				The intersection of culture, philosophy and design.
 			</p>
 
 			<div class="panel-content">

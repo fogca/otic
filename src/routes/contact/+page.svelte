@@ -41,6 +41,13 @@
 					<h3 class="title" lang="en">Contact</h3>
 					<!-- JA-only subheading, directly under the (always-English) title -->
 					<p class="subtitle-ja" lang="ja">お問い合わせ</p>
+					<!-- Reused verbatim from the body copy below (not new copy) —
+					     same "We look forward to the collaborations ahead."
+					     sentence, promoted to a large tagline (sized to match
+					     Office's .intro-headline). -->
+					<p class="intro-headline" lang="en">
+						We look forward to the collaborations ahead.
+					</p>
 				</div>
 
 				<div class="content">
@@ -224,6 +231,20 @@
 		line-height: var(--lh-h-ja);
 		margin: 8px 0 0;
 		opacity: 0.85;
+	}
+
+	/* Large tagline — sized to match Office's .intro-headline (same
+	   font-size/weight/uppercase treatment), left-aligned here rather than
+	   centered since Contact's layout (form, labels) is left-aligned
+	   throughout. */
+	.Contact .intro-headline {
+		font-size: var(--fs-h0);
+		font-weight: 325;
+		font-variation-settings: 'wght' 325;
+		text-transform: uppercase;
+		line-height: var(--lh-h0);
+		max-width: 100%;
+		margin: 16px 0 0;
 	}
 
 	.Contact .header {
