@@ -57,7 +57,10 @@
 </script>
 
 <section class="TitleBar">
-	<h1 class="title" lang="en">Work Archives</h1>
+	<!-- "Work Archives" — uppercased via CSS (text-transform) rather than
+	     literal caps so the accessible name stays normally cased. The <br>
+	     is SP-only (see .br-sp below); PC keeps it on one line. -->
+	<h1 class="title" lang="en">Work<br class="br-sp" /> Archives</h1>
 	<a
 		href={isText ? '/archives' : '/archives/list'}
 		class="view-switch"
@@ -91,7 +94,21 @@
 	.TitleBar .title {
 		font-size: var(--fs-h0);
 		font-weight: var(--fw-base);
+		text-transform: uppercase;
 		margin: 0;
+	}
+
+	/* SP: force "WORK ARCHIVES" onto two lines via an explicit <br> that's
+	   inert on PC (display:none on a <br> suppresses the break). Preferred
+	   over a width-based wrap, which would depend on the switch's width and
+	   re-flow differently as the type scale changes. */
+	.TitleBar .title .br-sp {
+		display: none;
+	}
+	@media (max-width: 1023px) {
+		.TitleBar .title .br-sp {
+			display: inline;
+		}
 	}
 
 	/* Segmented-pill switch: a light pill container with each option as its
