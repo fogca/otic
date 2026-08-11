@@ -211,7 +211,7 @@
 		<hr class="divider divider--next" class:is-first={!hasColophon} />
 		<section class="Next">
 			<div class="wrapper">
-				<h2 class="title" lang="en">Next</h2>
+				<h2 class="title" lang="en">Next in Archives</h2>
 				<div class="next-grid">
 					{#each nextWorks as item (item.slug)}
 						<a class="next-item" href="/archives/{item.slug}">
@@ -386,7 +386,7 @@
 	}
 
 	.lead__title {
-		margin-top: 120px;
+		margin-top: 150px;
 	}
 
 	.media {
@@ -705,6 +705,11 @@
 	   margin-inline:auto centers the now-narrower-than-100% image within
 	   the card. */
 	@media (max-width: 1023px) {
+		/* Tighter than the base 48px — SP only, PC keeps the wider gap. */
+		.media__hero {
+			margin-top: 30px;
+		}
+
 		.next-item img,
 		.next-item video {
 			width: auto;
