@@ -430,15 +430,13 @@
 	}
 
 	/* ── Panel 1: Office ── */
-	/* Display statement — the "headline" tier, size alone (fs-h0) carried it
-	   before; now also uppercase + an explicit lighter weight (250, below
-	   --fw-base) for more contrast against the page's body weight. Stays
-	   English always (matches the site's convention that headings/titles
-	   don't toggle, only body copy does — see the lang-toggle rules above). */
+	/* Display statement — the "headline" tier; size and uppercase carry it,
+	   weight stays at the default --fw-base like the rest of the page (an
+	   explicit lighter 325 was tried and dropped). Stays English always
+	   (matches the site's convention that headings/titles don't toggle,
+	   only body copy does — see the lang-toggle rules above). */
 	.intro-headline {
 		font-size: var(--fs-h0);
-		font-weight: 325;
-		font-variation-settings: 'wght' 325;
 		text-transform: uppercase;
 		text-align: center;
 		line-height: var(--lh-h0);
