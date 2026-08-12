@@ -34,8 +34,12 @@
 </main>
 
 <style>
+	/* padding-top matches archives/+page.svelte's .Archives (was 73px here,
+	   which started the shared TitleBar noticeably higher than on the Image
+	   view — the two switch between each other, so the title has to land in
+	   the same place). */
 	.Archives {
-		padding-top: 73px;
+		padding-top: 120px;
 		padding-bottom: 120px;
 	}
 
@@ -84,7 +88,8 @@
 
 	@media (min-width: 1024px) {
 		.Archives {
-			padding-top: 80px;
+			/* Matches archives/+page.svelte's PC value — see the base rule. */
+			padding-top: 150px;
 			padding-bottom: 160px;
 			/* Matches Header's own inset — .List .wrapper zeroes its previous
 			   --gutter padding below so this is the one source of it, same

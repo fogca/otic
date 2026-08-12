@@ -2,22 +2,62 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { goto, afterNavigate } from '$app/navigation';
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 
+	const realPath = $derived(page.url.pathname);
+
+	// The path the user just clicked, held until that navigation lands. The
+	// capsule and .is-active follow THIS rather than the real pathname, so
+	// the highlight visibly slides to the clicked target before the page
+	// transition starts covering it — same sequence as ArchivesTitleBar's
+	// Image/Text switch.
+	let pendingPath: string | null = $state(null);
+	const navPath = $derived(pendingPath ?? realPath);
+
 	// Underline only on the Archives index/list — not on individual project
 	// pages (/archives/[slug]).
-	const isHome = $derived(page.url.pathname === '/');
-	const isArchives = $derived(['/archives', '/archives/list'].includes(page.url.pathname));
-	const isOffice = $derived(page.url.pathname.startsWith('/office'));
-	const isContact = $derived(page.url.pathname === '/contact');
+	const isHome = $derived(navPath === '/');
+	const isArchives = $derived(['/archives', '/archives/list'].includes(navPath));
+	const isOffice = $derived(navPath.startsWith('/office'));
+	const isContact = $derived(navPath === '/contact');
+
+	// Theming stays on the REAL path — flipping the header's colours before
+	// the page underneath has actually changed would read as a glitch.
+	const isOfficeTheme = $derived(realPath.startsWith('/office'));
 	// The Legal pages (Privacy/Imprint/Company) have a dark (charcoal/black)
 	// page background — the nav's default var(--color-text) is black,
 	// effectively invisible there, so invert to white on these. Contact
 	// itself is white now, same as every other page — no longer in this list.
 	const DARK_PAGES = ['/legal/privacy', '/legal/imprint', '/legal/company'];
-	const isDark = $derived(DARK_PAGES.includes(page.url.pathname));
+	const isDark = $derived(DARK_PAGES.includes(realPath));
+
+	// Matches --duration-fast (200ms), the highlight's own transition length,
+	// plus a small margin so it's visibly settled before navigating.
+	const SLIDE_BEFORE_NAV = 250; // ms
+
+	function handleNavClick(event: MouseEvent, href: string) {
+		// Modified/non-primary clicks (open in new tab, etc.) keep the
+		// browser's normal link behavior — only a plain left click runs the
+		// slide-then-navigate sequence.
+		if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+			return;
+		}
+		event.preventDefault();
+		// Already here — nothing to slide to, and re-navigating would replay
+		// the page transition for no reason.
+		if (href === realPath) return;
+		pendingPath = href;
+		setTimeout(() => goto(href), SLIDE_BEFORE_NAV);
+	}
+
+	// Hand control back to the real pathname once the navigation lands (by
+	// then they agree, so the capsule doesn't move again).
+	afterNavigate(() => {
+		pendingPath = null;
+	});
 
 	// SP-only segmented-pill nav (see .switch-highlight below, same design
 	// language as ArchivesTitleBar's view switch) — a sliding black capsule
@@ -120,7 +160,7 @@
 	class="Header"
 	class:is-revealed={intro.completed}
 	class:is-shown={headerShown}
-	class:is-office={isOffice}
+	class:is-office={isOfficeTheme}
 	class:is-dark={isDark}
 >
 	<nav class="nav">
@@ -134,7 +174,14 @@
 		     below). Plain (non-positioned) wrapper — offsetLeft/offsetWidth
 		     used to place .switch-highlight above stay relative to .nav. -->
 		<div class="nav-links">
-			<a href="/" class="switch-option" class:is-active={isHome} lang="en" bind:this={homeEl}>
+			<a
+				href="/"
+				class="switch-option"
+				class:is-active={isHome}
+				lang="en"
+				bind:this={homeEl}
+				onclick={(e) => handleNavClick(e, '/')}
+			>
 				Home
 			</a>
 			<a
@@ -143,6 +190,7 @@
 				class:is-active={isArchives}
 				lang="en"
 				bind:this={archivesEl}
+				onclick={(e) => handleNavClick(e, '/archives')}
 			>
 				Archives
 			</a>
@@ -152,6 +200,7 @@
 				class:is-active={isOffice}
 				lang="en"
 				bind:this={officeEl}
+				onclick={(e) => handleNavClick(e, '/office')}
 			>
 				Office
 			</a>
@@ -161,6 +210,7 @@
 				class:is-active={isContact}
 				lang="en"
 				bind:this={contactEl}
+				onclick={(e) => handleNavClick(e, '/contact')}
 			>
 				Contact
 			</a>

@@ -211,7 +211,9 @@
 		<hr class="divider divider--next" class:is-first={!hasColophon} />
 		<section class="Next">
 			<div class="wrapper">
-				<h2 class="title" lang="en">Next in Archives</h2>
+				<!-- The <br> is SP-only (display:none on PC — see .br-sp below),
+				     so PC keeps this on one line. -->
+				<h2 class="title" lang="en">Next in<br class="br-sp" /> Archives</h2>
 				<div class="next-grid">
 					{#each nextWorks as item (item.slug)}
 						<a class="next-item" href="/archives/{item.slug}">
@@ -621,7 +623,19 @@
 	.Next .title {
 		font-size: 42px;
 		font-weight: var(--fw-base);
+		line-height: var(--lh-h0);
 		margin-bottom: 28px;
+	}
+	/* SP-only break — display:none on a <br> suppresses it, so PC keeps
+	   "NEXT IN ARCHIVES" on one line. Same technique as
+	   ArchivesTitleBar's own title. */
+	.Next .title .br-sp {
+		display: none;
+	}
+	@media (max-width: 1023px) {
+		.Next .title .br-sp {
+			display: inline;
+		}
 	}
 	.Colophon .title,
 	.Next .title {
