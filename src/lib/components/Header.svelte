@@ -429,10 +429,17 @@
 			gap: 12px;
 		}
 
-		/* Hidden state: rise by a flat 50px (not the whole header's -100%,
+		/* Scroll-hide: rise by a flat 50px (not the whole header's -100%,
 		   which would take the nav pill with it) — the pill stays visible,
-		   just the logo above it tucks (partially) out of view. */
-		.Header:not(.is-shown) {
+		   just the logo above it tucks out of view.
+
+		   Scoped to .is-revealed so it only covers the post-intro scroll
+		   state. Without that it also caught the intro, capping the OP's
+		   hide at 50px of a ~117px-tall header — the nav stayed on screen
+		   through the opening. The intro now falls through to the base
+		   rule's translateY(-100%), which clears the header whatever its
+		   height (a fixed -95px would leave ~22px showing at today's). */
+		.Header.is-revealed:not(.is-shown) {
 			transform: translateY(-50px);
 		}
 

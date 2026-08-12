@@ -388,10 +388,13 @@
 			width: 380px;
 			aspect-ratio: 380 / 570;
 		}
+		/* --fs-h7 matches the card-01 meta this hands off to (see
+		   routes/+page.svelte's own min-width:1024px block). It was --fs-h5
+		   here, so the text visibly shrank the moment the intro finished. */
 		.meta {
 			width: 380px;
 			top: calc(50% + (570px / 2) + 8px);
-			font-size: var(--fs-h5);
+			font-size: var(--fs-h7);
 		}
 	}
 </style>
