@@ -405,7 +405,7 @@
 		   for glass's top-edge sheen + depth. */
 		.Header .nav {
 			justify-content: space-between;
-			padding: 4px;
+			padding: 6px 12px 5px;
 			border-radius: 999px;
 			background: rgba(241, 241, 241, 0.55);
 			backdrop-filter: blur(20px) saturate(180%);
@@ -434,11 +434,17 @@
 				0 6px 16px rgba(0, 0, 0, 0.2);
 		}
 
+		/* Vertical inset tracks .nav's own padding (6px top / 5px bottom).
+		   top+bottom rather than top+height so it stays correct without a
+		   calc if that padding is retuned again. Horizontal needs nothing:
+		   the script positions this from the target's offsetLeft, which is
+		   measured from the same padding-box origin as this element's
+		   left:0, so .nav's side padding is already accounted for. */
 		.switch-highlight {
 			display: block;
-			top: 4px;
+			top: 6px;
+			bottom: 5px;
 			left: 0;
-			height: calc(100% - 8px);
 		}
 
 		.Header .switch-option {
