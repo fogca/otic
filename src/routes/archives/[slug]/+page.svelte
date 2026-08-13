@@ -543,16 +543,6 @@
 	.vclip video {
 		transform: scale(1.02);
 	}
-	/* SP Next cards shrink-wrap their video (width:auto + max-height cap,
-	   centered) — the clip box must hug the video, not span the card, or the
-	   overscanned edges would escape the clip on both sides. */
-	@media (max-width: 1023px) {
-		.next-item .vclip {
-			width: fit-content;
-			max-width: 100%;
-			margin-inline: auto;
-		}
-	}
 
 	/* Hero full-width; gallery thumbnails keep their centred-narrow /
 	   full-bleed rhythm (mp-1..mp-6, cycling per item — see the template's
@@ -706,31 +696,16 @@
 		display: block;
 	}
 
-	/* SP: capped height instead of natural-everything (PC still gets that) —
-	   an unusually tall/portrait pick could otherwise run the section on
-	   forever. Placed after the base rule above so this width:auto wins over
-	   its width:100% at equal specificity (source-order cascade) — without
-	   that ordering, width stays forced to 100% while max-height clips it,
-	   squishing the image instead of narrowing it. width/height:auto (not
-	   object-fit) is what actually does the work: bounded only by
-	   max-height, the image's own box narrows to whatever its intrinsic
-	   ratio needs, so there's no crop and no letterboxing to ask object-fit
-	   to resolve — it'd be inert with no fixed box to fit against.
-	   margin-inline:auto centers the now-narrower-than-100% image within
-	   the card. */
+	/* SP Next media used to carry a max-height:50vh cap, plus the
+	   width:auto/margin-inline:auto shrink-wrap (and a matching
+	   width:fit-content on .vclip) that existed only so a capped image
+	   narrowed instead of squishing. Cap dropped, so all of that machinery
+	   went with it — the base rule above (width:100%, height:auto) now
+	   applies at every breakpoint: full card width, natural height. */
 	@media (max-width: 1023px) {
 		/* Tighter than the base 48px — SP only, PC keeps the wider gap. */
 		.media__hero {
 			margin-top: 30px;
-		}
-
-		.next-item img,
-		.next-item video {
-			width: auto;
-			max-width: 100%;
-			height: auto;
-			max-height: 50vh;
-			margin-inline: auto;
 		}
 
 		/* Two visible cards at different scales (100vw then 75vw) rather than
@@ -740,9 +715,10 @@
 		   Only the MEDIA breaks out to full bleed, not the whole card: the
 		   .wrapper carries the page's inline padding, so a negative margin on
 		   .next-item would drag its caption to the screen edge too, out of
-		   line with every other text on the page. max-width:none is needed
-		   because the rule above caps the media at 100% of its (padded) box,
-		   which would otherwise cancel the negative margin entirely. */
+		   line with every other text on the page. max-width:none is belt-and-
+		   braces now that the SP cap above is gone (nothing constrains these
+		   to 100% anymore) — kept so a future max-width can't silently
+		   cancel the negative margin. */
 		.next-item:first-child .vclip,
 		.next-item:first-child > img {
 			width: 100vw;
