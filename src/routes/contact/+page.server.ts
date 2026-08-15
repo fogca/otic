@@ -5,9 +5,9 @@ import { fail } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import type { Actions } from './$types';
 
-const INQUIRY_TYPES = ['Project', 'Hiring', 'Press', 'Other'] as const;
-
 const NAME_MAX = 200;
+const COMPANY_MAX = 200;
+const PHONE_MAX = 40;
 const MSG_MIN = 10;
 const MSG_MAX = 5000;
 
@@ -33,31 +33,39 @@ export const actions: Actions = {
 	default: async ({ request }) => {
 		const data = await request.formData();
 
-		// Honeypot: `company` is visually hidden and off the tab order — a real
+		// Honeypot: `website` is visually hidden and off the tab order — a real
 		// visitor never fills it, bots that autofill every field do. Pretend
 		// success so we don't teach the bot which field tripped the filter.
-		if (str(data.get('company'))) {
+		// NOTE: this used to be `company`, which is now a REAL field — keep the
+		// two names distinct or genuine submissions get silently swallowed.
+		if (str(data.get('website'))) {
 			return { success: true };
 		}
 
 		const values = {
 			name: str(data.get('name')),
+			company: str(data.get('company')),
 			email: str(data.get('email')),
-			type: str(data.get('type')),
+			phone: str(data.get('phone')),
 			message: str(data.get('message'))
 		};
 
 		// Server-side validation — the native required/type=email on the client
-		// is a convenience, not a guarantee (trivially bypassed).
+		// is a convenience, not a guarantee (trivially bypassed). Company and
+		// phone are optional (an individual may have neither), so they're only
+		// length-checked when actually filled in.
 		const errors: Record<string, string> = {};
 		if (values.name.length < 1 || values.name.length > NAME_MAX) {
 			errors.name = 'お名前をご入力ください。';
 		}
+		if (values.company.length > COMPANY_MAX) {
+			errors.company = `会社名は${COMPANY_MAX}文字以内でご入力ください。`;
+		}
 		if (!isEmail(values.email)) {
 			errors.email = '有効なメールアドレスをご入力ください。';
 		}
-		if (!(INQUIRY_TYPES as readonly string[]).includes(values.type)) {
-			errors.type = '種別をお選びください。';
+		if (values.phone.length > PHONE_MAX) {
+			errors.phone = `電話番号は${PHONE_MAX}文字以内でご入力ください。`;
 		}
 		if (values.message.length < MSG_MIN || values.message.length > MSG_MAX) {
 			errors.message = `メッセージは${MSG_MIN}〜${MSG_MAX}文字でご入力ください。`;
@@ -81,15 +89,24 @@ export const actions: Actions = {
 			});
 		}
 
+		// Optional fields are omitted entirely when blank rather than shown as
+		// an empty row.
+		const optionalLine = (label: string, v: string) => (v ? `${label}: ${v}\n` : '');
+		const optionalRow = (label: string, v: string) =>
+			v ? `<p><strong>${label}:</strong> ${escapeHtml(v)}</p>` : '';
+
 		const text =
 			`Name: ${values.name}\n` +
+			optionalLine('Company', values.company) +
 			`Email: ${values.email}\n` +
-			`Type: ${values.type}\n\n` +
+			optionalLine('Phone', values.phone) +
+			`\n` +
 			values.message;
 		const html =
 			`<p><strong>Name:</strong> ${escapeHtml(values.name)}</p>` +
+			optionalRow('Company', values.company) +
 			`<p><strong>Email:</strong> ${escapeHtml(values.email)}</p>` +
-			`<p><strong>Type:</strong> ${escapeHtml(values.type)}</p>` +
+			optionalRow('Phone', values.phone) +
 			`<p style="white-space:pre-wrap">${escapeHtml(values.message)}</p>`;
 
 		try {
@@ -106,7 +123,7 @@ export const actions: Actions = {
 					from,
 					to: [to],
 					reply_to: values.email,
-					subject: `[Contact / ${values.type}] ${values.name}`,
+					subject: `[Contact] ${values.name}${values.company ? ` — ${values.company}` : ''}`,
 					text,
 					html
 				})
@@ -145,9 +162,11 @@ export const actions: Actions = {
 				`このたびはお問い合わせいただき、ありがとうございます。\n` +
 				`以下の内容で承りました。5営業日以内にご返信いたします。\n\n` +
 				`----------------------------------------\n` +
-				`種別: ${values.type}\n` +
 				`お名前: ${values.name}\n` +
-				`メールアドレス: ${values.email}\n\n` +
+				optionalLine('会社名', values.company) +
+				`メールアドレス: ${values.email}\n` +
+				optionalLine('電話番号', values.phone) +
+				`\n` +
 				`${values.message}\n` +
 				`----------------------------------------\n\n` +
 				`本メールは自動送信ですが、このままご返信いただけます。\n\n` +
@@ -164,9 +183,11 @@ export const actions: Actions = {
 				`<p>このたびはお問い合わせいただき、ありがとうございます。<br>` +
 				`以下の内容で承りました。5営業日以内にご返信いたします。</p>` +
 				`<hr>` +
-				`<p><strong>種別:</strong> ${escapeHtml(values.type)}<br>` +
-				`<strong>お名前:</strong> ${escapeHtml(values.name)}<br>` +
-				`<strong>メールアドレス:</strong> ${escapeHtml(values.email)}</p>` +
+				`<p><strong>お名前:</strong> ${escapeHtml(values.name)}<br>` +
+				(values.company ? `<strong>会社名:</strong> ${escapeHtml(values.company)}<br>` : '') +
+				`<strong>メールアドレス:</strong> ${escapeHtml(values.email)}` +
+				(values.phone ? `<br><strong>電話番号:</strong> ${escapeHtml(values.phone)}` : '') +
+				`</p>` +
 				`<p style="white-space:pre-wrap">${escapeHtml(values.message)}</p>` +
 				`<hr>` +
 				`<p>本メールは自動送信ですが、このままご返信いただけます。</p>` +

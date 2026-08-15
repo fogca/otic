@@ -121,7 +121,7 @@
 	<section class="panel panel--intro">
 		<div class="panel-inner">
 			<header class="panel-hd">
-				<h2 class="pt" lang="en">About Office</h2>
+				<h2 class="pt" lang="en">About</h2>
 			</header>
 			<p class="intro-headline" lang="en">
 				The intersection of culture, philosophy and creation.
@@ -438,19 +438,20 @@
 	.intro-headline {
 		font-size: var(--fs-h0);
 		text-transform: uppercase;
-		text-align: center;
+		text-align: left;
 		line-height: var(--lh-h0);
 		max-width: 780px;
 		/* Narrowed from 22px — panel-inner's own 10px gap makes up the rest
 		   of the (now smaller) space to .panel-content below. */
 		margin: 0 0 8px;
 	}
-	/* About Office label — hidden for now (kept in the DOM, not deleted;
-	   may come back), so its layout box no longer takes up space above the
-	   headline. Scoped to .panel--intro only — other panels' .panel-hd
-	   (Services/Director/Company/Ethos) are unaffected. */
-	.panel--intro .panel-hd {
-		display: none;
+	/* Small label above the display statement, matching Contact's own
+	   .title tier (--fs-h4). Was display:none while the label was parked;
+	   it's back now, so the .pt heading inside needs the same size rather
+	   than whatever the shared .pt rule gives it. */
+	.panel--intro .panel-hd .pt {
+		font-size: var(--fs-h4);
+		font-weight: var(--fw-medium);
 	}
 	/* Body paragraph — secondary to the headline now, so no explicit
 	   font-size override: falls back to base.css's standard p:lang(en|ja)
@@ -704,10 +705,9 @@
 			grid-column: 2;
 		}
 
-		/* Intro panel's label ("About Office") is hidden, so its rail is
-		   empty — running the content in column 2 anyway would read as an
-		   arbitrary indent. Span it full width instead, flush left under the
-		   display statement. */
+		/* Intro reads as a stack, not a rail: the "About" label takes its own
+		   row, then the display statement and the body copy each span the
+		   full width beneath it, all flush left on the same axis. */
 		.panel--intro .panel-content {
 			grid-column: 1 / -1;
 		}

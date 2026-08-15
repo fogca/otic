@@ -1,12 +1,10 @@
 <script lang="ts">
-	// Contact page — black background, accepts inquiries for new projects.
-	// Submits to the form action in +page.server.ts (validation + Resend email).
+	// Contact page — accepts inquiries for new projects. Submits to the form
+	// action in +page.server.ts (validation + Resend email).
 	// Progressive enhancement: works as a native POST with JS off; use:enhance
 	// upgrades it to an in-place submit with loading/error/success states.
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
-
-	const INQUIRY_TYPES = ['Project', 'Hiring', 'Press', 'Other'] as const;
 
 	let { form }: { form: ActionData } = $props();
 
@@ -79,11 +77,14 @@
 								<p class="form-error" role="alert">{form.formError}</p>
 							{/if}
 
-							<!-- Honeypot: hidden from users, catches naive bots. -->
+							<!-- Honeypot: hidden from users, catches naive bots. Named
+							     `website`, NOT `company` — there's a real Company field
+							     below now, and sharing the name would make every genuine
+							     submission that fills it look like a bot. -->
 							<div class="hp" aria-hidden="true">
 								<label>
-									Company
-									<input type="text" name="company" tabindex="-1" autocomplete="off" />
+									Website
+									<input type="text" name="website" tabindex="-1" autocomplete="off" />
 								</label>
 							</div>
 
@@ -107,6 +108,23 @@
 							</div>
 							<div class="field-group">
 								<label class="field">
+									<span class="label" lang="en">Company</span>
+									<input
+										id="company"
+										type="text"
+										name="company"
+										placeholder="Optional"
+										value={form?.values?.company ?? ''}
+										aria-invalid={form?.errors?.company ? 'true' : undefined}
+										aria-describedby={form?.errors?.company ? 'company-error' : undefined}
+									/>
+								</label>
+								{#if form?.errors?.company}
+									<span class="field-error" id="company-error">{form.errors.company}</span>
+								{/if}
+							</div>
+							<div class="field-group">
+								<label class="field">
 									<span class="label" lang="en">Email</span>
 									<input
 										id="email"
@@ -125,20 +143,19 @@
 							</div>
 							<div class="field-group">
 								<label class="field">
-									<span class="label" lang="en">Type</span>
-									<select
-										name="type"
-										required
-										aria-invalid={form?.errors?.type ? 'true' : undefined}
-										aria-describedby={form?.errors?.type ? 'type-error' : undefined}
-									>
-										{#each INQUIRY_TYPES as t (t)}
-											<option value={t} selected={(form?.values?.type ?? 'Project') === t}>{t}</option>
-										{/each}
-									</select>
+									<span class="label" lang="en">Phone</span>
+									<input
+										id="phone"
+										type="tel"
+										name="phone"
+										placeholder="Optional"
+										value={form?.values?.phone ?? ''}
+										aria-invalid={form?.errors?.phone ? 'true' : undefined}
+										aria-describedby={form?.errors?.phone ? 'phone-error' : undefined}
+									/>
 								</label>
-								{#if form?.errors?.type}
-									<span class="field-error" id="type-error">{form.errors.type}</span>
+								{#if form?.errors?.phone}
+									<span class="field-error" id="phone-error">{form.errors.phone}</span>
 								{/if}
 							</div>
 							<label class="field field--textarea">
@@ -159,7 +176,7 @@
 							</label>
 
 							<button type="submit" class="submit" lang="en" disabled={submitting}>
-								{submitting ? 'Sending…' : 'Send →'}
+								{submitting ? 'Sending…' : 'Confirm'}
 							</button>
 						</form>
 					{/if}
@@ -184,8 +201,8 @@
 	.Contact {
 		background: var(--color-bg);
 		color: var(--color-text);
-		padding-top: 100px;
-		padding-bottom: 120px;
+		padding-top: 120px;
+		padding-bottom: 0;
 		min-height: 100vh;
 		min-height: 100dvh;
 		/* White now (was black, seamlessly merged into the black Footer via a
@@ -227,8 +244,10 @@
 		max-width: none;
 	}
 
+	/* SP drops to --fs-h4; PC keeps --fs-h2 (restored in the
+	   min-width:1024px block below). */
 	.Contact .title {
-		font-size: var(--fs-h2);
+		font-size: var(--fs-h4);
 		font-weight: var(--fw-medium);
 		line-height: var(--lh-h2);
 		margin: 0;
@@ -256,7 +275,7 @@
 
 	/* Tightened from 40px — gap to .content (body copy) below. */
 	.Contact .header {
-		margin-bottom: 20px;
+		margin-bottom: 15px;
 	}
 
 	.Contact .body {
@@ -321,9 +340,10 @@
 		gap: 6px;
 	}
 
+	/* select rules removed along with the Type field — this form is inputs
+	   and a textarea only now. */
 	.Contact .field input,
-	.Contact .field textarea,
-	.Contact .field select {
+	.Contact .field textarea {
 		flex: 1;
 		font-size: 16px;
 		background: transparent;
@@ -343,35 +363,13 @@
 		font-size: 12.5px;
 	}
 
-	.Contact .field select {
-		appearance: none;
-		-webkit-appearance: none;
-		background-image: linear-gradient(45deg, transparent 50%, #000 50%),
-			linear-gradient(135deg, #000 50%, transparent 50%);
-		background-position:
-			calc(100% - 12px) 50%,
-			calc(100% - 7px) 50%;
-		background-size:
-			5px 5px,
-			5px 5px;
-		background-repeat: no-repeat;
-		padding-right: 24px;
-		cursor: pointer;
-	}
-
-	.Contact .field select option {
-		background: #fff;
-		color: #000;
-	}
-
 	.Contact .field-error {
 		font-size: 12px;
 		color: #b3261e;
 	}
 
 	.Contact .field input[aria-invalid='true'],
-	.Contact .field textarea[aria-invalid='true'],
-	.Contact .field select[aria-invalid='true'] {
+	.Contact .field textarea[aria-invalid='true'] {
 		border-bottom-color: #b3261e;
 	}
 
@@ -395,31 +393,33 @@
 	}
 
 	.Contact .field input:focus-visible,
-	.Contact .field textarea:focus-visible,
-	.Contact .field select:focus-visible {
+	.Contact .field textarea:focus-visible {
 		border-bottom-color: #000;
 	}
 
+	/* Solid black pill (was an outlined button that inverted on hover) —
+	   hover now just softens it, since the resting state is already the
+	   filled one. */
 	.Contact .submit {
 		align-self: flex-start;
-		padding: 14px 32px;
+		padding: 10px 30px;
 		margin-top: 16px;
 		font-size: 16px;
 		font-family: var(--font-en);
-		background: transparent;
-		color: inherit;
-		border: 1px solid rgba(0, 0, 0, 0.6);
+		background: #000;
+		color: #fff;
+		border: 1px solid #000;
+		border-radius: 30px;
 		cursor: pointer;
 		transition:
+			opacity var(--duration-fast) var(--ease-default),
 			background var(--duration-fast) var(--ease-default),
 			color var(--duration-fast) var(--ease-default),
 			border-color var(--duration-fast) var(--ease-default);
 	}
 
 	.Contact .submit:hover {
-		background: #000;
-		color: #fff;
-		border-color: #000;
+		opacity: 0.75;
 	}
 
 	.Contact .submit:disabled {
@@ -428,9 +428,7 @@
 	}
 
 	.Contact .submit:disabled:hover {
-		background: transparent;
-		color: inherit;
-		border-color: rgba(0, 0, 0, 0.6);
+		opacity: 0.5;
 	}
 
 	.Contact .thanks {
@@ -440,8 +438,15 @@
 	}
 
 	@media (min-width: 1024px) {
+		/* Was 42.5vh, which pushed the form far down a tall desktop viewport. */
 		.Contact {
-			padding-top: 42.5vh;
+			padding-top: 150px;
+		}
+
+		/* The header sits in the left grid column; nudging the right column
+		   down keeps the body copy from starting flush with the title. */
+		.Contact .content {
+			padding-top: 50px;
 		}
 
 		.Contact .container {
@@ -459,6 +464,8 @@
 		}
 
 		.Contact .title {
+			/* Back to the h2 tier — the base rule drops to h3 for SP only. */
+			font-size: var(--fs-h2);
 			margin-bottom: 0;
 		}
 
@@ -486,8 +493,7 @@
 		}
 
 		.Contact .field input,
-		.Contact .field textarea,
-		.Contact .field select {
+		.Contact .field textarea {
 			font-size: 17px;
 		}
 
