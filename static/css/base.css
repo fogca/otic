@@ -27,9 +27,15 @@
 
 /* Primary Latin face — August Type Foundry / Steiner (in-house face,
    formerly Aether). VF21 variable font (wght 1–950:
-   Hair / Book / Ultra masters). */
+   Hair / Book / Ultra masters).
+
+   The family is declared as 'Steiner by AUGUST.tf' so inspectors that read
+   getComputedStyle().fontFamily (WhatFont, Fontanello, DevTools' Computed
+   panel) credit the foundry. NOTE: DevTools' "Rendered Fonts" panel reads
+   the font binary's own name table instead, which still says "Steiner VF
+   69" — changing that means renaming at the Glyphs export, not here. */
 @font-face {
-  font-family: 'Steiner';
+  font-family: 'Steiner by AUGUST.tf';
   src: url('/fonts/Steiner-VF69.woff2?v=20260816e') format('woff2');
   font-weight: 1 950;
   font-style: normal;
@@ -149,14 +155,14 @@ a {
   --key:        var(--color-text);
 
   /* --- Typography stacks --- */
-  --font-en:     'Steiner', 'Helvetica Neue', Arial, sans-serif;
+  --font-en:     'Steiner by AUGUST.tf', 'Helvetica Neue', Arial, sans-serif;
   /* Steiner wght400 (Book) + Ishii Gothic R (TypeSquare) ahead of Tazugane
      (FontPlus). */
-  --font-ja:     'Steiner', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja:     'Steiner by AUGUST.tf', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   /* Steiner wght330 + Tazugane Light — lighter JP text */
-  --font-ja-light: 'Steiner', TazuganeGothicStdN-Light, 'TazuganeGothicStdN-Light', 'Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja-light: 'Steiner by AUGUST.tf', TazuganeGothicStdN-Light, 'TazuganeGothicStdN-Light', 'Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans W3', 'Hiragino Sans',
                  'Yu Gothic', 'Meiryo', sans-serif;
   --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI',
