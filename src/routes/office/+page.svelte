@@ -220,59 +220,64 @@
 	     mobile. ─── -->
 	<section class="panel panel--company-director">
 		<div class="panel-inner duo-inner">
-			<div class="duo-col">
-				<header class="panel-hd">
-					<h2 class="pt" lang="en">Director</h2>
-				</header>
-				<div class="panel-content">
-					<p class="panel-lead" lang="en">Takumi Isobe</p>
-					<p class="panel-lead panel-lead--ja" lang="ja">磯部タクミ</p>
-					<div class="director-row">
-						<div class="director-text">
-							<p lang="en">
-								Born in Japan in 2001.<br />
-								While attending the University of Westminster in the UK, exposed to a wide
-								range of cultures and arts, I developed a strong interest in visual
-								expression and entered the creative design industry. After returning to
-								Japan during COVID-19 and working at several design studios in Tokyo, I
-								established my own practice. Today, as creative director at Mirai Service
-								Co., Ltd., I run a design office at the core of my work, alongside AUGUST
-								— a type foundry designing original typefaces — and an image-making
-								studio.
-							</p>
-							<p lang="ja">
-								2001年日本生まれ。<br />
-								英国University of Westminster在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブ・デザイン業界へ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスのクリエイティブ事業部ディレクターとして、デザインオフィスを基軸に独自の書体を開発設計するAUGUSTタイプファウンダリやイメージメークスタジオの運営を行っている。
-							</p>
+			<!-- .duo-row wraps the pair so it can sit inside the PC layout's
+			     content column, lining its left edge up with Services above
+			     and Ethos below (see the min-width:1024px block). -->
+			<div class="duo-row">
+				<div class="duo-col">
+					<header class="panel-hd">
+						<h2 class="pt" lang="en">Director</h2>
+					</header>
+					<div class="panel-content">
+						<p class="panel-lead" lang="en">Takumi Isobe</p>
+						<p class="panel-lead panel-lead--ja" lang="ja">磯部タクミ</p>
+						<div class="director-row">
+							<div class="director-text">
+								<p lang="en">
+									Born in Japan in 2001.<br />
+									While attending the University of Westminster in the UK, exposed to a wide
+									range of cultures and arts, I developed a strong interest in visual
+									expression and entered the creative design industry. After returning to
+									Japan during COVID-19 and working at several design studios in Tokyo, I
+									established my own practice. Today, as creative director at Mirai Service
+									Co., Ltd., I run a design office at the core of my work, alongside AUGUST
+									— a type foundry designing original typefaces — and an image-making
+									studio.
+								</p>
+								<p lang="ja">
+									2001年日本生まれ。<br />
+									英国University of Westminster在学時、多様な文化と芸術に触れる中で、視覚表現に強く興味を抱きクリエイティブ・デザイン業界へ。COVID19の中で帰国し東京都内のデザインオフィス数社を経て、独立。現在は株式会社みらいサービスのクリエイティブ事業部ディレクターとして、デザインオフィスを基軸に独自の書体を開発設計するAUGUSTタイプファウンダリやイメージメークスタジオの運営を行っている。
+								</p>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="duo-col">
-				<header class="panel-hd">
-					<h2 class="pt" lang="en">Company</h2>
-				</header>
-				<div class="panel-content">
-					<p class="panel-lead" lang="en">Operating Company</p>
-					<p class="panel-lead panel-lead--ja" lang="ja">運営会社</p>
-					<div class="company-row">
-						<dl class="cfacts" lang="en">
-							<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
-							<div class="cfact">
-								<dt>Address</dt>
-								<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
-							</div>
-							<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
-							<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
-						</dl>
-						<dl class="cfacts" lang="ja">
-							<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
-							<div class="cfact">
-								<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
-							</div>
-							<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
-							<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
-						</dl>
+				<div class="duo-col">
+					<header class="panel-hd">
+						<h2 class="pt" lang="en">Company</h2>
+					</header>
+					<div class="panel-content">
+						<p class="panel-lead" lang="en">Operating Company</p>
+						<p class="panel-lead panel-lead--ja" lang="ja">運営会社</p>
+						<div class="company-row">
+							<dl class="cfacts" lang="en">
+								<div class="cfact"><dt>Company</dt><dd>Mirai Service Co., Ltd.</dd></div>
+								<div class="cfact">
+									<dt>Address</dt>
+									<dd>1-16 Hinokuchi-cho, Nishi-ku, Nagoya, Aichi<br />451-0034 Japan</dd>
+								</div>
+								<div class="cfact"><dt>Capital</dt><dd>JPY 10,000,000</dd></div>
+								<div class="cfact"><dt>Established</dt><dd>2005.07.20</dd></div>
+							</dl>
+							<dl class="cfacts" lang="ja">
+								<div class="cfact"><dt>屋号</dt><dd>株式会社みらいサービス</dd></div>
+								<div class="cfact">
+									<dt>所在地</dt><dd>〒451-0034 愛知県名古屋市西区樋の口町1-16</dd>
+								</div>
+								<div class="cfact"><dt>資本金</dt><dd>1,000万円</dd></div>
+								<div class="cfact"><dt>設立</dt><dd>2005.07.20</dd></div>
+							</dl>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -646,6 +651,14 @@
 	.duo-inner {
 		gap: 60px;
 	}
+	/* SP: the pair just stacks, carrying the 60px rhythm that used to sit on
+	   .duo-inner (its only child is .duo-row now, so that gap has nothing
+	   left to space). */
+	.duo-row {
+		display: flex;
+		flex-direction: column;
+		gap: 60px;
+	}
 	.duo-col {
 		display: flex;
 		flex-direction: column;
@@ -813,13 +826,16 @@
 			width: auto;
 		}
 
-		/* Company / Director sit side by side inside the content column —
-		   the label rail above already carries their headings, so this row
-		   only splits the content itself. */
-		.duo-inner {
+		/* This panel keeps .panel-inner's rail + content grid (it used to
+		   replace it with two full-width halves, which started the pair at
+		   the page edge instead of lining up with Services above and Ethos
+		   below). .duo-row takes the content column and splits it in two,
+		   at the same 48px gutter the services/ethos grids use. */
+		.duo-row {
+			grid-column: 2;
 			display: grid;
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-			column-gap: var(--rail-gap);
+			column-gap: 48px;
 		}
 		.duo-col {
 			min-width: 0;
