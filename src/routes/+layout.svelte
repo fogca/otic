@@ -67,8 +67,14 @@
 
 	// Awwwards-style silk easing for the white panel
 	CustomEase.create('panelSilk', 'M0,0 C0.76,0 0.24,1 1,1');
-	// Quintic out — soft, slow-landing ease for content fade-in
-	CustomEase.create('contentFade', 'M0,0 C0.22,1 0.36,1 1,1');
+	// Entry fade for page content. Was a quintic-out (0.22,1,0.36,1), which
+	// front-loads almost the whole ramp: over the 0.9s tween it hit 83%
+	// opacity by 0.27s and 96% by 0.45s, so the last half-second was
+	// invisible and the page read as popping in rather than fading. This
+	// sine-in-out spreads the change evenly (14% / 50% / 86% at the quarter,
+	// half and three-quarter marks) so the fade is perceptible throughout,
+	// without changing the overall timing.
+	CustomEase.create('contentFade', 'M0,0 C0.37,0 0.63,1 1,1');
 
 	let { children } = $props();
 
