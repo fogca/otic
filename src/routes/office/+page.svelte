@@ -387,6 +387,18 @@
 		gap: 10px;
 	}
 
+	/* First panel — the page's own padding-top already sets the clearance
+	   below the header, so the panel's own top padding just doubled it.
+	   Last panel — its bottom padding would stack on top of the Footer's
+	   own margin-top. Both are higher specificity than .panel-inner, so
+	   they hold at both breakpoints without a copy in the PC block. */
+	.panel--intro .panel-inner {
+		padding-top: 0;
+	}
+	.panel--ethos .panel-inner {
+		padding-bottom: 0;
+	}
+
 	.panel-hd {
 		flex: none;
 		display: flex;

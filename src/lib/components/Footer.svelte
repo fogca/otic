@@ -93,6 +93,15 @@
 		margin-top: 120px;
 	}
 
+	/* SP tightens the gap above the Footer; PC keeps the base 120px. Scoped
+	   at 1023px (the site-wide SP/PC split used by Header and every page),
+	   not this file's own 768px layout breakpoints. */
+	@media (max-width: 1023px) {
+		.Footer {
+			margin-top: 100px;
+		}
+	}
+
 	.Footer :global(*) {
 		color: #fff;
 	}
