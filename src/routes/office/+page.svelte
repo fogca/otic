@@ -34,6 +34,13 @@
 		image?: string;
 		/* Takes the place of `image` in the same 2.69:1 box when set. */
 		video?: string;
+		/* First frame of `video`. Required whenever video is set: iOS paints
+		   NOTHING for a preload="metadata" <video> until playback actually
+		   starts, so without this the box is simply empty there (and stays
+		   empty if autoplay is refused, e.g. Low Power Mode). The CDN-hosted
+		   videos elsewhere get the equivalent from videoFrame(); this one is
+		   a local file, so the frame is committed alongside it. */
+		videoPoster?: string;
 		imageAlt?: string;
 	};
 
@@ -56,6 +63,7 @@
 			body: '私たちは、ブランディングを始めとするクリエイティブ戦略の策定・ディレクションから、ロゴ・グラフィックデザイン・パッケージデザインといったクリエイションまで手掛けています。また弊社主宰のタイプファウンダリ——August Type Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。',
 			link: 'www.AUGUST.tf',
 			video: '/images/services_type_VF_animation.mp4',
+			videoPoster: '/images/services_type_VF_animation_poster.jpg',
 			imageAlt: 'V.I. & Typography'
 		},
 		{
@@ -197,6 +205,7 @@
 								     it's off-screen. -->
 								<video
 									src={s.video}
+									poster={s.videoPoster}
 									use:lazyVideo
 									loop
 									muted
