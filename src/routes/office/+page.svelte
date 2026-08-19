@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { officeIntro } from '$lib/state/officeIntro.svelte';
+	import { lazyVideo } from '$lib/actions/lazyVideo';
 
 	// The site-wide corner-logo starts oversized at the bottom of this page
 	// (same left inset, just wider — see +layout.svelte's .is-hero state) —
@@ -31,6 +32,8 @@
 		body: string;
 		link?: string;
 		image?: string;
+		/* Takes the place of `image` in the same 2.69:1 box when set. */
+		video?: string;
 		imageAlt?: string;
 	};
 
@@ -52,7 +55,7 @@
 				'From brand strategy and direction through to logo, graphic, and package design, we work across the full arc of creation. Our in-house type foundry, August Type Foundry, develops typefaces in pursuit of new forms that reinterpret history within a contemporary context. The precision honed in type design runs through all our branding, shaping a coherent formal language at the core of each brand.',
 			body: '私たちは、ブランディングを始めとするクリエイティブ戦略の策定・ディレクションから、ロゴ・グラフィックデザイン・パッケージデザインといったクリエイションまで手掛けています。また弊社主宰のタイプファウンダリ——August Type Foundryは、歴史を紐解き、現代の文脈で再解釈することで生まれるニューフォームを追い求め、タイプフェイス——書体の開発を行っています。書体開発で培ったディテールの追求をブランディング領域まで徹底し、ブランドの根幹を表現する一貫した造形言語を創造します。',
 			link: 'www.AUGUST.tf',
-			image: '/images/services_typefoundry.jpg',
+			video: '/images/services_type_VF_animation.mp4',
 			imageAlt: 'V.I. & Typography'
 		},
 		{
@@ -186,7 +189,23 @@
 				<div class="services-grid">
 				{#each services as s}
 					<article class="service-card">
-						{#if s.image}
+						{#if s.video}
+							<div class="service-image">
+								<!-- lazyVideo (not autoplay): plays only near the viewport and
+								     releases its src when scrolled away, same as the archive
+								     grid/slug videos — keeps this off the decoder budget while
+								     it's off-screen. -->
+								<video
+									src={s.video}
+									use:lazyVideo
+									loop
+									muted
+									playsinline
+									preload="metadata"
+									aria-label={s.imageAlt ?? s.title}
+								></video>
+							</div>
+						{:else if s.image}
 							<div class="service-image">
 								<img src={s.image} alt={s.imageAlt ?? s.title} loading="lazy" />
 							</div>
@@ -522,11 +541,19 @@
 		background: var(--color-bg-gray);
 		margin-bottom: 20px;
 	}
-	.service-image img {
+	.service-image img,
+	.service-image video {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		display: block;
+	}
+	/* ~2% overscan inside .service-image's own overflow box — the second half
+	   of the iOS AVPlayerLayer hairline fix (base.css shaves the outer 2px;
+	   this pushes the shaved edge outside the visible area). Same pattern as
+	   the slug's .vclip. */
+	.service-image video {
+		transform: scale(1.02);
 	}
 	.service-title {
 		font-size: var(--fs-h2);
