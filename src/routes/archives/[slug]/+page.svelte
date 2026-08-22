@@ -488,7 +488,7 @@
 	   wrapper (videoFrame(), see the template), so inherit it onto the element
 	   itself. The sliver then matches that video's own artwork instead of just
 	   being "light" — which is what makes it work for dark or saturated pieces
-	   (e.g. the red August clips) as well as the near-white one/etc ones. */
+	   (e.g. the red Andersen clips) as well as the near-white one/etc ones. */
 	.media__hero video,
 	.media__item video {
 		background-image: inherit;

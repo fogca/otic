@@ -293,7 +293,7 @@ export const load: PageServerLoad = async () => {
 	// 'order', same field the Top page uses), so this is just data.contents'
 	// own order filtered to works that made it into imagesByWork (a work with
 	// zero usable images is naturally absent). Keeps the grid's very first
-	// pass reading as deliberately arranged (e.g. RC1 → August → ...) instead
+	// pass reading as deliberately arranged (e.g. RC1 → Andersen → ...) instead
 	// of shuffled from the start.
 	const topOrder = data.contents.map((w) => w.id).filter((id) => imagesByWork.has(id));
 	const mainTopOrder = topOrder.filter((id) => !TRAILING_IDS.has(id));
