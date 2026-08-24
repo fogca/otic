@@ -41,6 +41,16 @@
 	<title>{archive.title} — TAKUMIISOBE.com</title>
 </svelte:head>
 
+<!-- Rebuild the whole page when the slug changes. Slug-to-slug navigation
+     stays on this same route, so without a key Svelte keeps the existing
+     DOM and only patches attributes — the browser goes on painting the
+     PREVIOUS project's already-decoded hero until the new file arrives
+     (measured: ~1.5s of the old thumbnail on the new URL). It also leaves
+     <picture>/<source srcset> to re-run resource selection on a swapped
+     srcset, which browsers do unreliably — that's the variant that needed
+     a reload. Keying also drops the index-keyed gallery reuse below and
+     any action closure still holding the old src. -->
+{#key archive.slug}
 <main class="Archive">
 	<!-- title + descriptions — same linear flow on every viewport (see the
 	     display:contents + order block in <style> below for how this
@@ -253,6 +263,7 @@
 		</section>
 	{/if}
 </main>
+{/key}
 
 <style>
 	/* Language toggle: show only the active language's tag + description body

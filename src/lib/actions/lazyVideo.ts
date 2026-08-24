@@ -36,11 +36,19 @@ export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } 
 	// story. Dormant state (src + preload=metadata) holds no decoder and
 	// stays outside the budget.
 	const { rootMargin = '200px' } = opts;
-	const src = node.getAttribute('src') ?? '';
+	// Remembered so release() can detach it and activate() can put it back.
+	// Re-read on every activate/release rather than captured once at mount:
+	// if the element is reused for a DIFFERENT video (same-route navigation
+	// patching src in place), a value captured here would be the previous
+	// clip's URL, and the first release/re-enter cycle would restore THAT —
+	// the video silently reverting to the last project's footage.
+	let src = node.getAttribute('src') ?? '';
 	let active = false;
 
 	const activate = () => {
-		if (!node.getAttribute('src') && src) {
+		const current = node.getAttribute('src');
+		if (current) src = current;
+		if (!current && src) {
 			node.setAttribute('src', src);
 			node.load();
 		}
@@ -59,6 +67,10 @@ export function lazyVideo(node: HTMLVideoElement, opts: { rootMargin?: string } 
 		}
 		active = false;
 		node.pause();
+		// Capture whatever it is playing NOW, so re-entry restores this clip
+		// and not one the element held earlier.
+		const current = node.getAttribute('src');
+		if (current) src = current;
 		// Freeze the rendered proportions before the intrinsic size is lost
 		// with the src (width:100%/height:auto would otherwise collapse to
 		// the 300x150 default and jump the scroll position).
