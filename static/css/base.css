@@ -33,10 +33,10 @@
    getComputedStyle().fontFamily (WhatFont, Fontanello, DevTools' Computed
    panel) credit the foundry. NOTE: DevTools' "Rendered Fonts" panel reads
    the font binary's own name table instead, which still says "Steiner VF
-   70" — changing that means renaming at the Glyphs export, not here. */
+   71" — changing that means renaming at the Glyphs export, not here. */
 @font-face {
   font-family: 'Steiner by AUGUST.tf';
-  src: url('/fonts/Steiner-VF70.woff2?v=20260828') format('woff2');
+  src: url('/fonts/Steiner-VF71.woff2?v=20260828b') format('woff2');
   font-weight: 1 950;
   font-style: normal;
   font-display: swap;
