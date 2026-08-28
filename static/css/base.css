@@ -159,9 +159,9 @@ a {
 
   /* --- Typography stacks --- */
   --font-en:     'Steiner by AUGUST.tf VF74', 'Helvetica Neue', Arial, sans-serif;
-  /* Steiner wght400 (Book) + Ishii Gothic L (TypeSquare) ahead of Tazugane
+  /* Steiner wght400 (Book) + Ishii Gothic R (TypeSquare) ahead of Tazugane
      (FontPlus). */
-  --font-ja:     'Steiner by AUGUST.tf VF74', 'Ishii Gothic L', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja:     'Steiner by AUGUST.tf VF74', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   /* Steiner wght330 + Tazugane Light — lighter JP text */
@@ -188,7 +188,7 @@ a {
   --fs-p:    11.5px;
 
   /* Body copy is language-aware (Latin runs larger than JP) */
-  --fs-p-en: 13px;   /* Body copy (Latin) — SP */
+  --fs-p-en: 15px;   /* Body copy (Latin) — SP */
   --fs-p-ja: 12px;   /* Body copy (JP) — SP */
 
   /* --- Font weights (single source of truth — no per-component weights) --- */
@@ -279,7 +279,7 @@ a {
     --fs-h7: 11.5px;
     --fs-body: 12px;
     --fs-p:    14px;
-    --fs-p-en: 12.5px;   /* Body copy (Latin) — PC */
+    --fs-p-en: 15px;   /* Body copy (Latin) — PC */
     --fs-p-ja: 12px;   /* Body copy (JP) — PC */
     --padding:       3vw;
     --gutter:        40px;
@@ -314,7 +314,7 @@ a {
 :lang(ja) {
   --heading-font: var(--font-ja);
   --text-font:    var(--font-ja);
-  /* 石井ゴシック L (TypeSquare) sits tighter than Tazugane by default —
+  /* 石井ゴシック R (TypeSquare) sits tighter than Tazugane by default —
      opened up to read comfortably again now that it leads the JP stack. */
   letter-spacing: 0.02em;
 }
