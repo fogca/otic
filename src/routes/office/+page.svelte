@@ -475,16 +475,19 @@
 	}
 
 	/* ── Panel 1: Office ── */
-	/* Display statement — the "headline" tier; size and uppercase carry it,
-	   weight stays at the default --fw-base like the rest of the page (an
-	   explicit lighter 325 was tried and dropped). Stays English always
-	   (matches the site's convention that headings/titles don't toggle,
-	   only body copy does — see the lang-toggle rules above). */
+	/* Display statement — the "headline" tier; size alone carries it, in
+	   sentence case (uppercase was tried and dropped). Weight stays at the
+	   default --fw-base like the rest of the page (an explicit lighter 325
+	   was also tried and dropped). Stays English always (matches the site's
+	   convention that headings/titles don't toggle, only body copy does —
+	   see the lang-toggle rules above). hyphens:none keeps long words whole
+	   rather than breaking them at display size. */
 	.intro-headline {
 		font-size: var(--fs-h0);
-		text-transform: uppercase;
 		text-align: left;
 		line-height: var(--lh-h0);
+		letter-spacing: 0;
+		hyphens: none;
 		max-width: 780px;
 		/* Narrowed from 22px — panel-inner's own 10px gap makes up the rest
 		   of the (now smaller) space to .panel-content below. */
@@ -798,7 +801,7 @@
 			grid-column: 1 / -1;
 			font-size: clamp(44px, 4vw, 68px);
 			line-height: 1.06;
-			letter-spacing: -0.01em;
+			letter-spacing: 0;
 			text-align: left;
 			max-width: 20ch;
 			margin: 0 0 64px;

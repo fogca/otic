@@ -260,15 +260,16 @@
 	}
 
 	/* Large tagline — sized to match Office's .intro-headline (same
-	   font-size/weight/uppercase treatment), left-aligned to fit Contact's
+	   font-size/weight/case treatment), left-aligned to fit Contact's
 	   left-aligned form layout. */
 	.Contact .intro-headline {
 		font-size: var(--fs-h0);
 		font-weight: var(--fw-base);
 		font-variation-settings: 'wght' var(--fw-base);
-		text-transform: uppercase;
 		text-align: left;
 		line-height: var(--lh-h0);
+		letter-spacing: 0;
+		hyphens: none;
 		max-width: 100%;
 		margin: 16px 0 0;
 	}

@@ -512,6 +512,13 @@
 			font-variation-settings: 'wght' var(--fw-base);
 		}
 
+		/* Page links sit a step heavier than the lang toggle beside them —
+		   they're the primary navigation, the toggle is a secondary control. */
+		.Header .nav-links .switch-option {
+			font-weight: var(--fw-medium);
+			font-variation-settings: 'wght' var(--fw-medium);
+		}
+
 		/* White text on the black highlight capsule — correct as-is on both
 		   light and dark pages (.Header.is-dark .switch-option's own
 		   white-text override, further up, already agrees with this one). */
