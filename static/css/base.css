@@ -188,7 +188,7 @@ a {
   --fs-p:    11.5px;
 
   /* Body copy is language-aware (Latin runs larger than JP) */
-  --fs-p-en: 15px;   /* Body copy (Latin) — SP */
+  --fs-p-en: 13.5px;   /* Body copy (Latin) — SP */
   --fs-p-ja: 12px;   /* Body copy (JP) — SP */
 
   /* --- Font weights (single source of truth — no per-component weights) --- */
@@ -206,7 +206,7 @@ a {
   --lh-h5:   1.4;
   --lh-h6:   1.5;
   --lh-body: 1.5;
-  --lh-en:   1.4;   /* Latin body line-height — used by p:lang(en) */
+  --lh-en:   1.5;   /* Latin body line-height — used by p:lang(en) */
   --lh-ja:   1.8;   /* JP body line-height — used by p:lang(ja) */
   --lh-h-ja: 1.6;   /* JP heading/lead line-height — tighter than body JA (1.8), looser than the h1–h6 tiers (tuned for Latin) */
   --lh-row:  2;
@@ -279,7 +279,7 @@ a {
     --fs-h7: 11.5px;
     --fs-body: 12px;
     --fs-p:    14px;
-    --fs-p-en: 15px;   /* Body copy (Latin) — PC */
+    --fs-p-en: 13.5px;   /* Body copy (Latin) — PC */
     --fs-p-ja: 12px;   /* Body copy (JP) — PC */
     --padding:       3vw;
     --gutter:        40px;

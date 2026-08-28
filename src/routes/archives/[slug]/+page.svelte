@@ -348,10 +348,10 @@
 	}
 	.lead__body--ja {
 		margin-top: 14px;
-		/* Half a px over the p:lang(ja) preset (--fs-p-ja, 11.5px) — SP
-		   only in effect: the PC block later overrides both bodies to 14px
-		   (same scoped specificity, later in source). */
-		font-size: 12px;
+		/* A px over the p:lang(ja) preset (--fs-p-ja, 11.5px) — SP only in
+		   effect: the PC block later overrides both bodies to 14px (same
+		   scoped specificity, later in source). */
+		font-size: 12.5px;
 	}
 	/* "Built with" line — a small technical footnote under the body copy,
 	   not a credits/colophon entry (that stays further down the page). */
