@@ -508,8 +508,8 @@
 			padding: 5px 10px 4.5px;
 			margin: 0;
 			opacity: 0.5;
-			font-weight: 420;
-			font-variation-settings: 'wght' 420;
+			font-weight: var(--fw-base);
+			font-variation-settings: 'wght' var(--fw-base);
 		}
 
 		/* White text on the black highlight capsule — correct as-is on both
