@@ -192,10 +192,10 @@ a {
   --fs-p-ja: 12px;   /* Body copy (JP) — SP */
 
   /* --- Font weights (single source of truth — no per-component weights) --- */
-  --fw-base:   250;   /* default for all text unless emphasized */
-  --fw-medium: 350;   /* medium emphasis */
-  --fw-bold:   450;   /* bold */
-  --fw-lead:   300;   /* exception: large display lead (Radix. For what endures.) */
+  --fw-base:   300;   /* default for all text unless emphasized */
+  --fw-medium: 400;   /* medium emphasis */
+  --fw-bold:   500;   /* bold */
+  --fw-lead:   350;   /* exception: large display lead (Radix. For what endures.) */
 
   /* --- Line heights --- */
   --lh-h0:   1.2;
