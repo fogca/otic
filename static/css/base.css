@@ -159,9 +159,9 @@ a {
 
   /* --- Typography stacks --- */
   --font-en:     'Steiner by AUGUST.tf VF73', 'Helvetica Neue', Arial, sans-serif;
-  /* Steiner wght400 (Book) + Ishii Gothic R (TypeSquare) ahead of Tazugane
+  /* Steiner wght400 (Book) + Ishii Gothic L (TypeSquare) ahead of Tazugane
      (FontPlus). */
-  --font-ja:     'Steiner by AUGUST.tf VF73', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja:     'Steiner by AUGUST.tf VF73', 'Ishii Gothic L', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   /* Steiner wght330 + Tazugane Light — lighter JP text */
@@ -312,7 +312,7 @@ a {
 :lang(ja) {
   --heading-font: var(--font-ja);
   --text-font:    var(--font-ja);
-  /* 石井ゴシック R (TypeSquare) sits tighter than Tazugane by default —
+  /* 石井ゴシック L (TypeSquare) sits tighter than Tazugane by default —
      opened up to read comfortably again now that it leads the JP stack. */
   letter-spacing: 0.02em;
 }
