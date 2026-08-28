@@ -508,27 +508,15 @@
 	   .panel-content's gap now — no own margin, so it doesn't stack.
 	   max-width:100% (was 560px) now that .panel-lead above it is gone and
 	   this carries the section's full body copy on its own. */
+	/* Ragged right, not justified. Justify was tried here and dropped: the
+	   paragraph is studded with long URLs, and forcing lines to the right
+	   edge either spread the Japanese characters apart or (with
+	   word-break:break-all to absorb the slack) chopped the Latin
+	   mid-word. Both read as poor setting — an even right edge isn't worth
+	   either cost. */
 	.intro-text {
 		max-width: 100%;
 		margin: 0;
-		text-align: justify;
-		/* This paragraph is Japanese studded with four long URLs, the worst
-		   case for justification: a line like "www.pyrenees.pictures /
-		   デジタルクリエイション：Post Script," is mostly unbreakable Latin,
-		   so the slack needed to reach the right edge gets pushed into the
-		   gaps BETWEEN the Japanese characters (JP has no word spaces to
-		   absorb it) and the run visibly spreads apart on WebKit.
-
-		   break-all lets those Latin runs break mid-token so each line fills
-		   naturally. Measured at 390px: worst-line slack drops from 89.8px
-		   to 11.4px (~30 chars of a 12px line were absorbing ~3px each,
-		   which is exactly the spread that was visible).
-
-		   NOT overflow-wrap:anywhere — that only breaks a token that would
-		   otherwise overflow, and these URLs fit on a line just fine, so it
-		   measured byte-identical to no rule at all. text-justify:inter-word
-		   would be the direct fix but WebKit doesn't implement it. */
-		word-break: break-all;
 	}
 	/* Language-agnostic (just a handle/link), so it sits outside the
 	   intro-text/--ja toggle pair — always visible regardless of
