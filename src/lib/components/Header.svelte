@@ -5,7 +5,7 @@
 	import { goto, afterNavigate } from '$app/navigation';
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
-	import Logo from '$lib/components/Logo.svelte';
+	import LogoVIII from '$lib/components/LogoVIII.svelte';
 
 	const realPath = $derived(page.url.pathname);
 
@@ -237,8 +237,8 @@
 
 	<div class="head-end">
 		<!-- Top-right wordmark, shown at every breakpoint. -->
-		<a href="/" class="logo" aria-label="Home">
-			<Logo />
+		<a href="/" class="logo logo--wordmark" aria-label="Home">
+			<LogoVIII />
 		</a>
 	</div>
 </header>
@@ -416,6 +416,18 @@
 		height: auto;
 	}
 
+	/* Short wordmark: sized by cap height, not by width. The drawn mark is
+	   ~15:1, so filling the header's width gave it a comfortable height for
+	   free; "VIII Inc." is ~4.5:1 and would come out about three times
+	   taller under the same rule. */
+	.Header .logo--wordmark {
+		width: auto;
+	}
+	.Header .logo--wordmark :global(svg) {
+		width: auto;
+		height: 20px;
+	}
+
 	/* SP: logo stacked above the nav row (was side-by-side) — order still
 	   flips visual position without touching DOM order (nav stays first
 	   for tab/reading order). Logo runs full-width within the Header's own
@@ -450,6 +462,13 @@
 
 		.Header .logo {
 			width: 100%;
+		}
+
+		.Header .logo--wordmark {
+			width: auto;
+		}
+		.Header .logo--wordmark :global(svg) {
+			height: 23px;
 		}
 
 		/* Segmented pill (see ArchivesTitleBar.svelte's .view-switch — same
