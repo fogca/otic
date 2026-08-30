@@ -106,6 +106,21 @@
 		color: #fff;
 	}
 
+	/* Footer copy runs one step above the rest of the site: it sits on the
+	   dark panel, where the same weight reads lighter than it does on white.
+	   :global(*) so it reaches the SVG-free text nodes and every nested
+	   element, and the p:lang() pair because base.css's p:lang(en) preset
+	   (0,1,1) would otherwise out-specify a plain .Footer rule. */
+	.Footer :global(*) {
+		font-weight: var(--fw-medium);
+		font-variation-settings: 'wght' var(--fw-medium);
+	}
+	.Footer :global(p:lang(en)),
+	.Footer :global(p:lang(ja)) {
+		font-weight: var(--fw-medium);
+		font-variation-settings: 'wght' var(--fw-medium);
+	}
+
 	.Footer :global(a) {
 		color: #fff;
 	}
@@ -175,7 +190,8 @@
 
 	.Footer__heading {
 		font-size: 12px;
-		font-weight: var(--fw-medium);
+		font-weight: var(--fw-bold);
+		font-variation-settings: 'wght' var(--fw-bold);
 		letter-spacing: 0;
 		opacity: 0.6;
 		margin: 0;
@@ -213,7 +229,8 @@
 
 	.Footer__cta {
 		font-size: 14px;
-		font-weight: var(--fw-medium);
+		font-weight: var(--fw-bold);
+		font-variation-settings: 'wght' var(--fw-bold);
 		color: inherit;
 		text-decoration: none;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.4);

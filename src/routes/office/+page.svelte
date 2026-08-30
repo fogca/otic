@@ -139,34 +139,19 @@
 			</p>
 
 			<div class="panel-content">
-				<!-- Opening/office-list kept as-is; the tail (previously a
-				     reused-verbatim paste of the Services blurbs below) is
-				     replaced with new, more conceptual copy about how the four
-				     offices' expertise/direction/philosophy connect — approved
-				     draft, see chat. -->
+				<!-- Opening statement only. The tail — the four-office list
+				     and the passage on how their direction connects — was cut
+				     to keep this compact; the Services panel below already
+				     carries the four offices in full. -->
 				<p class="intro-text" lang="en">
 					Office / TAKUMI ISOBE is a creative office based in Tokyo working across
 					visual identity and design engineering — experience, brand, product, type,
 					furniture, and digital communication. By blending culture and philosophy
 					with design, we pursue creation that speaks to what makes us human — our
-					physicality, our emotion. In practice, we bring this to life through
-					ongoing collaboration with four specialist offices we run — Product:
-					YSOVE 2001, www.ysove.com / Type Foundry: AUGUST, www.august.tf / Image
-					Making: Pyrenees Pictures, www.pyrenees.pictures / Digital Creation: Post
-					Script, www.postscript.jp. Each holds its own craft, yet none works in
-					isolation — one direction moves across all four, so a brand's typeface,
-					its objects, its imagery, and its digital presence stay in conversation
-					rather than drifting into separate voices. That direction is less a
-					house style than a way of thinking: design as the discipline through
-					which culture and philosophy become tangible, and creation as the act of
-					giving that thinking a form people can actually meet.
+					physicality, our emotion.
 				</p>
 				<p class="intro-text intro-text--ja" lang="ja">
-					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学にデザインを掛け合わせることで生まれる、わたしたちを人間たらしめる——身体性と情緒に語りかけるクリエイションを追求します。その実践としてわたしたちの主宰する4つの領域特化のオフィス——プロダクト：YSOVE
-					2001, www.ysove.com / タイプファウンダリ：AUGUST, www.august.tf /
-					イメージメーク：Pyrenees Pictures, www.pyrenees.pictures /
-					デジタルクリエイション：Post
-					Script, www.postscript.jp。それぞれが固有の専門性を持ちながら、独立して動いているわけではありません。一つのディレクションが4つの領域を横断することで、ブランドの書体、プロダクト、イメージ、デジタル上の体験がバラバラな声にならず、互いに呼応し続けます。そのディレクションはハウススタイルというより、一つの思考法です——デザインを、文化と哲学を手に触れられるかたちへと変換していく手段として捉え、クリエイションを、その思考に実際に出会えるかたちを与える行為として捉えること。
+					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学にデザインを掛け合わせることで生まれる、わたしたちを人間たらしめる——身体性と情緒に語りかけるクリエイションを追求します。
 				</p>
 				<a
 					class="intro-instagram"
@@ -414,7 +399,7 @@
 	   (see min-width:1024px block), matching the archives/[slug] page's
 	   lead/media split. */
 	.panel-inner {
-		padding: 40px var(--padding) 40px;
+		padding: 60px var(--padding) 60px;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
@@ -761,7 +746,7 @@
 			   centred once the viewport passes it. */
 			max-width: 1600px;
 			margin-inline: auto;
-			padding: 96px var(--padding) 96px;
+			padding: 116px var(--padding) 116px;
 		}
 
 		/* Section label sits in the left rail, aligned to the top of its
