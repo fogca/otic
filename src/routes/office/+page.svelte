@@ -81,7 +81,7 @@
 			bodyEn:
 				'Our in-house engineering studio, Post Script, designs and builds digital products — brand sites, e-commerce, reservation systems, and web apps — and digital infrastructure, including AI / DX integration. With a modern stack and considered architecture, we refine experience and usability to give form to a brand in the digital world.',
 			body: '弊社主宰のエンジニアリングスタジオ——Post Scriptでは、ブランドサイトやEコマース、予約システムの開発、Webアプリの開発などのデジタルプロダクトの設計と実装と、AI/DXインテグレーションなどの、デジタルインフラストラクチャ構築を行なっています。モダンな技術スタックを用い最適なアーキテクチャを設計することで、UXと利便性を向上させ高度なデジタルコミュニケーションと体験を整え、ブランドのデジタル体験を形にします。',
-			image: '/images/services_production.png',
+			image: '/images/services_production.jpg',
 			imageAlt: 'Digital Infrastructure'
 		}
 	];
@@ -418,6 +418,12 @@
 		align-items: center;
 		justify-content: center;
 		padding-inline: var(--padding);
+	}
+
+	/* Pulls the statement up by .OfficePage's own top padding, so it centres
+	   on the viewport rather than on the shorter box below that padding. */
+	.hero-inner {
+		margin-top: -120px;
 	}
 
 	/* Beats base.css's p:lang(en) preset (0,1,1) on weight, which would
