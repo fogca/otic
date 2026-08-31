@@ -445,6 +445,7 @@
 	.OfficePage .hero-statement {
 		margin: 0;
 		text-align: center;
+		font-size: 24px;
 		font-weight: var(--fw-medium);
 		font-variation-settings: 'wght' var(--fw-medium);
 	}
@@ -786,6 +787,10 @@
 			--measure: 680px;
 			--rail: 220px;
 			--rail-gap: 72px;
+		}
+
+		.OfficePage .hero-statement {
+			font-size: 48px;
 		}
 
 		.panel-inner {
