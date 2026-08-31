@@ -117,9 +117,18 @@
 				opacity: 1,
 				duration: 0.15,
 				ease: 'power2.out',
-				// Matches typeText.ts's own default charInterval (45ms) —
-				// the logo and the tagline "type" at the same rhythm.
-				stagger: 0.045,
+				stagger: {
+					// 45ms still matches typeText.ts's own default
+					// charInterval, just applied outward from the middle
+					// glyph in both directions at once (GSAP's built-in
+					// from:'center' distributes stagger by index distance
+					// from the array's centre) rather than strictly left to
+					// right — the array is still the x-sorted reading order
+					// from above, so "centre" here means the visual/textual
+					// centre of the wordmark, not just the middle DOM index.
+					each: 0.045,
+					from: 'center'
+				},
 				onComplete: () => {
 					logoRevealed = true;
 				}
@@ -171,16 +180,20 @@
 		{#if frames.length > 0}
 			<!-- All frames render simultaneously (opacity-toggled, not
 			     src-swapped) so none of them have to fetch mid-cycle — at
-			     250ms a network wait would show as a blank flash. Keyed by
-			     index, not src: microCMS reuses some assets across works, so
-			     src isn't guaranteed unique. aria-hidden as a group for the
-			     same reason as the mark above — a screen reader has no use
-			     for ~20 alt texts flickering past at 4/sec. -->
+			     250ms a network wait would show as a blank flash. is-active
+			     also requires logoRevealed, so frame 0 (activeIndex's
+			     default) stays fully transparent until the logo's own
+			     reveal finishes — no image shows through while it's still
+			     typing in. Keyed by index, not src: microCMS reuses some
+			     assets across works, so src isn't guaranteed unique.
+			     aria-hidden as a group for the same reason as the mark
+			     above — a screen reader has no use for ~20 alt texts
+			     flickering past at 4/sec. -->
 			<div class="frame-layer" aria-hidden="true">
 				{#each frames as frame, i (i)}
 					<img
 						class="frame"
-						class:is-active={i === activeIndex}
+						class:is-active={logoRevealed && i === activeIndex}
 						src={frame.src}
 						srcset={frame.srcset}
 						sizes="60vw"
@@ -194,7 +207,7 @@
 		{/if}
 	</div>
 
-	<p class="tagline" lang="en" bind:this={taglineEl}>
+	<p class="tagline" class:is-visible={logoRevealed} lang="en" bind:this={taglineEl}>
 		Our Digital Archive will be launching in September.
 	</p>
 </main>
@@ -296,6 +309,16 @@
 		color: var(--color-text);
 		text-align: center;
 		letter-spacing: 0;
+		/* Hidden until the logo's typewriter finishes (.is-visible is
+		   toggled by the same logoRevealed flag) — fades in just as
+		   typeText() clears the static text and starts re-typing it, so
+		   what actually fades into view is the cursor, immediately
+		   followed by the characters. */
+		opacity: 0;
+		transition: opacity 0.4s var(--ease-default);
+	}
+	.Teaser .tagline.is-visible {
+		opacity: 1;
 	}
 
 	.Teaser .tagline :global(.type-cursor) {
