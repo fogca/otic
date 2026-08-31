@@ -5,7 +5,7 @@
 	import { goto, afterNavigate } from '$app/navigation';
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
-	import LogoWordmark from '$lib/components/LogoWordmark.svelte';
+	import Logo from '$lib/components/Logo.svelte';
 
 	const realPath = $derived(page.url.pathname);
 
@@ -98,29 +98,72 @@
 	});
 
 	// ── Header visibility settings (adjust freely) ──
-	const HIDE_DISTANCE = 500; // px — scroll distance from resume point that triggers hide
-	const SCROLL_END_DELAY = 150; // ms — debounce to detect scroll-stop
+	const HIDE_DISTANCE = 500; // px — PC only: scroll distance from resume point that triggers hide
+	const SCROLL_END_DELAY = 150; // ms — PC only: debounce to detect scroll-stop
+	const DIRECTION_THRESHOLD = 8; // px — SP only: travel in one direction before it counts
+
+	// The SP/PC split matters here because "hidden" means different things at
+	// the two breakpoints: on PC the whole header clears the screen
+	// (translateY -100%), on SP it rises a flat 50px so the nav pill stays
+	// and only the logo tucks away (see the media block in the style below).
+	const SP_QUERY = '(max-width: 1023px)';
+	let isSP = $state(false);
 
 	let headerShown = $state(false);
 
 	// Sync Header visibility to intro.completed:
 	// false → hide (slides up via translateY -100%)
 	// true → show (slides down — existing silk animation)
+	//
+	// On SP every page except the Top one opens with the nav pill alone: the
+	// logo starts tucked and waits for a scroll back up. Re-runs on
+	// navigation, so each route arrives in its own starting state.
 	$effect(() => {
-		headerShown = intro.completed;
+		if (!intro.completed) {
+			headerShown = false;
+			return;
+		}
+		headerShown = !(isSP && realPath !== '/');
 	});
 
 	onMount(() => {
 		if (!browser) return;
 
+		const mql = window.matchMedia(SP_QUERY);
+		isSP = mql.matches;
+		const onBreakpoint = (e: MediaQueryListEvent) => {
+			isSP = e.matches;
+		};
+		mql.addEventListener('change', onBreakpoint);
+
 		let isScrolling = false;
-		let scrollAnchor = 0; // scrollY when scrolling resumed (reference for distance)
+		let scrollAnchor = 0; // scrollY when scrolling resumed (PC distance reference)
 		let lastScrollY = window.scrollY; // previous position, to detect direction
+		let direction = 0; // -1 up, 1 down — SP re-anchors whenever this flips
+		let directionAnchor = window.scrollY;
 		let scrollEndTimer: ReturnType<typeof setTimeout> | null = null;
 
 		function onScroll() {
 			const currentY = window.scrollY;
-			const scrollingUp = currentY < lastScrollY;
+			const delta = currentY - lastScrollY;
+			if (delta === 0) return;
+			const scrollingUp = delta < 0;
+
+			if (isSP) {
+				// SP: the logo is shown by scrolling back up and by nothing
+				// else — not by starting to scroll, not by stopping. The
+				// threshold keeps a few px of jitter from flipping it.
+				const dir = scrollingUp ? -1 : 1;
+				if (dir !== direction) {
+					direction = dir;
+					directionAnchor = lastScrollY;
+				}
+				lastScrollY = currentY;
+				if (Math.abs(currentY - directionAnchor) < DIRECTION_THRESHOLD) return;
+				headerShown = scrollingUp;
+				return;
+			}
+
 			lastScrollY = currentY;
 
 			// Scroll resume (idle → scrolling): re-anchor and show
@@ -151,6 +194,7 @@
 
 		return () => {
 			window.removeEventListener('scroll', onScroll);
+			mql.removeEventListener('change', onBreakpoint);
 			if (scrollEndTimer) clearTimeout(scrollEndTimer);
 		};
 	});
@@ -237,8 +281,8 @@
 
 	<div class="head-end">
 		<!-- Top-right wordmark, shown at every breakpoint. -->
-		<a href="/" class="logo logo--wordmark" aria-label="Home">
-			<LogoWordmark />
+		<a href="/" class="logo" aria-label="Home">
+			<Logo />
 		</a>
 	</div>
 </header>
@@ -416,23 +460,6 @@
 		height: auto;
 	}
 
-	/* Short wordmark: sized by cap height, not by width. The drawn mark is
-	   ~15:1, so filling the header's width gave it a comfortable height for
-	   free; "VIII Inc." is ~4.5:1 and would come out about three times
-	   taller under the same rule. */
-	.Header .logo--wordmark {
-		width: auto;
-	}
-	.Header .logo--wordmark :global(svg) {
-		width: auto;
-		/* 20px cap height (the component's box is 88/76.6 of its cap), with
-		   a guard so the mark can never grow wider than the space it has:
-		   9.861 is its aspect ratio, so dividing the available width by it
-		   gives the height at which it exactly fills that width. The guard
-		   only bites on very narrow viewports. */
-		height: min(23px, calc((100vw - 2 * var(--padding)) / 9.861));
-	}
-
 	/* SP: logo stacked above the nav row (was side-by-side) — order still
 	   flips visual position without touching DOM order (nav stays first
 	   for tab/reading order). Logo runs full-width within the Header's own
@@ -467,13 +494,6 @@
 
 		.Header .logo {
 			width: 100%;
-		}
-
-		.Header .logo--wordmark {
-			width: auto;
-		}
-		.Header .logo--wordmark :global(svg) {
-			height: min(26.4px, calc((100vw - 2 * var(--padding)) / 9.861));
 		}
 
 		/* Segmented pill (see ArchivesTitleBar.svelte's .view-switch — same

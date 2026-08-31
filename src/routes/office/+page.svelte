@@ -131,7 +131,7 @@
 	<section class="panel panel--hero">
 		<div class="hero-inner">
 			<p class="hero-statement" lang="en">
-				<span class="hero-mark">©</span>STUDIO VOLCANO<br />
+				<span class="hero-mark">©</span>Office / TAKUMIISOBE.com<br />
 				The Intersection of Culture, Philosophy and Creation.
 			</p>
 		</div>
