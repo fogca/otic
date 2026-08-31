@@ -425,7 +425,7 @@
 	}
 	.Header .logo--wordmark :global(svg) {
 		width: auto;
-		height: 20.3px;   /* 20px cap height */
+		height: 23.5px;   /* 20px cap height */
 	}
 
 	/* SP: logo stacked above the nav row (was side-by-side) — order still
@@ -468,7 +468,7 @@
 			width: auto;
 		}
 		.Header .logo--wordmark :global(svg) {
-			height: 23.4px;   /* 23px cap height */
+			height: 27px;   /* 23px cap height */
 		}
 
 		/* Segmented pill (see ArchivesTitleBar.svelte's .view-switch — same

@@ -3,13 +3,19 @@
      component so the Footer keeps the original mark and this can be dropped
      by reverting one import in Header.svelte.
 
-     The viewBox is the text's own measured ink box at font-size 100 —
-     advance width 744.1, ascender top 77.9 (measured in-browser with the
-     live font). Cap height is 76.6 at the same size, so the rendered
-     heights in Header.svelte are cap-height targets scaled by 77.9/76.6;
-     that keeps the cap height constant no matter which string is set here. -->
+     viewBox: advance width 744.1, baseline at y=77.9 (the ascender top is
+     y=0), and the box runs to 90 so there is 12.1 units of room below the
+     baseline. That room is not optional — the round letters overshoot the
+     baseline, and a box that stopped at 77.9 sheared the bottoms off every
+     o/S/c/a. It also leaves space for a true descender if the string ever
+     changes. Canvas measureText reports the overshoot as only 0.7 units
+     here, which is wrong for this font — do not tighten the box to it.
+
+     Cap height is 76.6 units, so the rendered heights in Header.svelte are
+     cap-height targets scaled by 90/76.6; the cap height stays constant no
+     matter what text is set here. -->
 <svg
-	viewBox="0 0 744.1 77.9"
+	viewBox="0 0 744.1 90"
 	fill="none"
 	xmlns="http://www.w3.org/2000/svg"
 	role="img"
