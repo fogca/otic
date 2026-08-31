@@ -145,7 +145,7 @@
 		/* flex:none, not the default shrink:1 — .mark-layer is a flex
 		   container, and a flex item's explicit width is only a starting
 		   point the algorithm is free to shrink from. Without this, the
-		   85vh/50vw widths below get silently squeezed down to whatever
+		   85vh/90vw widths below get silently squeezed down to whatever
 		   fits .mark-layer's own box (its viewport-width box, well under
 		   85vh) instead of actually rendering at that size — confirmed via
 		   getBoundingClientRect before this fix: 390px wide (== 100vw)
@@ -230,7 +230,7 @@
 
 	@media (min-width: 1024px) {
 		.Teaser .logo {
-			width: 50vw;
+			width: 90vw;
 		}
 
 		.Teaser .frame {
