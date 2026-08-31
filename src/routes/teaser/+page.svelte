@@ -9,22 +9,33 @@
 
 	type Frame = { src: string; srcset: string; alt: string };
 
-	// One frame per work — its main_visual image only. Works whose
-	// main_visual is a video (or has none at all) are skipped: this is a
-	// still-image flip cycle, and a video doesn't suit a quarter-second turn anyway.
-	const frames: Frame[] = data.works
-		.map((w) => {
-			const img = w.main_visual?.pj_images;
-			if (!img?.url) return null;
-			// Quality 85, not the site-wide default 72 — frames render large
-			// (up to 60vw/60vh), where compression artifacts read clearly.
-			return {
-				src: imgOpt(img.url, 1400, 85),
-				srcset: imgSrcset(img.url, [700, 1000, 1400, 2000], 85),
-				alt: w.title
-			} satisfies Frame;
-		})
-		.filter((f): f is Frame => f !== null);
+	const toFrame = (url: string | undefined, alt: string): Frame | null => {
+		if (!url) return null;
+		// Quality 85, not the site-wide default 72 — frames render large
+		// (up to 60vw/60vh), where compression artifacts read clearly.
+		return {
+			src: imgOpt(url, 1400, 85),
+			srcset: imgSrcset(url, [700, 1000, 1400, 2000], 85),
+			alt
+		};
+	};
+
+	// Up to two frames per work — main_visual and repeat's first entry
+	// (repeat[0]) — images only. A work whose main_visual/repeat[0] is a
+	// video, or absent, simply contributes no frame for that slot: this is
+	// a still-image flip cycle, and a video doesn't suit a quarter-second
+	// turn anyway.
+	//
+	// Two passes, not one frame right after the other per work: lap 1 is
+	// every work's main_visual, lap 2 every work's repeat[0], so a full
+	// round of the catalogue completes before any work's second image comes
+	// up — showing a work's two visuals back to back would read as "this
+	// project again" rather than fresh variety (same reasoning the old
+	// multi-lap version of this page used).
+	const frames: Frame[] = [
+		...data.works.map((w) => toFrame(w.main_visual?.pj_images?.url, w.title)),
+		...data.works.map((w) => toFrame(w.repeat?.[0]?.pj_images?.url, w.title))
+	].filter((f): f is Frame => f !== null);
 
 	// Straight cut, no crossfade — every frame is already in the DOM (see
 	// markup below), so a "switch" only ever toggles which one is opaque;
@@ -68,7 +79,7 @@
 			     index, not src: microCMS reuses some assets across works, so
 			     src isn't guaranteed unique. aria-hidden as a group for the
 			     same reason as the mark above — a screen reader has no use
-			     for ~16 alt texts flickering past at 4/sec. -->
+			     for ~20 alt texts flickering past at 4/sec. -->
 			<div class="frame-layer" aria-hidden="true">
 				{#each frames as frame, i (i)}
 					<img
