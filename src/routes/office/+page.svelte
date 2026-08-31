@@ -125,6 +125,18 @@
 
 <main class="OfficePage">
 
+	<!-- ─── Panel 0: opening statement. A screen of its own with nothing in
+	     it but the mark and the statement, centred both ways — the page
+	     opens on this, then About. ─── -->
+	<section class="panel panel--hero">
+		<div class="hero-inner">
+			<p class="hero-statement" lang="en">
+				©Studio Volcano<br />
+				The intersection of culture, philosophy and creation.
+			</p>
+		</div>
+	</section>
+
 	<!-- ─── Panel 1: Office — the page's own logo now lives in the fixed
 	     corner-logo (see +layout.svelte), which starts oversized and shrinks
 	     to its normal size the instant the user scrolls. Structure is now
@@ -410,19 +422,41 @@
 	   Last panel — its bottom padding would stack on top of the Footer's
 	   own margin-top. Both are higher specificity than .panel-inner, so
 	   they hold at both breakpoints without a copy in the PC block. */
-	/* The About panel owns the first screen on its own: it fills whatever
-	   height is left below .OfficePage's own 120px top padding, and its
-	   content is pushed to the bottom of that box, so the page opens on
-	   open space with the About block settled 40px above the fold and the
-	   next section entirely out of view.
+	/* Opening statement — a screen to itself, content centred both ways.
+	   The 120px is .OfficePage's own top padding, which sits above this
+	   section: subtracting it makes the section end exactly on the fold.
 
 	   svh (the viewport with the browser chrome fully shown) rather than
 	   dvh: dvh would re-measure as iOS Safari's toolbar collapses, shifting
 	   the block mid-scroll. svh can leave a little extra room once the
-	   toolbar hides, which is the harmless direction to be wrong in. */
-	.panel--intro {
+	   toolbar hides, which is the harmless direction to be wrong in. Same
+	   reasoning applies to .panel--intro below. */
+	.panel--hero {
 		min-height: calc(100vh - 120px);
 		min-height: calc(100svh - 120px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding-inline: var(--padding);
+	}
+
+	/* Beats base.css's p:lang(en) preset (0,1,1) on weight, which would
+	   otherwise pin this to the 350 body weight. */
+	.OfficePage .hero-statement {
+		margin: 0;
+		text-align: center;
+		font-weight: var(--fw-medium);
+		font-variation-settings: 'wght' var(--fw-medium);
+	}
+
+	/* About is a screen of its own too, with its content pushed to the
+	   bottom of the box so the section opens on open space and the block
+	   settles 40px above its lower edge. Full 100svh here rather than the
+	   hero's minus-120px: the page's top padding sits above the hero, not
+	   above this. */
+	.panel--intro {
+		min-height: 100vh;
+		min-height: 100svh;
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-end;
