@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import Logo from '$lib/components/Logo.svelte';
 	import { typeText } from '$lib/actions/typeText';
@@ -33,15 +34,17 @@
 	// project again" rather than fresh variety (same reasoning the old
 	// multi-lap version of this page used).
 	//
-	// One deliberate exception: Ondo Sake's repeat[3] is pulled in as a
-	// third lap of its own. Not a general "3rd repeat entry for every
-	// work" rule (most works' repeat[3] hasn't been vetted for this cycle)
-	// — just this one requested addition.
+	// Two deliberate exceptions, each pulled in as its own extra lap: Ondo
+	// Sake's repeat[3] and MILES 158's repeat[4]. Not a general "Nth repeat
+	// entry for every work" rule (most works' later repeat entries haven't
+	// been vetted for this cycle) — just these two requested additions.
 	const ondo = data.works.find((w) => w.title === 'Ondo Sake');
+	const miles158 = data.works.find((w) => w.title === 'MILES 158');
 	const frames: Frame[] = [
 		...data.works.map((w) => toFrame(w.main_visual?.pj_images?.url, w.title)),
 		...data.works.map((w) => toFrame(w.repeat?.[0]?.pj_images?.url, w.title)),
-		toFrame(ondo?.repeat?.[3]?.pj_images?.url, 'Ondo Sake')
+		toFrame(ondo?.repeat?.[3]?.pj_images?.url, 'Ondo Sake'),
+		toFrame(miles158?.repeat?.[4]?.pj_images?.url, 'MILES 158')
 	].filter((f): f is Frame => f !== null);
 
 	// Straight cut, no crossfade — every frame is already in the DOM (see
@@ -51,8 +54,85 @@
 	const FRAME_INTERVAL = 250; // ms
 	let activeIndex = $state(0);
 
+	// Intro sequence: the logo masks in first; only once that finishes do
+	// the frame cycle and the tagline's typewriter start ("そこから" per
+	// the brief — sequential, not simultaneous with the logo).
+	let logoEl = $state<HTMLDivElement | null>(null);
+	let taglineEl = $state<HTMLParagraphElement | null>(null);
+	let logoRevealed = $state(false);
+
+	onMount(() => {
+		if (!browser) return;
+
+		const prefersReducedMotion = window.matchMedia(
+			'(prefers-reduced-motion: reduce)'
+		).matches;
+		if (prefersReducedMotion) {
+			logoRevealed = true;
+			return;
+		}
+
+		let cancelled = false;
+		import('gsap').then(async ({ gsap }) => {
+			if (cancelled) return;
+			// Same defensive wait Loader.svelte's own GSAP reveal uses:
+			// tick() alone isn't reliably enough for bind:this + a real
+			// paint to have settled before a tween starts (confirmed live
+			// there as a genuine race, not a theoretical one — see that
+			// file's comment on this exact wait).
+			await tick();
+			if (cancelled) return;
+			await new Promise((resolve) =>
+				requestAnimationFrame(() => requestAnimationFrame(resolve))
+			);
+			if (cancelled || !logoEl) return;
+
+			// Typewriter reveal, glyph by glyph — each letterform in the
+			// wordmark SVG is its own <path> (22 of them for "Office /
+			// TAKUMIISOBE.com", one per visible character). Sorted by each
+			// path's own getBBox().x, NOT DOM order: the paths are not
+			// authored left-to-right in the source (indices 17-21 sit out
+			// of visual sequence — likely later additions), so trusting
+			// source order would pop letters in out of reading order and
+			// break the "typing" illusion. getBBox() reads the SVG's own
+			// un-rotated coordinate space, so this sorts correctly by
+			// reading order even on SP, where the wordmark as a whole is
+			// then rotated 90° by the CSS below — the glyphs still type in
+			// text order, just painted sideways.
+			//
+			// The wordmark's own position never moves — no translate here,
+			// same centred placement as the old mask-wipe version, just
+			// individual letters fading in instead of the whole mark
+			// wiping in as one block.
+			const glyphs = [...logoEl.querySelectorAll('path')].sort(
+				(a, b) => a.getBBox().x - b.getBBox().x
+			);
+			if (glyphs.length === 0) {
+				logoRevealed = true;
+				return;
+			}
+
+			gsap.set(glyphs, { opacity: 0 });
+			gsap.to(glyphs, {
+				opacity: 1,
+				duration: 0.15,
+				ease: 'power2.out',
+				// Matches typeText.ts's own default charInterval (45ms) —
+				// the logo and the tagline "type" at the same rhythm.
+				stagger: 0.045,
+				onComplete: () => {
+					logoRevealed = true;
+				}
+			});
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
 	$effect(() => {
-		if (!browser || frames.length < 2) return;
+		if (!browser || !logoRevealed || frames.length < 2) return;
 		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
 		const iv = setInterval(() => {
@@ -60,6 +140,15 @@
 		}, FRAME_INTERVAL);
 
 		return () => clearInterval(iv);
+	});
+
+	// typeText is a plain function, not exclusively a use:-directive action
+	// — called directly here (instead of declared via use:typeText on the
+	// element) so its start can be gated on logoRevealed rather than firing
+	// on mount.
+	$effect(() => {
+		if (!browser || !logoRevealed || !taglineEl) return;
+		typeText(taglineEl, {});
 	});
 </script>
 
@@ -74,7 +163,7 @@
 		     alongside it (see .frame-layer's z-index below). Hidden from AT:
 		     purely visual, the tagline carries the page's actual content. -->
 		<div class="mark-layer" aria-hidden="true">
-			<div class="logo">
+			<div class="logo" bind:this={logoEl}>
 				<Logo />
 			</div>
 		</div>
@@ -105,7 +194,7 @@
 		{/if}
 	</div>
 
-	<p class="tagline" lang="en" use:typeText>
+	<p class="tagline" lang="en" bind:this={taglineEl}>
 		Our Digital Archive will be launching in September.
 	</p>
 </main>
@@ -121,14 +210,17 @@
 		background: var(--color-bg);
 		/* Belt-and-braces on top of base.css's global html/body
 		   overflow-x:hidden: the SP logo's un-rotated box (see below) lays
-		   out at up to 85vh WIDE before the rotate transform is applied
+		   out WIDE (currently 80vh) before the rotate transform is applied
 		   (transforms affect paint, not layout), so the box itself is far
 		   wider than the viewport pre-rotation. */
 		overflow: hidden;
 	}
 
-	/* Fills whatever height .tagline's own flex space leaves — the mark and
-	   the frame cycle both centre themselves inside this box. */
+	/* On PC, fills whatever height .tagline's own flex space leaves. On SP
+	   .tagline is pulled out of flow entirely (see the max-width:1023px
+	   block), so this fills the Teaser column's full height there — the
+	   mark and the frame cycle both centre themselves inside this box
+	   either way. */
 	.Teaser .stage {
 		position: relative;
 		flex: 1 1 auto;
@@ -152,12 +244,11 @@
 		/* flex:none, not the default shrink:1 — .mark-layer is a flex
 		   container, and a flex item's explicit width is only a starting
 		   point the algorithm is free to shrink from. Without this, the
-		   85vh/90vw widths below get silently squeezed down to whatever
-		   fits .mark-layer's own box (its viewport-width box, well under
-		   85vh) instead of actually rendering at that size — confirmed via
+		   vh/vw widths below get silently squeezed down to whatever fits
+		   .mark-layer's own box (its viewport-width box, well under either)
+		   instead of actually rendering at that size — confirmed via
 		   getBoundingClientRect before this fix: 390px wide (== 100vw)
-		   instead of the intended 759.6px (90vh at 844px tall, the size
-		   tried before 85vh — same fix, same bug, either width). */
+		   instead of the intended size. */
 		flex: none;
 		color: var(--color-text);
 	}
@@ -221,17 +312,34 @@
 		/* Rotate the wordmark on its own centre — a rotate leaves the
 		   centre point fixed, so this stays centred inside .mark-layer's
 		   flex box without any extra offset math. Sizing the UN-rotated box
-		   to 85vh wide is deliberate: after the 90° turn that width becomes
+		   to 80vh wide is deliberate: after the 90° turn that width becomes
 		   the mark's on-screen HEIGHT, so it reads as a slender wordmark
-		   spanning 85% of the viewport top-to-bottom. */
+		   spanning 80% of the viewport top-to-bottom. */
 		.Teaser .logo {
-			width: 85vh;
+			width: 80vh;
 			transform: rotate(90deg);
 		}
 
 		.Teaser .frame {
-			max-width: 80vw;
-			max-height: 70vh;
+			max-width: 90vw;
+			max-height: 65vh;
+		}
+
+		/* Pinned to the bottom edge, out of .stage's flex space — .stage
+		   (flex:1 1 auto) now fills the Teaser column's full height, since
+		   this no longer reserves its own row. Painting order needs no
+		   explicit z-index: both this and .stage are positioned elements
+		   (non-static) and direct children of .Teaser, so at equal z-index
+		   (auto) the later one in DOM order — this — paints on top of
+		   .stage's entire stacking context (mark + frames included). */
+		.Teaser .tagline {
+			position: absolute;
+			top: auto;
+			bottom: 0;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 100%;
+			padding-bottom: 20px;
 		}
 	}
 
