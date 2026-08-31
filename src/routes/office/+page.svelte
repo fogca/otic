@@ -143,13 +143,6 @@
 	     intro (unnumbered hero) → About Office, no eyebrow numbering. ─── -->
 	<section class="panel panel--intro">
 		<div class="panel-inner">
-			<header class="panel-hd">
-				<h2 class="pt" lang="en">About</h2>
-			</header>
-			<p class="intro-headline" lang="en">
-				The intersection of culture, philosophy and creation.
-			</p>
-
 			<div class="panel-content">
 				<!-- Opening statement only. The tail — the four-office list
 				     and the passage on how their direction connects — was cut
@@ -165,13 +158,6 @@
 				<p class="intro-text intro-text--ja" lang="ja">
 					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学にデザインを掛け合わせることで生まれる、わたしたちを人間たらしめる——身体性と情緒に語りかけるクリエイションを追求します。
 				</p>
-				<a
-					class="intro-instagram"
-					href="https://www.instagram.com/takumiisobe_/"
-					target="_blank"
-					rel="noopener noreferrer"
-					lang="en">@takumiisobe_</a
-				>
 			</div>
 		</div>
 	</section>
@@ -494,32 +480,9 @@
 	}
 
 	/* ── Panel 1: Office ── */
-	/* Display statement — the "headline" tier; size alone carries it, in
-	   sentence case (uppercase was tried and dropped). Weight stays at the
-	   default --fw-base like the rest of the page (an explicit lighter 325
-	   was also tried and dropped). Stays English always (matches the site's
-	   convention that headings/titles don't toggle, only body copy does —
-	   see the lang-toggle rules above). hyphens:none keeps long words whole
-	   rather than breaking them at display size. */
-	.intro-headline {
-		font-size: var(--fs-h0);
-		text-align: left;
-		line-height: var(--lh-h0);
-		letter-spacing: 0;
-		hyphens: none;
-		max-width: 780px;
-		/* Narrowed from 22px — panel-inner's own 10px gap makes up the rest
-		   of the (now smaller) space to .panel-content below. */
-		margin: 0 0 8px;
-	}
-	/* Small label above the display statement, matching Contact's own
-	   .title tier (--fs-h4). Was display:none while the label was parked;
-	   it's back now, so the .pt heading inside needs the same size rather
-	   than whatever the shared .pt rule gives it. */
-	.panel--intro .panel-hd .pt {
-		font-size: var(--fs-h4);
-		font-weight: var(--fw-medium);
-	}
+	/* This panel carries body copy only — the "About" label and the display
+	   statement above it were removed, so it has no .panel-hd and no
+	   headline tier of its own. */
 	/* Body paragraph — secondary to the headline now, so no explicit
 	   font-size override: falls back to base.css's standard p:lang(en|ja)
 	   presets, same convention .service-en/.ethos-en etc already use
@@ -537,23 +500,6 @@
 		max-width: 100%;
 		margin: 0;
 	}
-	/* Language-agnostic (just a handle/link), so it sits outside the
-	   intro-text/--ja toggle pair — always visible regardless of
-	   [data-lang]. Explicit margin-top rather than relying on
-	   .panel-content's own 10px gap, which still applies on top of it. */
-	.intro-instagram {
-		display: inline-block;
-		margin-top: 20px;
-		font-size: var(--fs-h6);
-		color: var(--color-text);
-		text-decoration: underline;
-		text-underline-offset: 3px;
-		transition: opacity var(--duration-fast) var(--ease-default);
-	}
-	.intro-instagram:hover {
-		opacity: 0.6;
-	}
-
 	/* ── Services: single-column stack, generous vertical rhythm between
 	   entries (Takram reference) — not a card grid; each service reads as
 	   its own full-width statement: image, then a bold heading matching the
@@ -735,10 +681,6 @@
 			max-width: 85%;
 		}
 
-		.intro-headline {
-			max-width: 100%;
-		}
-
 		/* Full-bleed break-out of .panel-inner's own padding (var(--padding)
 		   each side) — classic 100vw/negative-margin technique. Safe from
 		   the extra 1px+ of horizontal overflow it can introduce because
@@ -804,29 +746,15 @@
 			grid-column: 1 / -1;
 		}
 
-		/* Display statement — spans both columns (it's the panel's hero, not
-		   a column of body copy) and finally renders at display size on PC:
-		   the .OfficePage p:lang() rule below used to out-specify this one,
-		   silently rendering it at ~14px body size. */
-		.intro-headline {
-			grid-column: 1 / -1;
-			font-size: clamp(44px, 4vw, 68px);
-			line-height: 1.06;
-			letter-spacing: 0;
-			text-align: left;
-			max-width: 20ch;
-			margin: 0 0 64px;
-		}
-
 		/* Body copy reads too small at base.css's global PC p:lang() size on
 		   this page — bump 2px over the site-wide token here rather than
 		   raising the token itself (would affect every page).
 
 		   Listed explicitly rather than as a blanket `p:lang()`: that form
-		   (0,2,1) out-specified every type rule on this page that's a single
-		   class — .intro-headline and .panel-lead both silently collapsed to
-		   ~14px on PC, flattening the whole hierarchy. An allowlist can't
-		   swallow a display tier by accident. */
+		   (0,2,1) out-specifies every type rule on this page that's a single
+		   class — .panel-lead silently collapsed to ~14px on PC, flattening
+		   the hierarchy. An allowlist can't swallow a display tier by
+		   accident. */
 		.OfficePage .intro-text:lang(en),
 		.OfficePage .service-en:lang(en),
 		.OfficePage .ethos-en:lang(en),
