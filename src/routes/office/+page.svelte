@@ -132,7 +132,7 @@
 		<div class="hero-inner">
 			<p class="hero-statement" lang="en">
 				©Studio Volcano<br />
-				The intersection of culture, philosophy and creation.
+				The Intersection of Culture, Philosophy and Creation.
 			</p>
 		</div>
 	</section>
