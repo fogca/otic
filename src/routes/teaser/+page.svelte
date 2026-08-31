@@ -32,9 +32,16 @@
 	// up — showing a work's two visuals back to back would read as "this
 	// project again" rather than fresh variety (same reasoning the old
 	// multi-lap version of this page used).
+	//
+	// One deliberate exception: Ondo Sake's repeat[3] is pulled in as a
+	// third lap of its own. Not a general "3rd repeat entry for every
+	// work" rule (most works' repeat[3] hasn't been vetted for this cycle)
+	// — just this one requested addition.
+	const ondo = data.works.find((w) => w.title === 'Ondo Sake');
 	const frames: Frame[] = [
 		...data.works.map((w) => toFrame(w.main_visual?.pj_images?.url, w.title)),
-		...data.works.map((w) => toFrame(w.repeat?.[0]?.pj_images?.url, w.title))
+		...data.works.map((w) => toFrame(w.repeat?.[0]?.pj_images?.url, w.title)),
+		toFrame(ondo?.repeat?.[3]?.pj_images?.url, 'Ondo Sake')
 	].filter((f): f is Frame => f !== null);
 
 	// Straight cut, no crossfade — every frame is already in the DOM (see
