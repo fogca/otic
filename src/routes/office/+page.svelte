@@ -417,11 +417,6 @@
 		gap: 10px;
 	}
 
-	/* First panel — the page's own padding-top already sets the clearance
-	   below the header, so the panel's own top padding just doubled it.
-	   Last panel — its bottom padding would stack on top of the Footer's
-	   own margin-top. Both are higher specificity than .panel-inner, so
-	   they hold at both breakpoints without a copy in the PC block. */
 	/* Opening statement — a screen to itself, content centred both ways.
 	   The 120px is .OfficePage's own top padding, which sits above this
 	   section: subtracting it makes the section end exactly on the fold.
@@ -429,8 +424,7 @@
 	   svh (the viewport with the browser chrome fully shown) rather than
 	   dvh: dvh would re-measure as iOS Safari's toolbar collapses, shifting
 	   the block mid-scroll. svh can leave a little extra room once the
-	   toolbar hides, which is the harmless direction to be wrong in. Same
-	   reasoning applies to .panel--intro below. */
+	   toolbar hides, which is the harmless direction to be wrong in. */
 	.panel--hero {
 		min-height: calc(100vh - 120px);
 		min-height: calc(100svh - 120px);
@@ -450,22 +444,9 @@
 		font-variation-settings: 'wght' var(--fw-medium);
 	}
 
-	/* About is a screen of its own too, with its content pushed to the
-	   bottom of the box so the section opens on open space and the block
-	   settles 40px above its lower edge. Full 100svh here rather than the
-	   hero's minus-120px: the page's top padding sits above the hero, not
-	   above this. */
-	.panel--intro {
-		min-height: 100vh;
-		min-height: 100svh;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-	}
-	.panel--intro .panel-inner {
-		padding-top: 0;
-		padding-bottom: 40px;
-	}
+	/* Last panel — its bottom padding would stack on top of the Footer's
+	   own margin-top. Higher specificity than .panel-inner, so it holds at
+	   both breakpoints without a copy in the PC block. */
 	.panel--ethos .panel-inner {
 		padding-bottom: 0;
 	}
