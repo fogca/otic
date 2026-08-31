@@ -125,9 +125,9 @@
 
 <main class="OfficePage">
 
-	<!-- ─── Panel 0: opening statement. A screen of its own with nothing in
-	     it but the mark and the statement, centred both ways — the page
-	     opens on this, then About. ─── -->
+	<!-- ─── Panel 0: the opening screen. The statement holds the centre; the
+	     body copy that used to be its own panel below now sits at the foot
+	     of this same screen. ─── -->
 	<section class="panel panel--hero">
 		<div class="hero-inner">
 			<p class="hero-statement" lang="en">
@@ -135,30 +135,21 @@
 				The Intersection of Culture, Philosophy and Creation.
 			</p>
 		</div>
-	</section>
-
-	<!-- ─── Panel 1: Office — the page's own logo now lives in the fixed
-	     corner-logo (see +layout.svelte), which starts oversized and shrinks
-	     to its normal size the instant the user scrolls. Structure is now
-	     intro (unnumbered hero) → About Office, no eyebrow numbering. ─── -->
-	<section class="panel panel--intro">
-		<div class="panel-inner">
-			<div class="panel-content">
-				<!-- Opening statement only. The tail — the four-office list
-				     and the passage on how their direction connects — was cut
-				     to keep this compact; the Services panel below already
-				     carries the four offices in full. -->
-				<p class="intro-text" lang="en">
-					Office / TAKUMI ISOBE is a creative office based in Tokyo working across
-					visual identity and design engineering — experience, brand, product, type,
-					furniture, and digital communication. By blending culture and philosophy
-					with design, we pursue creation that speaks to what makes us human — our
-					physicality, our emotion.
-				</p>
-				<p class="intro-text intro-text--ja" lang="ja">
-					東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学にデザインを掛け合わせることで生まれる、わたしたちを人間たらしめる——身体性と情緒に語りかけるクリエイションを追求します。
-				</p>
-			</div>
+		<div class="hero-body">
+			<!-- Opening statement only. The tail — the four-office list and
+			     the passage on how their direction connects — was cut to keep
+			     this compact; the Services panel below already carries the
+			     four offices in full. -->
+			<p class="intro-text" lang="en">
+				Office / TAKUMI ISOBE is a creative office based in Tokyo working across
+				visual identity and design engineering — experience, brand, product, type,
+				furniture, and digital communication. By blending culture and philosophy
+				with design, we pursue creation that speaks to what makes us human — our
+				physicality, our emotion.
+			</p>
+			<p class="intro-text intro-text--ja" lang="ja">
+				東京を拠点に、ビジュアルアイデンティティとデザインエンジニアリング——体験、ブランド、プロダクト、タイプ、家具、デジタルコミュニケーションを横断するクリエイティブオフィスです。文化と哲学にデザインを掛け合わせることで生まれる、わたしたちを人間たらしめる——身体性と情緒に語りかけるクリエイションを追求します。
+			</p>
 		</div>
 	</section>
 
@@ -412,12 +403,25 @@
 	   the block mid-scroll. svh can leave a little extra room once the
 	   toolbar hides, which is the harmless direction to be wrong in. */
 	.panel--hero {
+		position: relative;
 		min-height: calc(100vh - 120px);
 		min-height: calc(100svh - 120px);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding-inline: var(--padding);
+	}
+
+	/* Taken out of flow deliberately: the statement's centring is measured
+	   against the whole section, and leaving this in flow would push it up
+	   by half the copy's height. left/right are set to --padding rather than
+	   0 because an absolute child is placed against the padding box, which
+	   would otherwise put it under the section's own inset. */
+	.hero-body {
+		position: absolute;
+		left: var(--padding);
+		right: var(--padding);
+		bottom: 40px;
 	}
 
 	/* Pulls the statement up by .OfficePage's own top padding, so it centres
@@ -751,13 +755,6 @@
 		}
 		.panel-content {
 			grid-column: 2;
-		}
-
-		/* Intro reads as a stack, not a rail: the "About" label takes its own
-		   row, then the display statement and the body copy each span the
-		   full width beneath it, all flush left on the same axis. */
-		.panel--intro .panel-content {
-			grid-column: 1 / -1;
 		}
 
 		/* Body copy reads too small at base.css's global PC p:lang() size on
