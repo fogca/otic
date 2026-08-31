@@ -410,8 +410,26 @@
 	   Last panel — its bottom padding would stack on top of the Footer's
 	   own margin-top. Both are higher specificity than .panel-inner, so
 	   they hold at both breakpoints without a copy in the PC block. */
+	/* The About panel owns the first screen on its own: it fills whatever
+	   height is left below .OfficePage's own 120px top padding, and its
+	   content is pushed to the bottom of that box, so the page opens on
+	   open space with the About block settled 40px above the fold and the
+	   next section entirely out of view.
+
+	   svh (the viewport with the browser chrome fully shown) rather than
+	   dvh: dvh would re-measure as iOS Safari's toolbar collapses, shifting
+	   the block mid-scroll. svh can leave a little extra room once the
+	   toolbar hides, which is the harmless direction to be wrong in. */
+	.panel--intro {
+		min-height: calc(100vh - 120px);
+		min-height: calc(100svh - 120px);
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
 	.panel--intro .panel-inner {
 		padding-top: 0;
+		padding-bottom: 40px;
 	}
 	.panel--ethos .panel-inner {
 		padding-bottom: 0;

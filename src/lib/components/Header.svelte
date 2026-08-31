@@ -5,7 +5,7 @@
 	import { goto, afterNavigate } from '$app/navigation';
 	import { intro } from '$lib/state/intro.svelte';
 	import { lang } from '$lib/state/lang.svelte';
-	import LogoVIII from '$lib/components/LogoVIII.svelte';
+	import LogoWordmark from '$lib/components/LogoWordmark.svelte';
 
 	const realPath = $derived(page.url.pathname);
 
@@ -238,7 +238,7 @@
 	<div class="head-end">
 		<!-- Top-right wordmark, shown at every breakpoint. -->
 		<a href="/" class="logo logo--wordmark" aria-label="Home">
-			<LogoVIII />
+			<LogoWordmark />
 		</a>
 	</div>
 </header>
@@ -425,7 +425,7 @@
 	}
 	.Header .logo--wordmark :global(svg) {
 		width: auto;
-		height: 20px;
+		height: 20.3px;   /* 20px cap height */
 	}
 
 	/* SP: logo stacked above the nav row (was side-by-side) — order still
@@ -468,7 +468,7 @@
 			width: auto;
 		}
 		.Header .logo--wordmark :global(svg) {
-			height: 23px;
+			height: 23.4px;   /* 23px cap height */
 		}
 
 		/* Segmented pill (see ArchivesTitleBar.svelte's .view-switch — same
