@@ -180,11 +180,13 @@
 		padding: 24px var(--padding);
 		font-family: var(--font-en);
 		font-size: var(--fs-h6);
-		font-weight: var(--fw-base);
+		/* --fw-medium resolves to exactly 400 in the current scale. */
+		font-weight: var(--fw-medium);
+		font-variation-settings: 'wght' var(--fw-medium);
 		line-height: var(--lh-en);
 		color: var(--color-text);
 		text-align: center;
-		letter-spacing: 0.02em;
+		letter-spacing: 0;
 	}
 
 	.Teaser .tagline :global(.type-cursor) {
