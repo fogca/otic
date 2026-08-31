@@ -131,7 +131,7 @@
 	<section class="panel panel--hero">
 		<div class="hero-inner">
 			<p class="hero-statement" lang="en">
-				©Studio Volcano<br />
+				<span class="hero-mark">©</span>STUDIO VOLCANO<br />
 				The Intersection of Culture, Philosophy and Creation.
 			</p>
 		</div>
@@ -427,13 +427,21 @@
 	}
 
 	/* Beats base.css's p:lang(en) preset (0,1,1) on weight, which would
-	   otherwise pin this to the 350 body weight. */
+	   otherwise pin this to the 350 body weight. Weights here are literals
+	   rather than tokens: this is a one-off display setting, and the 950 on
+	   the mark has no token to name it. */
 	.OfficePage .hero-statement {
 		margin: 0;
 		text-align: center;
 		font-size: 24px;
-		font-weight: var(--fw-medium);
-		font-variation-settings: 'wght' var(--fw-medium);
+		line-height: 1.2;
+		font-weight: 500;
+		font-variation-settings: 'wght' 500;
+	}
+	/* The © alone, at the top of the axis. */
+	.OfficePage .hero-statement .hero-mark {
+		font-weight: 950;
+		font-variation-settings: 'wght' 950;
 	}
 
 	/* Last panel — its bottom padding would stack on top of the Footer's

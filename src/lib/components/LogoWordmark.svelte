@@ -3,32 +3,34 @@
      component so the Footer keeps the original mark and this can be dropped
      by reverting one import in Header.svelte.
 
-     viewBox: advance width 744.1, baseline at y=77.9 (the ascender top is
-     y=0), and the box runs to 90 so there is 12.1 units of room below the
-     baseline. That room is not optional — the round letters overshoot the
-     baseline, and a box that stopped at 77.9 sheared the bottoms off every
-     o/S/c/a. It also leaves space for a true descender if the string ever
-     changes. Canvas measureText reports the overshoot as only 0.7 units
-     here, which is wrong for this font — do not tighten the box to it.
+     viewBox, all at font-size 100 with 'wght' 500 applied: advance width
+     867.79 (measured with getComputedTextLength on this very element, which
+     accounts for the variable weight — canvas measureText cannot), cap
+     height 76.6, baseline at y=82. That leaves 5.4 units of clearance above
+     the caps and 6 below the baseline, both well past the round letters'
+     overshoot. The clearance is not optional: an earlier box that ended
+     exactly on the baseline sheared the bottoms off every O/S/C.
 
-     Cap height is 76.6 units, so the rendered heights in Header.svelte are
-     cap-height targets scaled by 90/76.6; the cap height stays constant no
-     matter what text is set here. -->
+     Header.svelte sizes this by cap height, scaling its target by 88/76.6
+     (box height over cap height), so the cap height stays put regardless of
+     what string or weight is set here. Its aspect ratio, 867.79/88 = 9.861,
+     is the divisor in the overflow guard there. Re-measure all four numbers
+     if the text or the weight changes. -->
 <svg
-	viewBox="0 0 744.1 90"
+	viewBox="0 0 867.79 88"
 	fill="none"
 	xmlns="http://www.w3.org/2000/svg"
 	role="img"
 	aria-label="Studio Volcano"
 >
-	<text x="0" y="77.9" font-size="100" fill="currentColor">Studio Volcano</text>
+	<text x="0" y="82" font-size="100" fill="currentColor">STUDIO VOLCANO</text>
 </svg>
 
 <style>
 	text {
 		font-family: var(--font-en);
-		font-weight: var(--fw-base);
-		font-variation-settings: 'wght' var(--fw-base);
+		font-weight: 500;
+		font-variation-settings: 'wght' 500;
 		letter-spacing: 0;
 	}
 </style>

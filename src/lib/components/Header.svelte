@@ -425,7 +425,12 @@
 	}
 	.Header .logo--wordmark :global(svg) {
 		width: auto;
-		height: 23.5px;   /* 20px cap height */
+		/* 20px cap height (the component's box is 88/76.6 of its cap), with
+		   a guard so the mark can never grow wider than the space it has:
+		   9.861 is its aspect ratio, so dividing the available width by it
+		   gives the height at which it exactly fills that width. The guard
+		   only bites on very narrow viewports. */
+		height: min(23px, calc((100vw - 2 * var(--padding)) / 9.861));
 	}
 
 	/* SP: logo stacked above the nav row (was side-by-side) — order still
@@ -468,7 +473,7 @@
 			width: auto;
 		}
 		.Header .logo--wordmark :global(svg) {
-			height: 27px;   /* 23px cap height */
+			height: min(26.4px, calc((100vw - 2 * var(--padding)) / 9.861));
 		}
 
 		/* Segmented pill (see ArchivesTitleBar.svelte's .view-switch — same
