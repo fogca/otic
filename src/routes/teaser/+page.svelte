@@ -7,148 +7,39 @@
 
 	let { data }: { data: PageData } = $props();
 
-	type Frame = { src: string; srcset: string; alt: string; isVideo: boolean };
-	type VisualSource = { pj_images?: { url: string }; pj_videos?: string } | undefined;
+	type Frame = { src: string; srcset: string; alt: string };
 
-	// Three full laps rather than each work's frames back to back: lap 1 is
-	// every work's main visual, lap 2 every work's 2nd frame (repeat[0] with
-	// a visual), lap 3 every work's 3rd (the next repeat entry with a visual
-	// after that) — so a "round" of the whole catalogue completes before any
-	// work repeats. Visuals reused from elsewhere on the site, no new asset
-	// work needed — and video-eligible (not image-only), so a work whose
-	// main/repeat slot is video-only is no longer skipped.
-	const frames: Frame[] = (() => {
-		const list: Frame[] = [];
-		const push = (source: VisualSource, alt: string) => {
-			if (!source) return;
-			const video = source.pj_videos?.trim();
-			if (video) {
-				list.push({ src: video, srcset: '', alt, isVideo: true });
-				return;
-			}
-			const img = source.pj_images;
-			if (!img?.url) return;
-			// Quality 85, not the site-wide default 72 — these render large
-			// (PC: 900px wide; SP: up to 70vw/60vh) instead of sitting as a
-			// thumbnail, so compression artifacts read much more.
-			list.push({
-				src: imgOpt(img.url, 1200, 85),
-				srcset: imgSrcset(img.url, [600, 900, 1200, 1800], 85),
-				alt,
-				isVideo: false
-			});
-		};
-		const visualRepeats = (w: (typeof data.works)[number]) =>
-			w.repeat?.filter((r) => r.pj_images || r.pj_videos) ?? [];
-		for (const w of data.works) {
-			push(w.main_visual, w.title);
-		}
-		for (const w of data.works) {
-			push(visualRepeats(w)[0], w.title);
-		}
-		for (const w of data.works) {
-			push(visualRepeats(w)[1], w.title);
-		}
-		return list;
-	})();
+	// One frame per work — its main_visual image only. Works whose
+	// main_visual is a video (or has none at all) are skipped: this is a
+	// still-image flip cycle, and a video doesn't suit a 100ms turn anyway.
+	const frames: Frame[] = data.works
+		.map((w) => {
+			const img = w.main_visual?.pj_images;
+			if (!img?.url) return null;
+			// Quality 85, not the site-wide default 72 — frames render large
+			// (up to 60vw/60vh), where compression artifacts read clearly.
+			return {
+				src: imgOpt(img.url, 1400, 85),
+				srcset: imgSrcset(img.url, [700, 1000, 1400, 2000], 85),
+				alt: w.title
+			} satisfies Frame;
+		})
+		.filter((f): f is Frame => f !== null);
 
-	let frameEls = $state<(HTMLImageElement | HTMLVideoElement)[]>([]);
-
-	// PC: stacked-frame clip-path wipe (unchanged). CSS hides the whole
-	// .slider on SP, but this loop still runs regardless of viewport — it
-	// costs nothing while hidden, and running it unconditionally means
-	// there's no JS viewport branching (and so no risk of the SSR/client
-	// mismatch that caused an earlier bug — see the SP effect below, which
-	// keeps this same "always run, let CSS decide what's visible" shape).
-	$effect(() => {
-		if (!browser) return;
-		const prefersReducedMotion = window.matchMedia(
-			'(prefers-reduced-motion: reduce)'
-		).matches;
-		if (prefersReducedMotion || frames.length < 2) return;
-
-		let cancelled = false;
-		let timer: ReturnType<typeof setTimeout> | undefined;
-		let index = 0;
-		let z = 1;
-
-		import('gsap').then(({ gsap }) => {
-			if (cancelled) return;
-			const els = frameEls.filter(Boolean);
-			if (els.length < 2) return;
-
-			// Same reveal duration + stagger as the home Loader
-			// (Loader.svelte's REVEAL_DURATION/REVEAL_STAGGER) so this loop
-			// shares its exact speed feel: each next frame starts while the
-			// current one is still mid-wipe, not after it finishes — that
-			// overlap is what makes the Loader read as fast.
-			const DURATION = 1.2; // s wipe duration
-			const STAGGER = 0.35; // s of overlap with the next frame
-			const INTERVAL = (DURATION - STAGGER) * 1000; // ms between frame starts
-
-			// Bottom-up clip-path wipe — same visual language as the home
-			// Loader's own frame reveal, just looping instead of running once.
-			gsap.set(els, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1, zIndex: 0 });
-			gsap.set(els[0], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: z });
-			if (els[0] instanceof HTMLVideoElement) els[0].play().catch(() => {});
-
-			// Each new frame gets a strictly higher z-index, so it always
-			// wipes in over everything before it — no separate step to
-			// demote older frames needed once overlap is in play. Video
-			// frames aren't given the `autoplay` attribute: every stacked
-			// frame is simultaneously in the DOM here (unlike a scrolling
-			// gallery), so autoplaying all of them at once would contend for
-			// the same limited hardware decoder pool that bit the archive
-			// gallery (see lazyVideo.ts) — only the current turn's video
-			// plays, explicitly, and the one it replaces is paused.
-			const advance = () => {
-				if (cancelled) return;
-				const prevEl = els[index];
-				index = (index + 1) % els.length;
-				const nextEl = els[index];
-				z++;
-				if (prevEl instanceof HTMLVideoElement) prevEl.pause();
-				gsap.set(nextEl, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1, zIndex: z });
-				if (nextEl instanceof HTMLVideoElement) {
-					nextEl.currentTime = 0;
-					nextEl.play().catch(() => {});
-				}
-				gsap.to(nextEl, {
-					clipPath: 'inset(0% 0% 0% 0%)',
-					scale: 1.05,
-					duration: DURATION,
-					ease: 'power3.out'
-				});
-				timer = setTimeout(advance, INTERVAL);
-			};
-
-			timer = setTimeout(advance, INTERVAL);
-		});
-
-		return () => {
-			cancelled = true;
-			if (timer) clearTimeout(timer);
-		};
-	});
-
-	// SP: no wipe — each frame shows at its own natural size (capped by
-	// max-width/max-height in CSS, so it varies frame to frame) instead of
-	// being cover-cropped into a fixed box, so there's nothing for GSAP to
-	// animate. Just swap which one is current — faster than the PC loop's
-	// 850ms since a plain swap has no wipe motion to read, only the cut.
-	let spIndex = $state(0);
+	// Straight cut, no crossfade — every frame is already in the DOM (see
+	// markup below), so a "switch" only ever toggles which one is opaque;
+	// none of them wait on a network fetch mid-cycle. That's what keeps a
+	// 100ms interval readable as a flip rather than a stutter.
+	const FRAME_INTERVAL = 100; // ms
+	let activeIndex = $state(0);
 
 	$effect(() => {
-		if (!browser) return;
-		const prefersReducedMotion = window.matchMedia(
-			'(prefers-reduced-motion: reduce)'
-		).matches;
-		if (prefersReducedMotion || frames.length < 2) return;
+		if (!browser || frames.length < 2) return;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-		const INTERVAL = 400;
 		const iv = setInterval(() => {
-			spIndex = (spIndex + 1) % frames.length;
-		}, INTERVAL);
+			activeIndex = (activeIndex + 1) % frames.length;
+		}, FRAME_INTERVAL);
 
 		return () => clearInterval(iv);
 	});
@@ -160,75 +51,41 @@
 </svelte:head>
 
 <main class="Teaser">
-	<div class="logo" aria-label="OTIC">
-		<Logo />
-	</div>
+	<div class="stage">
+		<!-- Decorative background mark — the flip cycle plays over it, not
+		     alongside it (see .frame-layer's z-index below). Hidden from AT:
+		     purely visual, the tagline carries the page's actual content. -->
+		<div class="mark-layer" aria-hidden="true">
+			<div class="logo">
+				<Logo />
+			</div>
+		</div>
 
-	{#if frames.length > 0}
-		<div class="slider">
-			<!-- Keyed by index, not frame.src: the CMS reuses some assets
-			     across works (e.g. the same file turned up as both mksk's
-			     2nd frame and 158's 3rd), so src isn't guaranteed unique —
-			     index is safe since `frames` is a static array that never
-			     reorders after mount. -->
-			{#each frames as frame, i (i)}
-				{#if frame.isVideo}
-					<!-- preload="auto" unconditionally, unlike the image branch's
-					     i===0 split: a video only gets ~850ms between its turn
-					     starting and the next frame's turn pausing it again, so
-					     it needs to already be buffered by the time that turn
-					     arrives — metadata-only fetches from cdn.takumiisobe.com
-					     don't finish in time and the video never visibly plays. -->
-					<video
-						class="frame"
-						bind:this={frameEls[i]}
-						src={frame.src}
-						loop
-						muted
-						playsinline
-						preload="auto"
-						aria-label={frame.alt}
-					></video>
-				{:else}
+		{#if frames.length > 0}
+			<!-- All frames render simultaneously (opacity-toggled, not
+			     src-swapped) so none of them have to fetch mid-cycle — at
+			     100ms a network wait would show as a blank flash. Keyed by
+			     index, not src: microCMS reuses some assets across works, so
+			     src isn't guaranteed unique. aria-hidden as a group for the
+			     same reason as the mark above — a screen reader has no use
+			     for ~16 alt texts flickering past at 10/sec. -->
+			<div class="frame-layer" aria-hidden="true">
+				{#each frames as frame, i (i)}
 					<img
 						class="frame"
-						bind:this={frameEls[i]}
+						class:is-active={i === activeIndex}
 						src={frame.src}
 						srcset={frame.srcset}
-						sizes="900px"
+						sizes="60vw"
 						alt={frame.alt}
-						loading={i === 0 ? 'eager' : 'lazy'}
+						loading="eager"
 						fetchpriority={i === 0 ? 'high' : undefined}
 						decoding="async"
 					/>
-				{/if}
-			{/each}
-		</div>
-
-		{#if frames[spIndex].isVideo}
-			<video
-				class="frame-simple"
-				src={frames[spIndex].src}
-				autoplay
-				loop
-				muted
-				playsinline
-				preload="auto"
-				aria-label={frames[spIndex].alt}
-			></video>
-		{:else}
-			<img
-				class="frame-simple"
-				src={frames[spIndex].src}
-				srcset={frames[spIndex].srcset}
-				sizes="70vw"
-				alt={frames[spIndex].alt}
-				loading="eager"
-				fetchpriority="high"
-				decoding="async"
-			/>
+				{/each}
+			</div>
 		{/if}
-	{/if}
+	</div>
 
 	<p class="tagline" lang="en" use:typeText>
 		Our office's digital archive will be launching in August.
@@ -237,78 +94,89 @@
 
 <style>
 	.Teaser {
+		position: relative;
 		width: 100%;
 		min-height: 100vh;
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
+		background: var(--color-bg);
+		/* Belt-and-braces on top of base.css's global html/body
+		   overflow-x:hidden: the SP logo's un-rotated box (see below) lays
+		   out at up to 90vh WIDE before the rotate transform is applied
+		   (transforms affect paint, not layout), so the box itself is far
+		   wider than the viewport pre-rotation. */
+		overflow: hidden;
+	}
+
+	/* Fills whatever height .tagline's own flex space leaves — the mark and
+	   the frame cycle both centre themselves inside this box. */
+	.Teaser .stage {
+		position: relative;
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	.Teaser .mark-layer,
+	.Teaser .frame-layer {
+		position: absolute;
+		inset: 0;
+	}
+
+	.Teaser .mark-layer {
+		z-index: 0;
+		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--color-bg);
-		padding: 48px var(--padding);
 	}
 
 	.Teaser .logo {
-		position: relative;
-		z-index: 1;
+		/* flex:none, not the default shrink:1 — .mark-layer is a flex
+		   container, and a flex item's explicit width is only a starting
+		   point the algorithm is free to shrink from. Without this, the
+		   90vh/50vw widths below get silently squeezed down to whatever
+		   fits .mark-layer's own box (its viewport-width box, well under
+		   90vh) instead of actually rendering at that size — confirmed via
+		   getBoundingClientRect before this fix: 390px wide (== 100vw)
+		   instead of the intended 759.6px (90vh at 844px tall). */
 		flex: none;
-		width: calc(100vw - var(--padding) * 2);
 		color: var(--color-text);
 	}
-
 	.Teaser .logo :global(svg) {
 		display: block;
 		width: 100%;
 		height: auto;
 	}
 
-	/* PC only (hidden on SP below): a contained, cover-cropped 900px/16:9
-	   box with the stacked-frame wipe. */
-	.Teaser .slider {
-		position: relative;
-		z-index: 0;
-		width: 100%;
-		max-width: 900px;
-		aspect-ratio: 16 / 9;
-		margin-top: 40px;
-		overflow: hidden;
-		background: var(--color-bg-gray);
-	}
-
-	.Teaser .frame {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
-		z-index: 0;
-		will-change: clip-path, transform;
-	}
-	/* No-JS / pre-hydration baseline: first frame on top, fully visible;
-	   the rest sit behind it at the same position (JS takes over from here). */
-	.Teaser .frame:first-child {
+	.Teaser .frame-layer {
 		z-index: 1;
 	}
 
-	/* SP only (hidden on PC below): no fixed box, no crop — each frame
-	   renders at its own natural aspect ratio, just capped so nothing
-	   overflows. Size varies frame to frame by design. No margin: SP pins
-	   tagline/logo to the two edges (below) and lets this sit in whatever
-	   space that leaves between them. */
-	.Teaser .frame-simple {
+	/* top/left/translate centring, not the mark-layer's flex trick: each
+	   frame's rendered size varies (max-width/max-height cap its own
+	   intrinsic aspect ratio, not a fixed box — that variance is the point,
+	   see the max-width/max-height rules below), and every frame has to
+	   share the exact same centre point regardless of its own size. */
+	.Teaser .frame {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 		display: block;
-		max-width: 70vw;
-		max-height: 60vh;
 		width: auto;
 		height: auto;
+		opacity: 0;
+		/* Hard cut — no transition. A crossfade would read as a dissolve;
+		   the brief was a flip-book. */
+		transition: none;
+	}
+	.Teaser .frame.is-active {
+		opacity: 1;
 	}
 
 	.Teaser .tagline {
-		position: relative;
-		z-index: 1;
 		flex: none;
-		margin-top: 32px;
+		padding: 24px var(--padding);
 		font-family: var(--font-en);
 		font-size: var(--fs-h6);
 		font-weight: var(--fw-base);
@@ -328,39 +196,32 @@
 		}
 	}
 
-	/* Exactly one of the two frame elements is ever in the DOM's visible
-	   flow — .slider (PC wipe) or .frame-simple (SP plain swap) — both JS
-	   loops above always run; only visibility is viewport-gated, so there's
-	   no JS breakpoint branching to get wrong on hydration. */
 	@media (max-width: 1023px) {
-		.Teaser .slider {
-			display: none;
-		}
-
-		/* PC centers logo/frame/tagline as one group (justify-content:center
-		   on the shared rule above) — SP instead pins tagline to the top edge
-		   and logo to the bottom (order flips their visual position without
-		   touching DOM order), so neither moves as frame-simple's own size
-		   varies frame to frame. space-between, not position:absolute/fixed,
-		   is what keeps them pinned. */
-		.Teaser {
-			justify-content: space-between;
-		}
-
-		.Teaser .tagline {
-			order: -1;
-			margin-top: 0;
-			font-size: var(--fs-h5);
-		}
-
+		/* Rotate the wordmark on its own centre — a rotate leaves the
+		   centre point fixed, so this stays centred inside .mark-layer's
+		   flex box without any extra offset math. Sizing the UN-rotated box
+		   to 90vh wide is deliberate: after the 90° turn that width becomes
+		   the mark's on-screen HEIGHT, so it reads as a slender wordmark
+		   spanning 90% of the viewport top-to-bottom. */
 		.Teaser .logo {
-			order: 1;
+			width: 90vh;
+			transform: rotate(90deg);
+		}
+
+		.Teaser .frame {
+			max-width: 80vw;
+			max-height: 70vh;
 		}
 	}
 
 	@media (min-width: 1024px) {
-		.Teaser .frame-simple {
-			display: none;
+		.Teaser .logo {
+			width: 50vw;
+		}
+
+		.Teaser .frame {
+			max-width: 60vw;
+			max-height: 60vh;
 		}
 	}
 </style>
