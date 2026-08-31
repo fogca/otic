@@ -87,11 +87,11 @@
 			);
 			if (cancelled || !logoEl) return;
 
-			// Typewriter reveal, matching typeText.ts's own mechanics as
-			// closely as an SVG wordmark allows — a real typewriter, not an
-			// animated fade: each character SNAPS into existence (no
-			// opacity tween, no ease) and a blinking cursor tracks the
-			// insertion point, exactly like typeText.ts's own trailing "|".
+			// Outline-draw reveal: each letterform traces its own outline
+			// (stroke-dashoffset animating a hairline stroke from hidden to
+			// fully drawn) and then fills in solid — a signature-style
+			// reveal rather than a typewriter cut. No cursor here (it doesn't
+			// fit this metaphor — nothing is "typed", each letter is drawn).
 			//
 			// Glyph order: each letterform is its own <path> (22 of them
 			// for "Office / TAKUMIISOBE.com", one per visible character).
@@ -143,44 +143,69 @@
 			const xPercentFor = (visibleCenterX: number) =>
 				((fullCenterX - visibleCenterX) / viewBox.width) * 100;
 
-			// The cursor is an SVG <rect>, not an HTML span like the
-			// tagline's — it has to live INSIDE svgEl to inherit the same
-			// translate/rotate the glyphs get, so it visually tracks them
-			// through both the recentring shift and SP's rotation. Same
-			// .type-cursor class/blink keyframe as the tagline (see CSS).
-			const cursor = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-			cursor.setAttribute('class', 'type-cursor');
-			cursor.setAttribute('y', '0');
-			cursor.setAttribute('width', String(viewBox.width * 0.006));
-			cursor.setAttribute('height', String(viewBox.height));
-			cursor.setAttribute('fill', 'currentColor');
-			cursor.setAttribute('x', String(boxes[0].x));
-			svgEl.appendChild(cursor);
-
-			gsap.set(glyphs, { opacity: 0 });
-			// Starting position: cursor blinking where "O" is about to
-			// land, already centred — matches typeText.ts showing its
-			// cursor immediately, before the first character types.
+			// Each glyph starts as a hairline outline (fill hidden, stroke
+			// drawn via the classic dasharray==dashoffset==totalLength
+			// trick — one dash spanning the whole path, offset all the way
+			// back so nothing shows, then animated to 0). Works fine
+			// through glyphs with counters (O, e, ...): a <path>'s `d` can
+			// hold multiple M...Z subpaths, getTotalLength() sums them, and
+			// the dash-offset parametrisation treats the whole thing as one
+			// continuous distance — the outer contour draws fully, then the
+			// inner counter's own subpath starts drawing in turn, with no
+			// connecting line rendered between the two (SVG never strokes
+			// across an M). Standard behaviour for multi-contour letterform
+			// draw-ins, not a bug to work around.
+			const STROKE_WIDTH = viewBox.height * 0.035;
+			const lengths = glyphs.map((g) => g.getTotalLength());
+			// Function-based values (GSAP evaluates these per-target, given
+			// its index) — strokeDasharray/dashoffset must start at EACH
+			// glyph's own total length, which differs letter to letter.
+			gsap.set(glyphs, {
+				fillOpacity: 0,
+				stroke: 'currentColor',
+				strokeWidth: STROKE_WIDTH,
+				strokeLinecap: 'round',
+				strokeLinejoin: 'round',
+				strokeDasharray: (i: number) => lengths[i],
+				strokeDashoffset: (i: number) => lengths[i]
+			});
+			// Starting position: the SVG sits where "O" alone would be
+			// centred, since that's the first thing about to be drawn —
+			// same "re-centre for whatever's visible so far" logic the
+			// per-glyph loop below continues.
 			gsap.set(svgEl, { xPercent: xPercentFor(centerXOf(1)) });
 
 			const tl = gsap.timeline({
 				onComplete: () => {
 					gsap.set(svgEl, { xPercent: 0 });
-					cursor.remove();
 					logoRevealed = true;
 				}
 			});
 
-			const CURSOR_GAP = viewBox.width * 0.01;
+			const DRAW_DURATION = 0.35; // s, per glyph's outline
+			const FILL_DURATION = 0.25; // s, solid fill-in once drawn
+			const STAGGER = 0.08; // s between each glyph's draw starting
 			const START_DELAY = 0.2; // matches typeText.ts's own default startDelay
 
 			glyphs.forEach((glyph, i) => {
-				// 45ms matches typeText.ts's own default charInterval, so
-				// the logo and the tagline "type" at the same rhythm.
-				const at = START_DELAY + i * 0.045;
-				tl.set(glyph, { opacity: 1 }, at)
-					.set(svgEl, { xPercent: xPercentFor(centerXOf(i + 1)) }, at)
-					.set(cursor, { attr: { x: boxes[i].x + boxes[i].width + CURSOR_GAP } }, at);
+				const at = START_DELAY + i * STAGGER;
+				// Absolute positions throughout, not chained `>` shorthand:
+				// draws overlap (STAGGER < DRAW_DURATION, so glyph i+1
+				// starts before glyph i's draw finishes), which means by
+				// the time glyph i's fill tween is being added, the
+				// timeline's overall latest end-time is often a PREVIOUS
+				// glyph's still-running fill, not this glyph's own draw —
+				// `>` resolves against that global latest end, not
+				// per-glyph, so a relative position here would anchor to
+				// the wrong tween.
+				const fillAt = at + DRAW_DURATION - FILL_DURATION * 0.5;
+				tl.to(glyph, { strokeDashoffset: 0, duration: DRAW_DURATION, ease: 'power1.inOut' }, at);
+				tl.to(glyph, { fillOpacity: 1, duration: FILL_DURATION, ease: 'power1.out' }, fillAt);
+				tl.to(
+					svgEl,
+					{ xPercent: xPercentFor(centerXOf(i + 1)), duration: STAGGER, ease: 'power2.out' },
+					at
+				);
 			});
 		});
 
