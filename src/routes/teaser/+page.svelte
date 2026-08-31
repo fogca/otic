@@ -87,23 +87,18 @@
 			);
 			if (cancelled || !logoEl) return;
 
-			// Typewriter reveal, glyph by glyph — each letterform in the
-			// wordmark SVG is its own <path> (22 of them for "Office /
-			// TAKUMIISOBE.com", one per visible character). Sorted by each
-			// path's own getBBox().x, NOT DOM order: the paths are not
-			// authored left-to-right in the source (indices 17-21 sit out
-			// of visual sequence — likely later additions), so trusting
-			// source order would pop letters in out of reading order and
-			// break the "typing" illusion. getBBox() reads the SVG's own
-			// un-rotated coordinate space, so this sorts correctly by
-			// reading order even on SP, where the wordmark as a whole is
-			// then rotated 90° by the CSS below — the glyphs still type in
-			// text order, just painted sideways.
-			//
-			// The wordmark's own position never moves — no translate here,
-			// same centred placement as the old mask-wipe version, just
-			// individual letters fading in instead of the whole mark
-			// wiping in as one block.
+			// Typewriter reveal, glyph by glyph, true left-to-right typing
+			// order — "O" first, then "f", then "f", etc. Each letterform
+			// in the wordmark SVG is its own <path> (22 of them for
+			// "Office / TAKUMIISOBE.com", one per visible character).
+			// Sorted by each path's own getBBox().x, NOT DOM order: the
+			// paths are not authored left-to-right in the source (indices
+			// 17-21 sit out of visual sequence — likely later additions),
+			// so trusting source order would pop letters in out of reading
+			// order and break the "typing" illusion. getBBox() reads the
+			// SVG's own un-rotated coordinate space, so this sorts
+			// correctly by reading order even on SP, where the wordmark as
+			// a whole is rotated 90° by the CSS below.
 			const glyphs = [...logoEl.querySelectorAll('path')].sort(
 				(a, b) => a.getBBox().x - b.getBBox().x
 			);
@@ -112,26 +107,54 @@
 				return;
 			}
 
+			// "O" itself has to sit at the composition's centre while it's
+			// the only thing on screen, and each further letter has to
+			// re-centre the growing word as it's typed — so unlike a
+			// static wordmark, the SVG's own horizontal position has to
+			// move over the course of the reveal, settling back to 0 (its
+			// original, already-centred CSS position) only once every
+			// glyph is in. xPercent (a fraction of the SVG's own rendered
+			// width) rather than a px offset, so this is scale-independent
+			// between the SP (80vh-wide box) and PC (90vw) sizes below —
+			// and because it's a percentage of the target's OWN box, it
+			// composes correctly with SP's static rotate(90deg) on the
+			// parent .logo: GSAP applies its own translate before that
+			// rotate, so a horizontal recentre here reads as a vertical
+			// one once rotated, the same way the reveal ORDER already
+			// does.
+			const svgEl = logoEl.querySelector('svg');
+			const viewBoxWidth = svgEl?.viewBox.baseVal.width ?? 300;
+			const boxes = glyphs.map((g) => g.getBBox());
+			const fullMinX = Math.min(...boxes.map((b) => b.x));
+			const fullMaxX = Math.max(...boxes.map((b) => b.x + b.width));
+			const fullCenterX = (fullMinX + fullMaxX) / 2;
+
 			gsap.set(glyphs, { opacity: 0 });
-			gsap.to(glyphs, {
-				opacity: 1,
-				duration: 0.15,
-				ease: 'power2.out',
-				stagger: {
-					// 45ms still matches typeText.ts's own default
-					// charInterval, just applied outward from the middle
-					// glyph in both directions at once (GSAP's built-in
-					// from:'center' distributes stagger by index distance
-					// from the array's centre) rather than strictly left to
-					// right — the array is still the x-sorted reading order
-					// from above, so "centre" here means the visual/textual
-					// centre of the wordmark, not just the middle DOM index.
-					each: 0.045,
-					from: 'center'
-				},
+			const tl = gsap.timeline({
 				onComplete: () => {
+					// Land exactly on 0 — floating-point drift across 22
+					// overlapping tweens on the same property should be
+					// negligible, but this guarantees the final resting
+					// position matches the static (untransformed) layout
+					// exactly, with no residual sub-pixel offset.
+					if (svgEl) gsap.set(svgEl, { xPercent: 0 });
 					logoRevealed = true;
 				}
+			});
+
+			glyphs.forEach((glyph, i) => {
+				// 45ms matches typeText.ts's own default charInterval, so
+				// the logo and the tagline "type" at the same rhythm.
+				const at = i * 0.045;
+				tl.to(glyph, { opacity: 1, duration: 0.15, ease: 'power2.out' }, at);
+
+				if (!svgEl) return;
+				const seen = boxes.slice(0, i + 1);
+				const minX = Math.min(...seen.map((b) => b.x));
+				const maxX = Math.max(...seen.map((b) => b.x + b.width));
+				const visibleCenterX = (minX + maxX) / 2;
+				const xPercent = ((fullCenterX - visibleCenterX) / viewBoxWidth) * 100;
+				tl.to(svgEl, { xPercent, duration: 0.15, ease: 'power2.out' }, at);
 			});
 		});
 
@@ -362,7 +385,11 @@
 			left: 50%;
 			transform: translateX(-50%);
 			width: 100%;
-			padding-bottom: 20px;
+			/* viewport-fit=cover (set site-wide in app.html) lets this box
+			   extend into iOS Safari's bottom safe area — without the
+			   env() term the text sits right under the floating tab bar,
+			   same fix as .corner-logo in +layout.svelte. */
+			padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
 		}
 	}
 
