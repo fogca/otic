@@ -87,18 +87,21 @@
 			);
 			if (cancelled || !logoEl) return;
 
-			// Typewriter reveal, glyph by glyph, true left-to-right typing
-			// order — "O" first, then "f", then "f", etc. Each letterform
-			// in the wordmark SVG is its own <path> (22 of them for
-			// "Office / TAKUMIISOBE.com", one per visible character).
+			// Typewriter reveal, matching typeText.ts's own mechanics as
+			// closely as an SVG wordmark allows — a real typewriter, not an
+			// animated fade: each character SNAPS into existence (no
+			// opacity tween, no ease) and a blinking cursor tracks the
+			// insertion point, exactly like typeText.ts's own trailing "|".
+			//
+			// Glyph order: each letterform is its own <path> (22 of them
+			// for "Office / TAKUMIISOBE.com", one per visible character).
 			// Sorted by each path's own getBBox().x, NOT DOM order: the
 			// paths are not authored left-to-right in the source (indices
 			// 17-21 sit out of visual sequence — likely later additions),
 			// so trusting source order would pop letters in out of reading
-			// order and break the "typing" illusion. getBBox() reads the
-			// SVG's own un-rotated coordinate space, so this sorts
-			// correctly by reading order even on SP, where the wordmark as
-			// a whole is rotated 90° by the CSS below.
+			// order. getBBox() reads the SVG's own un-rotated coordinate
+			// space, so this sorts correctly even on SP, where the
+			// wordmark as a whole is rotated 90° by the CSS below.
 			const glyphs = [...logoEl.querySelectorAll('path')].sort(
 				(a, b) => a.getBBox().x - b.getBBox().x
 			);
@@ -107,54 +110,77 @@
 				return;
 			}
 
-			// "O" itself has to sit at the composition's centre while it's
-			// the only thing on screen, and each further letter has to
-			// re-centre the growing word as it's typed — so unlike a
-			// static wordmark, the SVG's own horizontal position has to
-			// move over the course of the reveal, settling back to 0 (its
-			// original, already-centred CSS position) only once every
-			// glyph is in. xPercent (a fraction of the SVG's own rendered
-			// width) rather than a px offset, so this is scale-independent
-			// between the SP (80vh-wide box) and PC (90vw) sizes below —
-			// and because it's a percentage of the target's OWN box, it
-			// composes correctly with SP's static rotate(90deg) on the
-			// parent .logo: GSAP applies its own translate before that
-			// rotate, so a horizontal recentre here reads as a vertical
-			// one once rotated, the same way the reveal ORDER already
-			// does.
 			const svgEl = logoEl.querySelector('svg');
-			const viewBoxWidth = svgEl?.viewBox.baseVal.width ?? 300;
+			if (!svgEl) {
+				gsap.set(glyphs, { opacity: 1 });
+				logoRevealed = true;
+				return;
+			}
+
+			const viewBox = svgEl.viewBox.baseVal;
 			const boxes = glyphs.map((g) => g.getBBox());
 			const fullMinX = Math.min(...boxes.map((b) => b.x));
 			const fullMaxX = Math.max(...boxes.map((b) => b.x + b.width));
 			const fullCenterX = (fullMinX + fullMaxX) / 2;
 
+			// typeText.ts's textContent insertion re-centres the growing
+			// line for free (the tagline is text-align:center — adding a
+			// character reflows the whole line instantly, no animation).
+			// An SVG has no such reflow, so this computes the same thing by
+			// hand: the on-screen centre of whatever's been typed so far,
+			// expressed as %-of-the-SVG's-own-width so it's scale-
+			// independent between the SP/PC sizes below AND composes
+			// correctly with SP's static rotate(90deg) on the parent (GSAP
+			// applies its own translate before that rotate, so this
+			// horizontal shift reads as vertical once rotated — same
+			// reasoning as the reveal order itself).
+			const centerXOf = (n: number) => {
+				const seen = boxes.slice(0, n);
+				const minX = Math.min(...seen.map((b) => b.x));
+				const maxX = Math.max(...seen.map((b) => b.x + b.width));
+				return (minX + maxX) / 2;
+			};
+			const xPercentFor = (visibleCenterX: number) =>
+				((fullCenterX - visibleCenterX) / viewBox.width) * 100;
+
+			// The cursor is an SVG <rect>, not an HTML span like the
+			// tagline's — it has to live INSIDE svgEl to inherit the same
+			// translate/rotate the glyphs get, so it visually tracks them
+			// through both the recentring shift and SP's rotation. Same
+			// .type-cursor class/blink keyframe as the tagline (see CSS).
+			const cursor = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			cursor.setAttribute('class', 'type-cursor');
+			cursor.setAttribute('y', '0');
+			cursor.setAttribute('width', String(viewBox.width * 0.006));
+			cursor.setAttribute('height', String(viewBox.height));
+			cursor.setAttribute('fill', 'currentColor');
+			cursor.setAttribute('x', String(boxes[0].x));
+			svgEl.appendChild(cursor);
+
 			gsap.set(glyphs, { opacity: 0 });
+			// Starting position: cursor blinking where "O" is about to
+			// land, already centred — matches typeText.ts showing its
+			// cursor immediately, before the first character types.
+			gsap.set(svgEl, { xPercent: xPercentFor(centerXOf(1)) });
+
 			const tl = gsap.timeline({
 				onComplete: () => {
-					// Land exactly on 0 — floating-point drift across 22
-					// overlapping tweens on the same property should be
-					// negligible, but this guarantees the final resting
-					// position matches the static (untransformed) layout
-					// exactly, with no residual sub-pixel offset.
-					if (svgEl) gsap.set(svgEl, { xPercent: 0 });
+					gsap.set(svgEl, { xPercent: 0 });
+					cursor.remove();
 					logoRevealed = true;
 				}
 			});
 
+			const CURSOR_GAP = viewBox.width * 0.01;
+			const START_DELAY = 0.2; // matches typeText.ts's own default startDelay
+
 			glyphs.forEach((glyph, i) => {
 				// 45ms matches typeText.ts's own default charInterval, so
 				// the logo and the tagline "type" at the same rhythm.
-				const at = i * 0.045;
-				tl.to(glyph, { opacity: 1, duration: 0.15, ease: 'power2.out' }, at);
-
-				if (!svgEl) return;
-				const seen = boxes.slice(0, i + 1);
-				const minX = Math.min(...seen.map((b) => b.x));
-				const maxX = Math.max(...seen.map((b) => b.x + b.width));
-				const visibleCenterX = (minX + maxX) / 2;
-				const xPercent = ((fullCenterX - visibleCenterX) / viewBoxWidth) * 100;
-				tl.to(svgEl, { xPercent, duration: 0.15, ease: 'power2.out' }, at);
+				const at = START_DELAY + i * 0.045;
+				tl.set(glyph, { opacity: 1 }, at)
+					.set(svgEl, { xPercent: xPercentFor(centerXOf(i + 1)) }, at)
+					.set(cursor, { attr: { x: boxes[i].x + boxes[i].width + CURSOR_GAP } }, at);
 			});
 		});
 
@@ -344,7 +370,9 @@
 		opacity: 1;
 	}
 
-	.Teaser .tagline :global(.type-cursor) {
+	/* Not scoped to .tagline — the logo's own SVG cursor rect (added at
+	   runtime, see the script above) needs the same blink. */
+	.Teaser :global(.type-cursor) {
 		animation: type-blink 1s step-end infinite;
 	}
 
