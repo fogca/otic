@@ -87,21 +87,21 @@
 			);
 			if (cancelled || !logoEl) return;
 
-			// Outline-draw reveal: each letterform traces its own outline
-			// (stroke-dashoffset animating a hairline stroke from hidden to
-			// fully drawn) and then fills in solid — a signature-style
-			// reveal rather than a typewriter cut. No cursor here (it doesn't
-			// fit this metaphor — nothing is "typed", each letter is drawn).
+			// Clip-path rise, one glyph at a time: each letterform starts
+			// masked out below its own bottom edge and rises into view,
+			// staggered left to right — same bottom-up wipe technique as
+			// Loader.svelte's frame reveal (inset(100% 0% 0% 0%) -> inset
+			// (0% 0% 0% 0%)), just applied per-<path> instead of to one
+			// whole image. clip-path's default reference box on an SVG
+			// shape is its own fill-box (≈ getBBox()), so this masks each
+			// glyph against ITS OWN extent, not the whole wordmark's.
 			//
-			// Glyph order: each letterform is its own <path> (22 of them
-			// for "Office / TAKUMIISOBE.com", one per visible character).
-			// Sorted by each path's own getBBox().x, NOT DOM order: the
-			// paths are not authored left-to-right in the source (indices
-			// 17-21 sit out of visual sequence — likely later additions),
-			// so trusting source order would pop letters in out of reading
-			// order. getBBox() reads the SVG's own un-rotated coordinate
-			// space, so this sorts correctly even on SP, where the
-			// wordmark as a whole is rotated 90° by the CSS below.
+			// No JS is needed for SP's rotation: this whole thing runs in
+			// the glyphs' own un-rotated local space, and .logo's existing
+			// static rotate(90deg) (see the CSS below) applies on top of
+			// it — the same "bottom-up" clip direction that reads as
+			// vertical rise on PC reads as a sideways wipe once rotated,
+			// for free.
 			const glyphs = [...logoEl.querySelectorAll('path')].sort(
 				(a, b) => a.getBBox().x - b.getBBox().x
 			);
@@ -110,102 +110,20 @@
 				return;
 			}
 
-			const svgEl = logoEl.querySelector('svg');
-			if (!svgEl) {
-				gsap.set(glyphs, { opacity: 1 });
-				logoRevealed = true;
-				return;
-			}
-
-			const viewBox = svgEl.viewBox.baseVal;
-			const boxes = glyphs.map((g) => g.getBBox());
-			const fullMinX = Math.min(...boxes.map((b) => b.x));
-			const fullMaxX = Math.max(...boxes.map((b) => b.x + b.width));
-			const fullCenterX = (fullMinX + fullMaxX) / 2;
-
-			// typeText.ts's textContent insertion re-centres the growing
-			// line for free (the tagline is text-align:center — adding a
-			// character reflows the whole line instantly, no animation).
-			// An SVG has no such reflow, so this computes the same thing by
-			// hand: the on-screen centre of whatever's been typed so far,
-			// expressed as %-of-the-SVG's-own-width so it's scale-
-			// independent between the SP/PC sizes below AND composes
-			// correctly with SP's static rotate(90deg) on the parent (GSAP
-			// applies its own translate before that rotate, so this
-			// horizontal shift reads as vertical once rotated — same
-			// reasoning as the reveal order itself).
-			const centerXOf = (n: number) => {
-				const seen = boxes.slice(0, n);
-				const minX = Math.min(...seen.map((b) => b.x));
-				const maxX = Math.max(...seen.map((b) => b.x + b.width));
-				return (minX + maxX) / 2;
-			};
-			const xPercentFor = (visibleCenterX: number) =>
-				((fullCenterX - visibleCenterX) / viewBox.width) * 100;
-
-			// Each glyph starts as a hairline outline (fill hidden, stroke
-			// drawn via the classic dasharray==dashoffset==totalLength
-			// trick — one dash spanning the whole path, offset all the way
-			// back so nothing shows, then animated to 0). Works fine
-			// through glyphs with counters (O, e, ...): a <path>'s `d` can
-			// hold multiple M...Z subpaths, getTotalLength() sums them, and
-			// the dash-offset parametrisation treats the whole thing as one
-			// continuous distance — the outer contour draws fully, then the
-			// inner counter's own subpath starts drawing in turn, with no
-			// connecting line rendered between the two (SVG never strokes
-			// across an M). Standard behaviour for multi-contour letterform
-			// draw-ins, not a bug to work around.
-			const STROKE_WIDTH = viewBox.height * 0.035;
-			const lengths = glyphs.map((g) => g.getTotalLength());
-			// Function-based values (GSAP evaluates these per-target, given
-			// its index) — strokeDasharray/dashoffset must start at EACH
-			// glyph's own total length, which differs letter to letter.
-			gsap.set(glyphs, {
-				fillOpacity: 0,
-				stroke: 'currentColor',
-				strokeWidth: STROKE_WIDTH,
-				strokeLinecap: 'round',
-				strokeLinejoin: 'round',
-				strokeDasharray: (i: number) => lengths[i],
-				strokeDashoffset: (i: number) => lengths[i]
-			});
-			// Starting position: the SVG sits where "O" alone would be
-			// centred, since that's the first thing about to be drawn —
-			// same "re-centre for whatever's visible so far" logic the
-			// per-glyph loop below continues.
-			gsap.set(svgEl, { xPercent: xPercentFor(centerXOf(1)) });
-
+			gsap.set(glyphs, { clipPath: 'inset(100% 0% 0% 0%)' });
 			const tl = gsap.timeline({
 				onComplete: () => {
-					gsap.set(svgEl, { xPercent: 0 });
 					logoRevealed = true;
 				}
 			});
 
-			const DRAW_DURATION = 0.35; // s, per glyph's outline
-			const FILL_DURATION = 0.25; // s, solid fill-in once drawn
-			const STAGGER = 0.08; // s between each glyph's draw starting
-			const START_DELAY = 0.2; // matches typeText.ts's own default startDelay
-
-			glyphs.forEach((glyph, i) => {
-				const at = START_DELAY + i * STAGGER;
-				// Absolute positions throughout, not chained `>` shorthand:
-				// draws overlap (STAGGER < DRAW_DURATION, so glyph i+1
-				// starts before glyph i's draw finishes), which means by
-				// the time glyph i's fill tween is being added, the
-				// timeline's overall latest end-time is often a PREVIOUS
-				// glyph's still-running fill, not this glyph's own draw —
-				// `>` resolves against that global latest end, not
-				// per-glyph, so a relative position here would anchor to
-				// the wrong tween.
-				const fillAt = at + DRAW_DURATION - FILL_DURATION * 0.5;
-				tl.to(glyph, { strokeDashoffset: 0, duration: DRAW_DURATION, ease: 'power1.inOut' }, at);
-				tl.to(glyph, { fillOpacity: 1, duration: FILL_DURATION, ease: 'power1.out' }, fillAt);
-				tl.to(
-					svgEl,
-					{ xPercent: xPercentFor(centerXOf(i + 1)), duration: STAGGER, ease: 'power2.out' },
-					at
-				);
+			tl.to(glyphs, {
+				clipPath: 'inset(0% 0% 0% 0%)',
+				duration: 0.5,
+				ease: 'power3.out',
+				// 45ms matches typeText.ts's own default charInterval, so
+				// the logo and the tagline "type" at the same rhythm.
+				stagger: 0.045
 			});
 		});
 
