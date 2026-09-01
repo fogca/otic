@@ -88,21 +88,10 @@
 			);
 			if (cancelled || !logoEl) return;
 
-			// Clip-path rise, one glyph at a time: each letterform starts
-			// masked out below its own bottom edge and rises into view,
-			// staggered left to right — same bottom-up wipe technique as
-			// Loader.svelte's frame reveal (inset(100% 0% 0% 0%) -> inset
-			// (0% 0% 0% 0%)), just applied per-<path> instead of to one
-			// whole image. clip-path's default reference box on an SVG
-			// shape is its own fill-box (≈ getBBox()), so this masks each
-			// glyph against ITS OWN extent, not the whole wordmark's.
-			//
-			// No JS is needed for SP's rotation: this whole thing runs in
-			// the glyphs' own un-rotated local space, and .logo's existing
-			// static rotate(90deg) (see the CSS below) applies on top of
-			// it — the same "bottom-up" clip direction that reads as
-			// vertical rise on PC reads as a sideways wipe once rotated,
-			// for free.
+			// Fade in, one glyph at a time, staggered left to right. Order
+			// still matters even though the motion is now a plain fade —
+			// sorted by each path's own getBBox().x, not DOM order, so it
+			// reads left-to-right regardless of source authoring order.
 			const glyphs = [...logoEl.querySelectorAll('path')].sort(
 				(a, b) => a.getBBox().x - b.getBBox().x
 			);
@@ -111,7 +100,7 @@
 				return;
 			}
 
-			gsap.set(glyphs, { clipPath: 'inset(100% 0% 0% 0%)' });
+			gsap.set(glyphs, { opacity: 0 });
 			const tl = gsap.timeline({
 				onComplete: () => {
 					logoRevealed = true;
@@ -119,9 +108,9 @@
 			});
 
 			tl.to(glyphs, {
-				clipPath: 'inset(0% 0% 0% 0%)',
+				opacity: 1,
 				duration: 0.5,
-				ease: 'power3.out',
+				ease: 'power2.out',
 				// 45ms matches typeText.ts's own default charInterval, so
 				// the logo and the tagline "type" at the same rhythm.
 				stagger: 0.045
