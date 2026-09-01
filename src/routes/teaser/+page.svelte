@@ -88,32 +88,16 @@
 			);
 			if (cancelled || !logoEl) return;
 
-			// Fade in, one glyph at a time, staggered left to right. Order
-			// still matters even though the motion is now a plain fade —
-			// sorted by each path's own getBBox().x, not DOM order, so it
-			// reads left-to-right regardless of source authoring order.
-			const glyphs = [...logoEl.querySelectorAll('path')].sort(
-				(a, b) => a.getBBox().x - b.getBBox().x
-			);
-			if (glyphs.length === 0) {
-				logoRevealed = true;
-				return;
-			}
-
-			gsap.set(glyphs, { opacity: 0 });
-			const tl = gsap.timeline({
-				onComplete: () => {
-					logoRevealed = true;
-				}
-			});
-
-			tl.to(glyphs, {
+			// Plain fade-in, the whole wordmark as one block — no stagger,
+			// no per-glyph anything.
+			gsap.set(logoEl, { opacity: 0 });
+			gsap.to(logoEl, {
 				opacity: 1,
 				duration: 0.5,
 				ease: 'power2.out',
-				// 45ms matches typeText.ts's own default charInterval, so
-				// the logo and the tagline "type" at the same rhythm.
-				stagger: 0.045
+				onComplete: () => {
+					logoRevealed = true;
+				}
 			});
 		});
 
