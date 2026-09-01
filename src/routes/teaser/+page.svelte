@@ -60,6 +60,7 @@
 	let logoEl = $state<HTMLDivElement | null>(null);
 	let taglineEl = $state<HTMLParagraphElement | null>(null);
 	let logoRevealed = $state(false);
+	let taglineTyped = $state(false);
 
 	onMount(() => {
 		if (!browser) return;
@@ -132,8 +133,12 @@
 		};
 	});
 
+	// logo -> tagline -> images, strictly in sequence: the frame cycle
+	// waits on taglineTyped (set by typeText's onComplete below), not on
+	// logoRevealed directly, so images don't start until the tagline has
+	// actually finished typing, not just once the logo is done.
 	$effect(() => {
-		if (!browser || !logoRevealed || frames.length < 2) return;
+		if (!browser || !taglineTyped || frames.length < 2) return;
 		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
 		const iv = setInterval(() => {
@@ -149,7 +154,11 @@
 	// on mount.
 	$effect(() => {
 		if (!browser || !logoRevealed || !taglineEl) return;
-		typeText(taglineEl, {});
+		typeText(taglineEl, {
+			onComplete: () => {
+				taglineTyped = true;
+			}
+		});
 	});
 </script>
 
@@ -173,19 +182,19 @@
 			<!-- All frames render simultaneously (opacity-toggled, not
 			     src-swapped) so none of them have to fetch mid-cycle — at
 			     250ms a network wait would show as a blank flash. is-active
-			     also requires logoRevealed, so frame 0 (activeIndex's
-			     default) stays fully transparent until the logo's own
-			     reveal finishes — no image shows through while it's still
-			     typing in. Keyed by index, not src: microCMS reuses some
-			     assets across works, so src isn't guaranteed unique.
-			     aria-hidden as a group for the same reason as the mark
-			     above — a screen reader has no use for ~20 alt texts
-			     flickering past at 4/sec. -->
+			     also requires taglineTyped, so frame 0 (activeIndex's
+			     default) stays fully transparent until BOTH the logo has
+			     finished revealing AND the tagline has finished typing —
+			     logo -> tagline -> images, strictly in that order. Keyed by
+			     index, not src: microCMS reuses some assets across works,
+			     so src isn't guaranteed unique. aria-hidden as a group for
+			     the same reason as the mark above — a screen reader has no
+			     use for ~20 alt texts flickering past at 4/sec. -->
 			<div class="frame-layer" aria-hidden="true">
 				{#each frames as frame, i (i)}
 					<img
 						class="frame"
-						class:is-active={logoRevealed && i === activeIndex}
+						class:is-active={taglineTyped && i === activeIndex}
 						src={frame.src}
 						srcset={frame.srcset}
 						sizes="60vw"

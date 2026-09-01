@@ -2,9 +2,9 @@
 // trailing the reveal, which is removed once the full string has typed out.
 export function typeText(
 	node: HTMLElement,
-	opts: { charInterval?: number; startDelay?: number } = {}
+	opts: { charInterval?: number; startDelay?: number; onComplete?: () => void } = {}
 ) {
-	const { charInterval = 45, startDelay = 200 } = opts;
+	const { charInterval = 45, startDelay = 200, onComplete } = opts;
 
 	const finalText = node.textContent?.trim() ?? '';
 	node.textContent = '';
@@ -26,6 +26,7 @@ export function typeText(
 			timer = setTimeout(tick, charInterval);
 		} else {
 			cursor.remove();
+			onComplete?.();
 		}
 	};
 	timer = setTimeout(tick, startDelay);
