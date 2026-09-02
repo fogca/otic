@@ -45,21 +45,6 @@
   font-display: swap;
 }
 
-/* Elio — August Type Foundry's sibling face to Steiner, tried here as an
-   experiment (2026-09-02). Variable, wght 150-850, 2 masters (Hair/Ultra).
-   Only 174 glyphs — no ampersand, at-sign, AE/ae, Thorn/thorn, germandbls,
-   or fractions yet, so --font-en below lists Steiner right after it as a
-   fallback: the browser silently uses Steiner glyph-by-glyph for anything
-   Elio doesn't cover (e.g. "Services & Partners", "hi@..." addresses),
-   instead of showing tofu. */
-@font-face {
-  font-family: 'Elio';
-  src: url('/fonts/Elio-VF02.woff2?v=20260902a') format('woff2-variations');
-  font-weight: 150 850;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* ------------------------------------------------------------
    2. Modern reset
    ------------------------------------------------------------ */
@@ -173,7 +158,7 @@ a {
   --key:        var(--color-text);
 
   /* --- Typography stacks --- */
-  --font-en:     'Elio', 'Steiner by AUGUST.tf VF75', 'Helvetica Neue', Arial, sans-serif;
+  --font-en:     'Steiner by AUGUST.tf VF75', 'Helvetica Neue', Arial, sans-serif;
   /* Steiner wght400 (Book) + Ishii Gothic R (TypeSquare) ahead of Tazugane
      (FontPlus). */
   --font-ja:     'Steiner by AUGUST.tf VF75', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
