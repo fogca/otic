@@ -185,6 +185,32 @@
 		caches.delete('cdn-media').catch(() => {});
 	});
 
+	// PWA wiring — the vite.config.ts SvelteKitPWA setup (manifest, Workbox
+	// runtime caching) was already fully configured, but never actually
+	// connected: `injectRegister: 'auto'` only patches a static index.html,
+	// which doesn't exist here (this app is SSR'd fresh per request, not
+	// prerendered), so neither the manifest <link> nor the service worker
+	// registration ever reached a real page. Both have to be done by hand,
+	// client-side only — virtual:pwa-info's `pwaInfo` is `undefined` during
+	// SSR by the plugin's own design (see its type declaration), so this
+	// can't run at the top level or in a $derived; it has to wait for
+	// onMount.
+	let webManifestLink = $state('');
+	onMount(() => {
+		if (!browser) return;
+		import('virtual:pwa-info').then(({ pwaInfo }) => {
+			if (pwaInfo) webManifestLink = pwaInfo.webManifest.linkTag;
+		});
+		// registerType:'autoUpdate' in vite.config.ts means updates apply
+		// silently on the next load — no "new version available" prompt UI
+		// to wire up, so the plain vanilla register is enough here (not the
+		// Svelte-store-returning virtual:pwa-register/svelte, which exists
+		// for building that prompt).
+		import('virtual:pwa-register').then(({ registerSW }) => {
+			registerSW({ immediate: true });
+		});
+	});
+
 	onMount(() => {
 		if (!browser) return;
 
@@ -458,6 +484,11 @@
 
 <svelte:head>
 	<link rel="icon" type="image/png" href="/favicon.png" />
+	<!-- Empty string pre-hydration/during SSR (see the onMount above) — no
+	     manifest link on first paint, present once the client-side import
+	     resolves. Harmless: nothing reads the manifest before a user
+	     actually tries to install the page. -->
+	{@html webManifestLink}
 	<title>TAKUMIISOBE.com</title>
 	<!-- FONTPLUS (Tazugane) and TypeSquare (石井ゴシック) loaders live in
 	     app.html <head>: each loads once and survives SPA navigation, and is

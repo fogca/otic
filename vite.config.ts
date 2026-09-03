@@ -44,8 +44,27 @@ export default defineConfig({
 			},
 			workbox: {
 				globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff,woff2}'],
-				navigateFallback: '/',
-				navigateFallbackDenylist: [/^\/api\//],
+				// Explicitly undefined, not omitted: this app is fully
+				// SSR'd, nothing is prerendered, so globPatterns (static
+				// assets only, no .html) never puts any page markup in the
+				// precache. navigateFallback registers a NavigationRoute
+				// bound to that nonexistent precache entry -- and because
+				// Workbox tries routes in registration order, that route
+				// claimed every navigation BEFORE the NetworkFirst 'pages'
+				// rule below ever got a chance to run, silently swallowing
+				// every offline page load (confirmed live: SW active, 140
+				// precached entries, all JS/CSS/font/image -- zero HTML --
+				// and an actual offline reload failed outright rather than
+				// falling through). Just omitting this key doesn't disable
+				// it either -- @vite-pwa/sveltekit's own wrapper re-adds
+				// navigateFallback:'/' whenever the key is absent from this
+				// object (checks `'navigateFallback' in options.workbox`,
+				// which `undefined` satisfies but a missing key doesn't).
+				// The runtimeCaching 'pages' rule below already does the
+				// right thing on its own: cache each page as the visitor
+				// actually reads it, serve that from cache when the
+				// network's gone.
+				navigateFallback: undefined,
 				cleanupOutdatedCaches: true,
 				runtimeCaching: [
 					/* Page HTML — cache after first visit so offline navigation works.
