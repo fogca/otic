@@ -25,21 +25,20 @@
    1. Font faces
    ------------------------------------------------------------ */
 
-/* Primary Latin face — Andersen / Steiner (in-house face,
-   formerly Aether). VF21 variable font (wght 1–950:
-   Hair / Book / Ultra masters).
+/* Primary Latin face — Andersen / Norma (in-house face, formerly
+   Steiner/Aether — renamed 2026-09-05; build_vf.sh's 2nd arg now bakes
+   "Norma" into the binary's own name table too, so DevTools' "Rendered
+   Fonts" panel and this CSS name finally agree). Variable font (wght
+   1–950: Hair / Book / Ultra masters).
 
-   The family is declared as 'Steiner by AUGUST.tf VF75' — version number
+   The family is declared as 'Norma by AUGUST.tf VF02' — version number
    included on request, so inspectors that read getComputedStyle().fontFamily
    (WhatFont, Fontanello, DevTools' Computed panel) see both the foundry
    credit and the build in one string. Bump the number here (and in the 3
-   --font-* variables below) on every export. DevTools' "Rendered Fonts"
-   panel reads the font binary's own name table independently — that
-   already says "Steiner VF 72" regardless of this name, since build_vf.sh
-   sets it at export time. */
+   --font-* variables below) on every export. */
 @font-face {
-  font-family: 'Steiner by AUGUST.tf VF75';
-  src: url('/fonts/Steiner-VF75.woff2?v=20260828f') format('woff2');
+  font-family: 'Norma by AUGUST.tf VF02';
+  src: url('/fonts/Norma-VF02.woff2?v=20260905a') format('woff2');
   font-weight: 1 950;
   font-style: normal;
   font-display: swap;
@@ -158,14 +157,14 @@ a {
   --key:        var(--color-text);
 
   /* --- Typography stacks --- */
-  --font-en:     'Steiner by AUGUST.tf VF75', 'Helvetica Neue', Arial, sans-serif;
+  --font-en:     'Norma by AUGUST.tf VF02', 'Helvetica Neue', Arial, sans-serif;
   /* Steiner wght400 (Book) + Ishii Gothic R (TypeSquare) ahead of Tazugane
      (FontPlus). */
-  --font-ja:     'Steiner by AUGUST.tf VF75', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja:     'Norma by AUGUST.tf VF02', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   /* Steiner wght330 + Tazugane Light — lighter JP text */
-  --font-ja-light: 'Steiner by AUGUST.tf VF75', TazuganeGothicStdN-Light, 'TazuganeGothicStdN-Light', 'Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja-light: 'Norma by AUGUST.tf VF02', TazuganeGothicStdN-Light, 'TazuganeGothicStdN-Light', 'Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans W3', 'Hiragino Sans',
                  'Yu Gothic', 'Meiryo', sans-serif;
   --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI',
