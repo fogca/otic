@@ -22,14 +22,33 @@ const STATIC_FILES = new Set([
 	'/icon-512.png'
 ]);
 
+// Preview bypass: visit once with ?preview=<PREVIEW_TOKEN> and the gate stays
+// open for that browser from then on (a 1-year cookie), while every other
+// visitor still gets funneled to /teaser as before. Not meant to withstand a
+// determined attacker — just to keep the redirect from catching the one
+// person who needs to see the real pages before launch.
+const PREVIEW_TOKEN = 'c912bbb38a26c7c9';
+const PREVIEW_COOKIE = 'otif_preview';
+
 export const handle: Handle = async ({ event, resolve }) => {
-	const { pathname } = event.url;
+	const { pathname, searchParams } = event.url;
+
+	if (searchParams.get('preview') === PREVIEW_TOKEN) {
+		event.cookies.set(PREVIEW_COOKIE, PREVIEW_TOKEN, {
+			path: '/',
+			maxAge: 60 * 60 * 24 * 365,
+			httpOnly: true,
+			sameSite: 'lax'
+		});
+	}
+	const hasPreviewBypass =
+		event.cookies.get(PREVIEW_COOKIE) === PREVIEW_TOKEN || searchParams.get('preview') === PREVIEW_TOKEN;
 
 	const isTeaser = pathname === '/teaser';
 	const isStaticAsset =
 		STATIC_PREFIXES.some((prefix) => pathname.startsWith(prefix)) || STATIC_FILES.has(pathname);
 
-	if (!isTeaser && !isStaticAsset) {
+	if (!isTeaser && !isStaticAsset && !hasPreviewBypass) {
 		// 307, not 301/302: this is a temporary state (until launch), not a
 		// permanent move, and 307 preserves the request method — matters if
 		// anything ever POSTs somewhere on this domain while the gate is up.
