@@ -278,11 +278,11 @@
 		font-size: var(--fs-h6);
 		/* --fw-medium resolves to exactly 400 in the current scale. */
 		font-weight: var(--fw-medium);
-		font-variation-settings: 'wght' var(--fw-medium);
+		font-variation-settings: 'wght' 500;
 		line-height: var(--lh-en);
 		color: var(--color-text);
 		text-align: center;
-		letter-spacing: 0;
+		letter-spacing: 0.03em;
 		text-transform: uppercase;
 		/* Hidden until the logo's typewriter finishes (.is-visible is
 		   toggled by the same logoRevealed flag) — fades in just as
