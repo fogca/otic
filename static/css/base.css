@@ -39,6 +39,17 @@
    outline refined (width change cascades to Aacute-type composites and
    parenleft/parenright); the only real change vs VF08. baht/ogonekcomb
    remain excluded. */
+/* Humorist (VF47) — the site's face from 2026-11-16. Variable, wght 50–950.
+   Norma stays declared below as the fallback for the few glyphs Humorist
+   does not carry yet (ß @ £). */
+@font-face {
+  font-family: 'Humorist VF47';
+  src: url('/fonts/Humorist-VF47.woff2?v=20261116a') format('woff2');
+  font-weight: 50 950;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'Norma by AUGUST.tf VF09';
   src: url('/fonts/Norma-VF09.woff2?v=20260929a') format('woff2');
@@ -160,14 +171,14 @@ a {
   --key:        var(--color-text);
 
   /* --- Typography stacks --- */
-  --font-en:     'Norma by AUGUST.tf VF09', 'Helvetica Neue', Arial, sans-serif;
+  --font-en:     'Humorist VF47', 'Norma by AUGUST.tf VF09', 'Helvetica Neue', Arial, sans-serif;
   /* Steiner wght400 (Book) + Ishii Gothic R (TypeSquare) ahead of Tazugane
      (FontPlus). */
-  --font-ja:     'Norma by AUGUST.tf VF09', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja:     'Humorist VF47', 'Norma by AUGUST.tf VF09', 'Ishii Gothic R', TazuganeGothicStdN-Book, 'TazuganeGothicStdN-Book','Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
                  'Yu Gothic', 'Meiryo', sans-serif;
   /* Steiner wght330 + Tazugane Light — lighter JP text */
-  --font-ja-light: 'Norma by AUGUST.tf VF09', TazuganeGothicStdN-Light, 'TazuganeGothicStdN-Light', 'Tazugane Gothic StdN', 'Tazugane Gothic',
+  --font-ja-light: 'Humorist VF47', 'Norma by AUGUST.tf VF09', TazuganeGothicStdN-Light, 'TazuganeGothicStdN-Light', 'Tazugane Gothic StdN', 'Tazugane Gothic',
                  'Hiragino Sans W3', 'Hiragino Sans',
                  'Yu Gothic', 'Meiryo', sans-serif;
   --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI',

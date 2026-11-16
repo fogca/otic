@@ -182,7 +182,7 @@
 	</div>
 
 	<p class="tagline" class:is-visible={logoRevealed} lang="en" bind:this={taglineEl}>
-		Our Digital Archive will be launching in September.
+		Our Digital Archive will be launching in December.
 	</p>
 </main>
 
@@ -283,6 +283,7 @@
 		color: var(--color-text);
 		text-align: center;
 		letter-spacing: 0;
+		text-transform: uppercase;
 		/* Hidden until the logo's typewriter finishes (.is-visible is
 		   toggled by the same logoRevealed flag) — fades in just as
 		   typeText() clears the static text and starts re-typing it, so
